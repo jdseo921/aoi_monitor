@@ -42,6 +42,7 @@ public static class AoiDatabaseMigrations
         new(29, "Add recoverable payload to log archive for archive-then-purge retention.", ApplyLogArchivePayload),
         new(30, "Add held-out false-call estimate to image-learning calibration results.", ApplyCalibrationHeldOutEstimate),
         new(31, "Add customer classification-table severity and detection method to the defect taxonomy.", ApplyDefectClassificationColumns),
+        new(32, "Refresh the default defect taxonomy with catalogue aliases added after migration 31.", ApplyDefectTaxonomyCatalogueRefresh),
     };
 
     public static int LatestVersion => OrderedMigrations[^1].Version;
@@ -239,6 +240,16 @@ public static class AoiDatabaseMigrations
         AoiDatabase.EnsureDefectTaxonomyTables(connection, transaction);
         AoiDatabase.AddColumnIfMissing(connection, transaction, "DefectTaxonomyEntries", "Severity", "TEXT NOT NULL DEFAULT ''");
         AoiDatabase.AddColumnIfMissing(connection, transaction, "DefectTaxonomyEntries", "DetectionMethod", "TEXT NOT NULL DEFAULT ''");
+        AoiDatabase.UpgradeDefaultDefectTaxonomy(connection, transaction);
+    }
+
+    private static void ApplyDefectTaxonomyCatalogueRefresh(SqliteConnection connection, SqliteTransaction transaction)
+    {
+        // The catalogue gained aliases (e.g. Height Error's "Height Anomaly") after migration 31
+        // last rewrote the system-owned default taxonomy, so installs migrated before then never
+        // see them: the persisted snapshot wins over the shipped catalogue at runtime. Re-running
+        // the deterministic rewrite brings those installs up to the current catalogue; operator/
+        // customer-imported taxonomies are never touched.
         AoiDatabase.UpgradeDefaultDefectTaxonomy(connection, transaction);
     }
 

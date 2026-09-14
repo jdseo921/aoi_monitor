@@ -223,6 +223,34 @@ public static partial class AoiDatabase
         transaction.Commit();
     }
 
+    public static void RetireThresholdProfile(string profileId, string revision)
+    {
+        EnsureInitialized();
+
+        using var connection = OpenConnection();
+        using var transaction = connection.BeginTransaction();
+        using var deactivate = connection.CreateCommand();
+        deactivate.Transaction = transaction;
+        deactivate.CommandText =
+            """
+            UPDATE ThresholdProfileDeployments
+            SET IsActive = 0
+            WHERE ProfileId = $profileId AND Revision = $revision;
+            """;
+        deactivate.Parameters.AddWithValue("$profileId", profileId);
+        deactivate.Parameters.AddWithValue("$revision", revision);
+        deactivate.ExecuteNonQuery();
+
+        using var updateProfile = connection.CreateCommand();
+        updateProfile.Transaction = transaction;
+        updateProfile.CommandText = "UPDATE ThresholdProfiles SET Status = 'Retired' WHERE ProfileId = $profileId AND Revision = $revision;";
+        updateProfile.Parameters.AddWithValue("$profileId", profileId);
+        updateProfile.Parameters.AddWithValue("$revision", revision);
+        updateProfile.ExecuteNonQuery();
+
+        transaction.Commit();
+    }
+
     public static long RecordFalseCallReductionRun(FalseCallReductionRun run, string? operatorId = null)
     {
         EnsureInitialized();

@@ -425,8 +425,10 @@ public sealed class PixelDifferenceInspectionEngine : IInspectionEngine
         // The real recipe name is load-bearing: the frame path also runs when a loaded
         // recipe has no enabled ROIs, and drafts created from the AI / Models screen are
         // scoped to that recipe's name — an empty name would orphan those deployments.
+        // Dataset-driven runs carry the manifest row's board model via InspectionScope;
+        // the station identity (result.BoardId) governs only the live path.
         var profileRule = ThresholdProfileService.GetEffectiveThreshold(
-            result.BoardId,
+            InspectionScope.BoardModel ?? result.BoardId,
             result.BoardProgram,
             recipeLoad.Recipe?.RecipeName ?? string.Empty,
             result.ViewType,
@@ -468,7 +470,7 @@ public sealed class PixelDifferenceInspectionEngine : IInspectionEngine
         RecipeRoi roi)
     {
         var profileRule = ThresholdProfileService.GetEffectiveThreshold(
-            result.BoardId,
+            InspectionScope.BoardModel ?? result.BoardId,
             recipe.BoardProgram,
             recipe.RecipeName,
             result.ViewType,

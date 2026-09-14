@@ -273,10 +273,16 @@ public static class BatchSoakTestService
         // abandoned (its late fault, if any, is appended to the engineer debug file)
         // and the headless driver's process teardown reclaims the thread.
         var analyzeTask = Task.Run(
-            () => context.Engine.Analyze(
-                item.ImagePath,
-                string.IsNullOrWhiteSpace(item.Manifest.GoldenPath) ? null : item.Manifest.GoldenPath,
-                context.Options.DetectionPriority),
+            () =>
+            {
+                using (InspectionScope.ForBoardModel(item.Manifest.BoardModel))
+                {
+                    return context.Engine.Analyze(
+                        item.ImagePath,
+                        string.IsNullOrWhiteSpace(item.Manifest.GoldenPath) ? null : item.Manifest.GoldenPath,
+                        context.Options.DetectionPriority);
+                }
+            },
             CancellationToken.None);
         using var watchdog = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var delayTask = Task.Delay(context.Options.StuckImageTimeout, watchdog.Token);

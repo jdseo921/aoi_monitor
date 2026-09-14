@@ -349,10 +349,15 @@ public static class Stage1ExitEvidenceService
                     continue;
                 }
 
-                var analysis = engine.Analyze(
-                    item.ImagePath,
-                    string.IsNullOrWhiteSpace(item.Manifest.GoldenPath) ? null : item.Manifest.GoldenPath,
-                    priority);
+                AnalysisResult analysis;
+                using (InspectionScope.ForBoardModel(item.Manifest.BoardModel))
+                {
+                    analysis = engine.Analyze(
+                        item.ImagePath,
+                        string.IsNullOrWhiteSpace(item.Manifest.GoldenPath) ? null : item.Manifest.GoldenPath,
+                        priority);
+                }
+
                 rows.Add(BatchValidationService.ToRow(item.ImagePath, item.Manifest, analysis));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or NotSupportedException)

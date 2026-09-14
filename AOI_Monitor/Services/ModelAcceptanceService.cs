@@ -86,7 +86,10 @@ public static class ModelAcceptanceService
                 progress?.Report($"Analyzing validation image {i + 1} of {items.Count}: {Path.GetFileName(item.ImagePath)}");
                 try
                 {
-                    rows.Add(BatchValidationService.ToRow(item.ImagePath, item.Manifest, engine.Analyze(item.ImagePath, item.Manifest.GoldenPath, DetectionPriority.Balanced)));
+                    using (InspectionScope.ForBoardModel(item.Manifest.BoardModel))
+                    {
+                        rows.Add(BatchValidationService.ToRow(item.ImagePath, item.Manifest, engine.Analyze(item.ImagePath, item.Manifest.GoldenPath, DetectionPriority.Balanced)));
+                    }
                 }
                 catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
                 {

@@ -153,6 +153,30 @@ public static class ThresholdProfileService
         return AoiDatabase.GetThresholdProfile(profileId, revision)!;
     }
 
+    /// <summary>
+    /// Retires a profile revision: its deployments are deactivated so it no longer governs any
+    /// verdicts, and its status becomes Retired so it can never be redeployed. Results it already
+    /// decided keep their stamped profile id/revision, so retirement never breaks traceability.
+    /// </summary>
+    public static ThresholdProfile RetireProfile(string profileId, string revision, UserRole role, string operatorId, string reason)
+    {
+        EnsureThresholdPermission(role, "retire threshold profiles");
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new InvalidOperationException("A retire reason is required for traceability.");
+
+        var profile = AoiDatabase.GetThresholdProfile(profileId, revision)
+            ?? throw new InvalidOperationException("Threshold profile was not found.");
+
+        AoiDatabase.RetireThresholdProfile(profileId, revision);
+        AoiDatabase.RecordAuditEvent(
+            "THRESHOLD_PROFILE_RETIRED",
+            $"Threshold profile retired: {profileId}/{revision}; board={profile.BoardModel}; recipe={profile.RecipeName}; reason: {reason.Trim()}",
+            operatorWithRole: operatorId,
+            relatedEntityType: "ThresholdProfile",
+            relatedEntityId: $"{profileId}/{revision}");
+        return AoiDatabase.GetThresholdProfile(profileId, revision)!;
+    }
+
     public static EffectiveThresholdRule? GetEffectiveThreshold(
         string boardModel,
         string boardProgram,

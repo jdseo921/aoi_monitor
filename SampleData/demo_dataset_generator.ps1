@@ -228,11 +228,11 @@ Use AI / Models:
 4. Run Batch Inspection
 5. Export CSV, annotated images, or Export Stage 1 Validation Package
 
-Use Export & Trace:
-1. Performance Benchmark
+Use Readiness & QA:
+1. Click Performance Benchmark (Readiness and Quality Gates panel)
 2. Source: Image folder
 3. Image folder: $imagesDir
-4. Stage 1 Readiness: refresh and export the readiness report after benchmark/package evidence exists
+4. Stage 1 Readiness tab: click Refresh Stage 1 Readiness, then Export Stage 1 Readiness Report after benchmark/package evidence exists
 
 Use Run Inspection folder-camera simulation:
 - Top Folder: $cameraTop

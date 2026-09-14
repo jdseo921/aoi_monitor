@@ -333,6 +333,28 @@ public sealed class DefectTaxonomyServiceTests : IDisposable
     }
 
     [Fact]
+    public void CatalogueRefreshRestoresAliasesAddedAfterEarlierMigrations()
+    {
+        // Simulates an install whose default taxonomy was rewritten by migration 31 before the
+        // catalogue gained Height Error's "Height Anomaly" alias: the demo dataset's
+        // 'height_anomaly' label must normalize again after the migration-32 refresh.
+        AoiDatabase.Initialize();
+        var stale = DefectTaxonomyService.CreateDefaultTaxonomy();
+        stale.Aliases.RemoveAll(alias => alias.Alias == "Height Anomaly");
+        AoiDatabase.SaveDefectTaxonomySnapshot(stale, "SYSTEM");
+        Assert.False(DefectTaxonomyService.Normalize("height_anomaly").IsKnown);
+
+        using var connection = new Microsoft.Data.Sqlite.SqliteConnection(
+            new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder { DataSource = AoiDatabase.DatabasePath }.ToString());
+        connection.Open();
+        AoiDatabase.UpgradeDefaultDefectTaxonomy(connection);
+
+        var normalized = DefectTaxonomyService.Normalize("height_anomaly");
+        Assert.True(normalized.IsKnown);
+        Assert.Equal("Height Error", normalized.CanonicalClass);
+    }
+
+    [Fact]
     public void MigrationLeavesCustomerImportedTaxonomiesAlone()
     {
         AoiDatabase.Initialize();

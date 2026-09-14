@@ -2508,6 +2508,60 @@ public sealed class AoiDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void RetiredThresholdProfileStopsGoverningVerdictsAndCannotRedeploy()
+    {
+        AoiDatabase.Initialize();
+        var profile = new ThresholdProfile
+        {
+            ProfileId = "TP-RETIRE",
+            Revision = "R0001",
+            BoardModel = "ANY",
+            BoardProgram = "ANY",
+            RecipeName = "ANY",
+            RecipeRevision = "ANY",
+            Status = "Approved",
+            CreatedBy = "Engineer01",
+            CreatedAtUtc = DateTime.UtcNow,
+            Rules = [new ThresholdProfileRule { ViewType = "Any", RoiType = "Any", DefectClass = "Any", ReviewThreshold = 1, NgThreshold = 2, ConfidenceThreshold = 0.65 }],
+        };
+        AoiDatabase.SaveThresholdProfile(profile);
+        ThresholdProfileService.DeployProfile(profile.ProfileId, profile.Revision, UserRole.Engineer, "Engineer01 [Engineer]");
+        Assert.NotNull(AoiDatabase.GetActiveThresholdProfile("ANY", "ANY", "ANY"));
+
+        var retired = ThresholdProfileService.RetireProfile(
+            profile.ProfileId, profile.Revision, UserRole.Engineer, "Engineer01 [Engineer]",
+            "Superseded by a board-model-scoped profile.");
+
+        Assert.Equal("Retired", retired.Status);
+        Assert.Null(AoiDatabase.GetActiveThresholdProfile("ANY", "ANY", "ANY"));
+        Assert.Throws<InvalidOperationException>(() =>
+            ThresholdProfileService.DeployProfile(profile.ProfileId, profile.Revision, UserRole.Engineer, "Engineer01 [Engineer]"));
+        Assert.Contains(
+            AoiDatabase.GetAuditEvents(new LogFilter { ActionCategory = "THRESHOLD_PROFILE_RETIRED" }),
+            auditEvent => auditEvent.ActionDetail.Contains("TP-RETIRE/R0001", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ThresholdProfileRetireRequiresEngineerRoleAndReason()
+    {
+        AoiDatabase.Initialize();
+        var profile = new ThresholdProfile
+        {
+            ProfileId = "TP-RETIRE-DENIED",
+            Revision = "R0001",
+            CreatedBy = "Engineer01",
+            CreatedAtUtc = DateTime.UtcNow,
+            Rules = [new ThresholdProfileRule { ReviewThreshold = 8, NgThreshold = 18, ConfidenceThreshold = 0.65 }],
+        };
+        AoiDatabase.SaveThresholdProfile(profile);
+
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            ThresholdProfileService.RetireProfile(profile.ProfileId, profile.Revision, UserRole.Operator, "Operator01 [Operator]", "reason"));
+        Assert.Throws<InvalidOperationException>(() =>
+            ThresholdProfileService.RetireProfile(profile.ProfileId, profile.Revision, UserRole.Engineer, "Engineer01 [Engineer]", "  "));
+    }
+
+    [Fact]
     public void PixelDifferenceEngineEvidenceIncludesThresholdProfileSource()
     {
         AoiDatabase.Initialize();
@@ -2577,6 +2631,48 @@ public sealed class AoiDatabaseTests : IDisposable
         Assert.Equal(1.0, after.NgThreshold);
         Assert.Contains("deployed threshold profile TP-FRAME/R0001", after.DecisionReason, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(after.Evidence, line => line.Contains("Threshold profile (full frame): TP-FRAME/R0001", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void PixelDifferenceFullFrameHonorsBoardModelScopedProfileViaInspectionScope()
+    {
+        AoiDatabase.Initialize();
+        var golden = WriteBmp("frame-scope-model-golden.bmp", 40, 40, (_, _) => White());
+        var sample = WriteBmp("frame-scope-model-sample.bmp", 40, 40,
+            (x, y) => x < 5 && y < 5 ? ((byte)247, (byte)247, (byte)247) : White());
+        var engine = new PixelDifferenceInspectionEngine();
+
+        var profile = new ThresholdProfile
+        {
+            ProfileId = "TP-BOARD-SCOPED",
+            Revision = "R0001",
+            BoardModel = "DATASET-TILE-999",
+            BoardProgram = "ANY",
+            RecipeName = "ANY",
+            RecipeRevision = "ANY",
+            Status = "Approved",
+            CreatedBy = "Engineer01",
+            CreatedAtUtc = DateTime.UtcNow,
+            Rules = [new ThresholdProfileRule { ViewType = "Any", RoiType = "Any", DefectClass = "Any", ReviewThreshold = 0.5, NgThreshold = 1.0, ConfidenceThreshold = 0.7 }],
+        };
+        AoiDatabase.SaveThresholdProfile(profile);
+        ThresholdProfileService.DeployProfile(profile.ProfileId, profile.Revision, UserRole.Engineer, "Engineer01 [Engineer]");
+
+        // The station identity does not match the profile scope: policy defaults govern.
+        var stationRun = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+        Assert.Equal("OK", stationRun.Verdict);
+        Assert.Equal("Built-in policy default", stationRun.ThresholdSource);
+
+        // A dataset row carrying the scoped board model resolves the deployed profile.
+        AnalysisResult scopedRun;
+        using (InspectionScope.ForBoardModel("DATASET-TILE-999"))
+            scopedRun = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+        Assert.Equal("NG", scopedRun.Verdict);
+        Assert.Equal("TP-BOARD-SCOPED", scopedRun.ThresholdProfileId);
+
+        // The scope does not leak once disposed.
+        var afterRun = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+        Assert.Equal("OK", afterRun.Verdict);
     }
 
     [Fact]

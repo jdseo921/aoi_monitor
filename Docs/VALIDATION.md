@@ -104,14 +104,14 @@ The whole Stage 1 evidence chain runs without the GUI, so it is repeatable and C
 pwsh Scripts/run-stage1-testing.ps1 -Operator <your-id>
 ```
 
-Or step by step (from the repo root, after `dotnet build AOI_PCB_Database.slnx -c Release`):
-
-```powershell
-dotnet run --project AOI_Monitor.Tools -c Release -- stage1-exit --dataset SampleData/DemoSet_Quick/images --manifest SampleData/DemoSet_Quick/customer_validation_manifest.csv --output TestResults/stage1/exit --operator <id> --priority maximize-defect-recall --allow-simulation
-```
+Or step by step (from the repo root, after `dotnet build AOI_PCB_Database.slnx -c Release`). The benchmark must run FIRST: the `stage1-exit` validation package embeds the latest recorded benchmark, so running the benchmark after the exit step stamps a previous (possibly different-dataset) benchmark into the package (defect found 2026-09-14; two packages had byte-identical benchmark CSVs from the wrong dataset).
 
 ```powershell
 dotnet run --project AOI_Monitor.Tools -c Release -- benchmark --images SampleData/DemoSet_Quick/images --golden SampleData/DemoSet_Quick/golden/tbox_ref_top.png --output TestResults/stage1/bench --priority maximize-defect-recall
+```
+
+```powershell
+dotnet run --project AOI_Monitor.Tools -c Release -- stage1-exit --dataset SampleData/DemoSet_Quick/images --manifest SampleData/DemoSet_Quick/customer_validation_manifest.csv --output TestResults/stage1/exit --operator <id> --priority maximize-defect-recall --allow-simulation
 ```
 
 ```powershell
@@ -263,7 +263,7 @@ Default gates: min total images 50; min known ground-truth images 50; min OK 20;
 
 With preflight `PASS` (or accepted `CONDITIONAL`): `Run Batch Inspection`; review metrics, dataset quality, class breakdowns, `FAIL`/`N/A` rows; export annotated evidence only after confirming the intended dataset/manifest. Stage 1 may use the Pixel Difference prototype - no production model accuracy claim. Then choose the false-call mode, `Analyze False Calls`; review precision, recall, false-call rate, possible escape rate, review load, recommendation status; Engineers may draft a threshold profile or apply a recommended threshold when the recommendation is valid. Threshold changes are Stage 1 labeled-data evidence only - not production readiness across new cameras, lighting, boards, or factories.
 
-**Headless threshold calibration** (same lifecycle as the UI, for the CLI testing kit): run `stage1-exit` on a CALIBRATION manifest whose boards are disjoint from the evaluation boards, then `AOI_Monitor.Tools threshold-profile draft --operator "<id> [Engineer]" --role Engineer` (refuses anything but a VALID recommendation), `threshold-profile approve --profile <id> --operator ... --role Engineer`, `threshold-profile deploy ...`, and finally `stage1-exit` on the EVALUATION manifest - the deployed profile now governs full-frame verdicts and is stamped into every result. `threshold-profile list` shows profiles and rules. Selecting the threshold on the same rows used for acceptance metrics invalidates the metrics; keep the split.
+**Headless threshold calibration** (same lifecycle as the UI, for the CLI testing kit): run `stage1-exit` on a CALIBRATION manifest whose boards are disjoint from the evaluation boards, then `AOI_Monitor.Tools threshold-profile draft --operator "<id> [Engineer]" --role Engineer` (refuses anything but a VALID recommendation), `threshold-profile approve --profile <id> --operator ... --role Engineer`, `threshold-profile deploy ...`, and finally `stage1-exit` on the EVALUATION manifest - the deployed profile now governs full-frame verdicts and is stamped into every result. `threshold-profile list` shows profiles and rules. Selecting the threshold on the same rows used for acceptance metrics invalidates the metrics; keep the split. **Scope the draft to the board model it was calibrated on** (`--board-model <model>`): a profile left at the `ANY` default governs every dataset on the station and silently changes other boards' verdicts. `threshold-profile retire --profile <id> --operator ... --role Engineer --reason "<why>"` deactivates a deployment (audited; results it already decided keep their stamped profile id, and a retired revision can never be redeployed) - use it to withdraw a mis-scoped or superseded profile.
 
 ### 5.5 Benchmark and model acceptance
 
@@ -436,7 +436,6 @@ Nothing here is a defect report. Each item is a deliberate engineering decision 
 | DEV-02 | TensorFlow / PyTorch engine with NVIDIA CUDA acceleration | **ONNX Runtime, CPU execution provider.** PyTorch is used offline for training only. | Measured Stage 1 frame-to-overlay is 12-14 ms p50-p95 on CPU against a 1000 ms budget — roughly 70x headroom. Adding a GPU dependency would raise per-station hardware cost and driver-support burden for no measurable benefit. GPU adoption is a tracked open decision, gated on Stage 2 live-camera timing evidence. |
 | DEV-03 | Five main GUI modules | **13 focused workflow windows.** Every specified function is reachable; the shell aliases the specification's vocabulary onto the same routes. | Per-page density is a hard constraint of the factory HMI design (1920x1080, >= 14 pt text, >= 120x40 primary buttons). The five specified modules would each become a crowded multi-purpose page. The mapping table is in `Docs/Customer_Spec_Gap_Audit.md` §3. |
 | DEV-04 | 12-column responsive grid | WPF star-sizing and adaptive panels, verified by a machine-enforced layout audit at 1920x1080 across 100 / 125 / 150 % DPI. | A 12-column grid is a web layout idiom with no WPF equivalent. The delivered substitute is checked automatically on every build (48 views x 3 DPI scales) rather than by inspection. |
-| DEV-05 | Font >= 14 pt | 14 **DIP** baseline (= 10.5 typographic pt at 100 % scaling). | Interpreted as "14 units in the platform's device-independent measure". **This is the one deviation where the specification reading is genuinely ambiguous and the delivered text is smaller than a literal reading requires.** Raising the floor to true 14 pt (18.67 DIP) is a scoped change if the customer wants the literal reading. |
 | DEV-06 | Buttons >= 120x40 px | Enforced for **primary operator actions**. Secondary and mini buttons are 96x34-104x38. | Applying 120x40 to every button, including inline row actions, would force scrolling on dense pages. |
 | DEV-07 | Auto-save after each board | Operator opt-in toggle, **default off**. | The delivered default is review-then-save, so an operator confirms a verdict before it enters the permanent record. Flipping the default is a one-line change if the customer prefers it. |
 | DEV-09 | "Exported reports verified for accuracy" | Report **integrity** verification: per-file and aggregate SHA-256, PNG/PDF signature checks, required CSV headers and JSON fields, package manifest reconciliation. | Verifies that exported artifacts are complete and unaltered. It does **not** re-derive exported values from the database, so it does not detect a value that was computed wrongly before export. A content cross-check is scoped, separate work. |
@@ -448,6 +447,7 @@ Noted for completeness; each is equal to or stricter than the specification.
 
 | # | Item | Delivered |
 |---|---|---|
+| DEV-05 | Font >= 14 pt | **Closed by compliance (M4, 2026-08-23):** the operator text floor was raised to a true 14 pt (18.67 DIP), audit-enforced at Fail severity, so the earlier DIP reinterpretation is withdrawn and the specification is met literally. No acknowledgement needed. |
 | DEV-08 | Third verdict named "Warning" | Named `REVIEW`; the display accepts both. |
 | DEV-10 | "Within 1 second per image" | P95 frame-to-overlay budget with a zero-tolerance over-threshold count — stricter than a per-image average. |
 | DEV-11 | "8-hour continuous testing" | 8-hour PoC soak as the minimum; a 5-minute rehearsal is required first (§8). |

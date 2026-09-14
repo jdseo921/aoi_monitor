@@ -263,10 +263,15 @@ public partial class AIModelTestView : UserControl, IAsyncNavigationPage, IDispo
                             continue;
                         }
 
-                        var analysis = engine.Analyze(
-                            item.ImagePath,
-                            string.IsNullOrWhiteSpace(item.Manifest.GoldenPath) ? null : item.Manifest.GoldenPath,
-                            WorkflowState.Instance.DetectionPriority);
+                        AnalysisResult analysis;
+                        using (InspectionScope.ForBoardModel(item.Manifest.BoardModel))
+                        {
+                            analysis = engine.Analyze(
+                                item.ImagePath,
+                                string.IsNullOrWhiteSpace(item.Manifest.GoldenPath) ? null : item.Manifest.GoldenPath,
+                                WorkflowState.Instance.DetectionPriority);
+                        }
+
                         var analysisEndUtc = DateTime.UtcNow;
 
                         if (analysis.Timing.IsOverOneSecond)

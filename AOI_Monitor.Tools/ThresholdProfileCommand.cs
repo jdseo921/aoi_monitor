@@ -35,6 +35,7 @@ public static class ThresholdProfileCommand
                 "draft" => Draft(values, output, error),
                 "approve" => Transition(values, output, error, deploy: false),
                 "deploy" => Transition(values, output, error, deploy: true),
+                "retire" => Retire(values, output, error),
                 "list" => List(output),
                 _ => Unknown(action, error),
             };
@@ -113,6 +114,31 @@ public static class ThresholdProfileCommand
         output.WriteLine($"Scope: board-model={profile.BoardModel}; board-program={profile.BoardProgram}; recipe={profile.RecipeName}");
         foreach (var rule in profile.Rules)
             output.WriteLine($"Rule: view={rule.ViewType}; roi={rule.RoiType}; class={rule.DefectClass}; Review >= {rule.ReviewThreshold:F1}%; NG >= {rule.NgThreshold:F1}%");
+        return 0;
+    }
+
+    private static int Retire(Dictionary<string, string> values, TextWriter output, TextWriter error)
+    {
+        if (!TryGetOperator(values, error, out var operatorId) || !TryGetRole(values, error, out var role))
+            return 2;
+        if (!values.TryGetValue("profile", out var profileId) || string.IsNullOrWhiteSpace(profileId))
+        {
+            error.WriteLine("FAIL --profile <id> is required.");
+            return 2;
+        }
+        if (!values.TryGetValue("reason", out var reason) || string.IsNullOrWhiteSpace(reason))
+        {
+            error.WriteLine("FAIL --reason <text> is required: retirement must be traceable.");
+            return 2;
+        }
+
+        var revision = values.GetValueOrDefault("revision", "R0001");
+        var profile = ThresholdProfileService.RetireProfile(profileId, revision, role, operatorId, reason);
+
+        output.WriteLine($"OK Threshold profile retired: {profile.ProfileId}/{profile.Revision}; status={profile.Status}");
+        output.WriteLine($"Scope: board-model={profile.BoardModel}; board-program={profile.BoardProgram}; recipe={profile.RecipeName}");
+        output.WriteLine("Its deployments are deactivated; verdicts fall back to the next matching deployed profile or the policy defaults.");
+        output.WriteLine("Results it already decided keep their stamped profile id/revision for traceability.");
         return 0;
     }
 
@@ -196,9 +222,11 @@ public static class ThresholdProfileCommand
         writer.WriteLine("      Creates a Draft profile from the LATEST false-call reduction run; the recommendation must be VALID.");
         writer.WriteLine("  AOI_Monitor.Tools threshold-profile approve --profile <id> [--revision R0001] --operator <id> [--role Engineer|Admin]");
         writer.WriteLine("  AOI_Monitor.Tools threshold-profile deploy  --profile <id> [--revision R0001] --operator <id> [--role Engineer|Admin]");
+        writer.WriteLine("  AOI_Monitor.Tools threshold-profile retire  --profile <id> [--revision R0001] --operator <id> [--role Engineer|Admin] --reason <text>");
+        writer.WriteLine("      Deactivates the profile's deployments and blocks redeployment; already-decided results keep their stamp.");
         writer.WriteLine("  AOI_Monitor.Tools threshold-profile list");
         writer.WriteLine();
-        writer.WriteLine("  Draft/approve/deploy are Engineer/Admin actions; every step writes an audit event.");
+        writer.WriteLine("  Draft/approve/deploy/retire are Engineer/Admin actions; every step writes an audit event.");
         writer.WriteLine("  A deployed profile's rules govern pixel-difference verdict bands (full-frame and recipe-ROI paths)");
         writer.WriteLine("  and are stamped into every result they decide. Stage 1 labeled-data calibration only.");
     }

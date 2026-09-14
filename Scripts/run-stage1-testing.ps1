@@ -115,7 +115,18 @@ if (-not $SkipBuild) {
     if ($LASTEXITCODE -ne 0) { throw "Release build failed with exit code $LASTEXITCODE." }
 }
 
-Invoke-Step -Title "1/4 Stage 1 exit evidence" -ToolArguments @(
+# The benchmark runs BEFORE the exit step: the stage1-exit validation package embeds the
+# latest recorded benchmark, so running it afterwards would stamp a previous (possibly
+# different-dataset) benchmark into the package.
+Invoke-Step -Title "1/4 Inspection performance benchmark" -ToolArguments @(
+    "benchmark",
+    "--images", $images,
+    "--golden", $golden,
+    "--output", (Join-Path $results "bench"),
+    "--priority", $Priority
+)
+
+Invoke-Step -Title "2/4 Stage 1 exit evidence" -ToolArguments @(
     "stage1-exit",
     "--dataset", $images,
     "--manifest", $manifest,
@@ -123,14 +134,6 @@ Invoke-Step -Title "1/4 Stage 1 exit evidence" -ToolArguments @(
     "--operator", $Operator,
     "--priority", $Priority,
     "--allow-simulation"
-)
-
-Invoke-Step -Title "2/4 Inspection performance benchmark" -ToolArguments @(
-    "benchmark",
-    "--images", $images,
-    "--golden", $golden,
-    "--output", (Join-Path $results "bench"),
-    "--priority", $Priority
 )
 
 Invoke-Step -Title "3/4 Record build/test evidence" -ToolArguments @(
