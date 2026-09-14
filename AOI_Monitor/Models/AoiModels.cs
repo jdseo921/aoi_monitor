@@ -516,9 +516,9 @@ public sealed class BuildTestEvidenceSummary
 
 public sealed class ModelAcceptanceCriteria
 {
-    public double MinimumAccuracy { get; set; } = 0.90;
-    public double MinimumPrecision { get; set; } = 0.90;
-    public double MinimumRecall { get; set; } = 0.90;
+    public double MinimumAccuracy { get; set; } = 0.97;
+    public double MinimumPrecision { get; set; } = 0.97;
+    public double MinimumRecall { get; set; } = 0.97;
     public double MaximumFalseCallRate { get; set; } = 0.05;
     public double MaximumPossibleEscapeRate { get; set; } = 0.02;
     public double MaximumReviewRate { get; set; } = 0.10;
@@ -590,9 +590,9 @@ public record ValidationPackageRecord(
 
 public sealed class ValidationAcceptanceCriteria
 {
-    public double MinimumAccuracy { get; set; } = 0.90;
-    public double MinimumPrecision { get; set; } = 0.90;
-    public double MinimumRecall { get; set; } = 0.90;
+    public double MinimumAccuracy { get; set; } = 0.97;
+    public double MinimumPrecision { get; set; } = 0.97;
+    public double MinimumRecall { get; set; } = 0.97;
     public double MaximumFalseCallRate { get; set; } = 0.05;
     public int MaximumImagesOverOneSecond { get; set; } = 0;
     public bool RequireFormalManifest { get; set; }

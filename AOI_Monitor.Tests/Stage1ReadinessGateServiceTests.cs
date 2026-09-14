@@ -210,6 +210,23 @@ public sealed class Stage1ReadinessGateServiceTests : IDisposable
         Assert.True(File.Exists(benchmark.CsvPath));
     }
 
+    [Fact]
+    public void AcceptanceCriteriaDefaultMetricGatesAre97Percent()
+    {
+        // Product decision 2026-09-14: acceptance metric gates raised from 90% to 97%.
+        // A silent default drift here would loosen every validation package and model
+        // acceptance verdict, so the defaults are pinned.
+        var validation = new ValidationAcceptanceCriteria();
+        Assert.Equal(0.97, validation.MinimumAccuracy);
+        Assert.Equal(0.97, validation.MinimumPrecision);
+        Assert.Equal(0.97, validation.MinimumRecall);
+
+        var model = new ModelAcceptanceCriteria();
+        Assert.Equal(0.97, model.MinimumAccuracy);
+        Assert.Equal(0.97, model.MinimumPrecision);
+        Assert.Equal(0.97, model.MinimumRecall);
+    }
+
     private Stage1EvidenceSeed SeedStage1Evidence(bool includeBuildEvidence)
     {
         var repositoryRoot = CreateRepositoryRoot();

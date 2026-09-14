@@ -24,6 +24,8 @@ Minimum total images 50; minimum known ground-truth images 50; minimum OK images
 
 Typical configured gates: maximum allowed false call rate; maximum allowed possible escape rate; minimum known OK sample count; minimum known NG sample count; management review of limitations when data coverage is insufficient. Insufficient ground truth must be INVALID or CONDITIONAL - never presented as PASS evidence. The documented image-learning walkthrough default is `--false-call-target 0.05`.
 
+Default metric gates for the Stage 1 validation package and for ONNX model acceptance (raised from 90% on 2026-09-14; pinned by `Stage1ReadinessGateServiceTests.AcceptanceCriteriaDefaultMetricGatesAre97Percent`): minimum accuracy 97%, minimum precision 97%, minimum recall 97%; maximum false-call rate 5% (model acceptance additionally caps possible-escape rate at 2% and review rate at 10%). Metrics count decided verdicts only — REVIEW rows are excluded from the confusion matrix and reported as review burden instead.
+
 A Stage 1 exit package is acceptable only when all of these hold:
 
 - customer/evaluator dataset preflight is `PASS` or explicitly accepted with documented warnings;
