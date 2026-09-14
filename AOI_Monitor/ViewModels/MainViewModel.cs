@@ -13,6 +13,9 @@ public class NavPage : ViewModelBase
     public string Key { get; set; } = "";
     public string Number { get; set; } = "";
 
+    /// <summary>Home menu cluster: "operate", "analyze", or "system".</summary>
+    public string Group { get; set; } = "operate";
+
     /// <summary>
     /// UIA item containers announce ToString(); without this override every workflow tile row
     /// read as "AOI_Monitor.ViewModels.NavPage" to assistive tech and UI automation.
@@ -65,19 +68,23 @@ public class MainViewModel : ViewModelBase
     // tile would do nothing. The "home" route stays valid via the shell Home button.
     public ObservableCollection<NavPage> NavPages { get; } = new()
     {
-        new NavPage { Key="library",     Number="01", Title="Board & Images",     Subtitle="library, folders, golden refs" },
-        new NavPage { Key="monitor",     Number="02", Title="Run Inspection",     Subtitle="embedded run, large image view" },
-        new NavPage { Key="compare",     Number="03", Title="Golden Compare",     Subtitle="embedded compare, large image view" },
-        new NavPage { Key="review",      Number="04", Title="Defect Review",      Subtitle="queue, evidence, disposition" },
-        new NavPage { Key="recipe",      Number="05", Title="Recipe Rules",       Subtitle="ROI, masks, tolerances" },
-        new NavPage { Key="modeltest",   Number="06", Title="AI / Models",        Subtitle="model checks, false calls" },
-        new NavPage { Key="spc",         Number="07", Title="Yield Analytics",    Subtitle="SPC, Pareto, trends" },
-        new NavPage { Key="reports",     Number="08", Title="Export & Trace",     Subtitle="CSV, PDF, audit, MES" },
-        new NavPage { Key="calibration", Number="09", Title="Calibration",        Subtitle="2D transform, Stage 2 prep" },
-        new NavPage { Key="profile",     Number="10", Title="3D Profile",         Subtitle="height data, acceptance" },
-        new NavPage { Key="pilot",       Number="11", Title="Hardware Readiness", Subtitle="camera, lighting, robot gates" },
-        new NavPage { Key="settings",    Number="12", Title="System Settings",    Subtitle="display, storage, security" },
+        new NavPage { Key="library",     Number="01", Group="operate", Title="Board & Images",     Subtitle="library, folders, golden refs" },
+        new NavPage { Key="monitor",     Number="02", Group="operate", Title="Run Inspection",     Subtitle="embedded run, large image view" },
+        new NavPage { Key="compare",     Number="03", Group="operate", Title="Golden Compare",     Subtitle="embedded compare, large image view" },
+        new NavPage { Key="review",      Number="04", Group="operate", Title="Defect Review",      Subtitle="queue, evidence, disposition" },
+        new NavPage { Key="recipe",      Number="05", Group="analyze", Title="Recipe Rules",       Subtitle="ROI, masks, tolerances" },
+        new NavPage { Key="modeltest",   Number="06", Group="analyze", Title="AI / Models",        Subtitle="model checks, false calls" },
+        new NavPage { Key="spc",         Number="07", Group="analyze", Title="Yield Analytics",    Subtitle="SPC, Pareto, trends" },
+        new NavPage { Key="reports",     Number="08", Group="analyze", Title="Export & Trace",     Subtitle="CSV, PDF, audit, MES" },
+        new NavPage { Key="calibration", Number="09", Group="system",  Title="Calibration",        Subtitle="2D transform, Stage 2 prep" },
+        new NavPage { Key="profile",     Number="10", Group="system",  Title="3D Profile",         Subtitle="height data, acceptance" },
+        new NavPage { Key="pilot",       Number="11", Group="system",  Title="Hardware Readiness", Subtitle="camera, lighting, robot gates" },
+        new NavPage { Key="settings",    Number="12", Group="system",  Title="System Settings",    Subtitle="display, storage, security" },
     };
+
+    public IEnumerable<NavPage> OperatePages => NavPages.Where(p => p.Group == "operate");
+    public IEnumerable<NavPage> AnalyzePages => NavPages.Where(p => p.Group == "analyze");
+    public IEnumerable<NavPage> SystemPages => NavPages.Where(p => p.Group == "system");
 
     public RelayCommand NavigateCommand { get; }
 

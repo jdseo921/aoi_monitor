@@ -229,7 +229,6 @@
                 <WrapPanel Orientation="Horizontal">
                   <Button x:Name="FileMenuBtn" Style="{StaticResource MiniBtn}" Content="File" Margin="0,0,6,6" Click="OnMenuFileClick"/>
                   <Button x:Name="ReportIssueBtn" Style="{StaticResource MiniBtnAmber}" MinWidth="120" Content="Report Issue" Margin="0,0,6,6" Click="OnReportIssueClick"/>
-                  <Button x:Name="LayoutStressBtn" Style="{StaticResource MiniBtn}" MinWidth="120" Content="Layout Stress" Margin="0,0,6,6" Click="OnLayoutStressClick"/>
                   <Button x:Name="SupportBundleBtn" Style="{StaticResource MiniBtn}" MinWidth="140" Content="Support Bundle" Margin="0,0,0,6" Click="OnExportSupportBundleClick"/>
                 </WrapPanel>
                 <WrapPanel Orientation="Horizontal">

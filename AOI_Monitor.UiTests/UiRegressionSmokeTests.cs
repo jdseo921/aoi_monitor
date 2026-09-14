@@ -357,7 +357,7 @@ public sealed class UiRegressionSmokeTests : IDisposable
         var viewModel = new MainViewModel();
         return new[]
         {
-            new UiPageDefinition("home", "Home", () => new HomeView { DataContext = new MainViewModel() }, true, new[] { "HomeModuleItems" }),
+            new UiPageDefinition("home", "Home", () => new HomeView { DataContext = new MainViewModel() }, true, new[] { "HomeModuleItems", "HomeAnalyzeItems", "HomeSystemItems", "HomeEngineStatusText", "HomeStatusSummaryText" }),
             new UiPageDefinition("library", "Board & Images", () => new LibraryView(), false, new[] { "RecordsGrid", "SchemaGrid", "ImportStatusText" }),
             new UiPageDefinition("monitor", "Run Inspection", () => new MonitorView(), false, new[] { "StartInspectionButton", "StopInspectionButton", "NextBoardButton", "SaveResultButton" }),
             new UiPageDefinition("compare", "Golden Compare", () => new CompareView(), false, new[] { "FindingsGrid", "DiffScoreText" }),

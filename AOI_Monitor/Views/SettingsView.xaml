@@ -1005,6 +1005,7 @@
                     <Button x:Name="OpenInstallNotesBtn" Style="{StaticResource ActionBtn}" Content="Installation Notes" MinWidth="170" Click="OnOpenInstallNotesClick" Margin="0,0,8,8"/>
                     <Button x:Name="OpenGuideBtn" Style="{StaticResource ActionBtn}" Content="Open Guide" MinWidth="150" Click="OnOpenGuideClick" Margin="0,0,8,8"/>
                     <Button x:Name="ExportDiagnosticsBtn" Style="{StaticResource ActionBtn}" Content="Export Diagnostics Report" MinWidth="220" Click="OnExportDiagnosticsClick" Margin="0,0,8,8"/>
+                    <Button x:Name="RunLayoutStressBtn" Style="{StaticResource ActionBtn}" Content="Run Layout Stress Test" MinWidth="210" Click="OnRunLayoutStressClick" Margin="0,0,8,8" ToolTip="Developer/maintenance layout audit across all screens. Writes a report file; no settings change."/>
                     <Button x:Name="BackupConfigurationBtn" Style="{StaticResource ActionBtnGreen}" Content="Backup Configuration" MinWidth="190" Click="OnBackupConfigurationClick" Margin="0,0,8,8"/>
                     <Button x:Name="RestoreConfigurationPreviewBtn" Style="{StaticResource ActionBtnAmber}" Content="Restore Configuration Preview" MinWidth="240" Click="OnRestoreConfigurationPreviewClick" Margin="0,0,8,8"/>
                     <Button x:Name="ApplyRestoreBtn" Style="{StaticResource ActionBtnGreen}" Content="Apply Restore" Click="OnApplyRestoreClick" Margin="0,0,8,8" IsEnabled="False"/>

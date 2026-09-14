@@ -304,6 +304,31 @@ public partial class SettingsView
         }
     }
 
+    private void OnRunLayoutStressClick(object sender, RoutedEventArgs e)
+    {
+        // Relocated from the shell Access popup: a developer/maintenance audit harness
+        // does not belong in the operator login flyout.
+        if (!Authorize(RoleAuthorization.CanUseMaintenanceActions, "Running developer layout stress test"))
+            return;
+
+        try
+        {
+            var reportPath = LayoutStressTestService.RunDeveloperStressTest();
+            WorkflowState.Instance.AddEvent("LAYOUT_STRESS", $"Developer layout stress report written: {reportPath}");
+            MessageBox.Show($"Layout stress report written:\n{reportPath}", "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            var alarm = AlarmEventService.RaiseFromException(
+                "Run layout stress test",
+                "LayoutStress",
+                ex,
+                AlarmSeverity.Warning,
+                "Review the layout test environment and run the audit again before client demo readiness.");
+            MessageBox.Show(alarm.Message, "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void OnBackupConfigurationClick(object sender, RoutedEventArgs e)
     {
         if (!Authorize(RoleAuthorization.CanManageSettings, "Backing up workstation configuration"))

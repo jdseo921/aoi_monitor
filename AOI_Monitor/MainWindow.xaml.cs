@@ -737,29 +737,6 @@ public partial class MainWindow : Window, IDisposable
         _vm.CurrentPage = "home";
     }
 
-    private void OnLayoutStressClick(object sender, RoutedEventArgs e)
-    {
-        if (!EnsurePermission(RoleAuthorization.CanUseMaintenanceActions, "Running developer layout stress test"))
-            return;
-
-        try
-        {
-            var reportPath = LayoutStressTestService.RunDeveloperStressTest();
-            WorkflowState.Instance.AddEvent("LAYOUT_STRESS", $"Developer layout stress report written: {reportPath}");
-            MessageBox.Show($"Layout stress report written:\n{reportPath}", "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
-        {
-            var alarm = AlarmEventService.RaiseFromException(
-                "Run layout stress test",
-                "LayoutStress",
-                ex,
-                AlarmSeverity.Warning,
-                "Review the layout test environment and run the audit again before client demo readiness.");
-            MessageBox.Show(alarm.Message, "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-    }
-
     private void OnReportIssueClick(object sender, RoutedEventArgs e)
     {
         try
@@ -925,7 +902,6 @@ public partial class MainWindow : Window, IDisposable
         FileMenuBtn.Content = UiPreferencesService.Text("File", "\uD30C\uC77C");
         AccessPanelButton.Content = UiPreferencesService.Text("Access", "\uC811\uADFC");
         ReportIssueBtn.Content = UiPreferencesService.Text("Report Issue", "\uC774\uC288 \uBCF4\uACE0");
-        LayoutStressBtn.Content = UiPreferencesService.Text("Layout Stress", "\uB808\uC774\uC544\uC6C3 \uC810\uAC80");
         SupportBundleBtn.Content = UiPreferencesService.Text("Support Bundle", "\uC9C0\uC6D0 \uBC88\uB4E4");
         RefreshPageBtn.Content = UiPreferencesService.Text("Refresh", "\uC0C8\uB85C\uACE0\uCE68");
         LockRecipeBtn.Content = UiPreferencesService.Text("Lock Recipe", "\uB808\uC2DC\uD53C \uC7A0\uAE08");

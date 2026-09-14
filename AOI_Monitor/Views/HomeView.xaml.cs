@@ -1,7 +1,6 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using AOI_Monitor.Data;
 using AOI_Monitor.Models;
 using AOI_Monitor.Services;
@@ -19,43 +18,55 @@ public partial class HomeView : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        WorkflowState.Instance.StateChanged += OnWorkflowStateChanged;
-        InspectionModelConfigurationService.ConfigurationChanged += OnInspectionConfigurationChanged;
-        CameraSourceFactory.ActiveSourceChanged += OnCameraSourceChanged;
-        LightingSettingsService.SettingsChanged += OnIntegrationSettingsChanged;
-        MesIntegrationSettingsService.SettingsChanged += OnIntegrationSettingsChanged;
-        AuthenticationSettingsService.AuthenticationChanged += OnIntegrationSettingsChanged;
-        OperatingModeSettingsService.SettingsChanged += OnIntegrationSettingsChanged;
-        DeploymentProfileSettingsService.SettingsChanged += OnIntegrationSettingsChanged;
-        AlarmEventService.AlarmEventsChanged += OnAlarmEventsChanged;
+        InspectionModelConfigurationService.ConfigurationChanged += OnStatusSourceChanged;
+        CameraSourceFactory.ActiveSourceChanged += OnStatusSourceChanged;
+        LightingSettingsService.SettingsChanged += OnStatusSourceChanged;
+        MesIntegrationSettingsService.SettingsChanged += OnStatusSourceChanged;
+        AuthenticationSettingsService.AuthenticationChanged += OnStatusSourceChanged;
+        OperatingModeSettingsService.SettingsChanged += OnStatusSourceChanged;
+        DeploymentProfileSettingsService.SettingsChanged += OnStatusSourceChanged;
+        AlarmEventService.AlarmEventsChanged += OnStatusSourceChanged;
         RefreshStatus();
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
-        WorkflowState.Instance.StateChanged -= OnWorkflowStateChanged;
-        InspectionModelConfigurationService.ConfigurationChanged -= OnInspectionConfigurationChanged;
-        CameraSourceFactory.ActiveSourceChanged -= OnCameraSourceChanged;
-        LightingSettingsService.SettingsChanged -= OnIntegrationSettingsChanged;
-        MesIntegrationSettingsService.SettingsChanged -= OnIntegrationSettingsChanged;
-        AuthenticationSettingsService.AuthenticationChanged -= OnIntegrationSettingsChanged;
-        OperatingModeSettingsService.SettingsChanged -= OnIntegrationSettingsChanged;
-        DeploymentProfileSettingsService.SettingsChanged -= OnIntegrationSettingsChanged;
-        AlarmEventService.AlarmEventsChanged -= OnAlarmEventsChanged;
+        InspectionModelConfigurationService.ConfigurationChanged -= OnStatusSourceChanged;
+        CameraSourceFactory.ActiveSourceChanged -= OnStatusSourceChanged;
+        LightingSettingsService.SettingsChanged -= OnStatusSourceChanged;
+        MesIntegrationSettingsService.SettingsChanged -= OnStatusSourceChanged;
+        AuthenticationSettingsService.AuthenticationChanged -= OnStatusSourceChanged;
+        OperatingModeSettingsService.SettingsChanged -= OnStatusSourceChanged;
+        DeploymentProfileSettingsService.SettingsChanged -= OnStatusSourceChanged;
+        AlarmEventService.AlarmEventsChanged -= OnStatusSourceChanged;
     }
 
-    private void OnWorkflowStateChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshStatus);
-    private void OnInspectionConfigurationChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshStatus);
-    private void OnCameraSourceChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshStatus);
-    private void OnIntegrationSettingsChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshStatus);
-    private void OnAlarmEventsChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshStatus);
+    private void OnStatusSourceChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshStatus);
 
     private void RefreshStatus()
     {
+        // Exception-based status: the engine truth chip is always visible; every other
+        // chip appears only when its state differs from the Stage-1-expected baseline
+        // (DB/Vault present, no hardware connected). Collapsed states are rolled up
+        // into HomeStatusSummaryText so nothing is silently omitted.
+        var summaryHealthy = new List<string>();
+        var summaryAbsent = new List<string>();
+
         var databaseConnected = File.Exists(AoiDatabase.DatabasePath);
+        SetStatus(HomeDatabaseStatusBorder, HomeDatabaseStatusText,
+            databaseConnected ? "Connected" : "Not Connected",
+            databaseConnected ? StatusKind.Ok : StatusKind.Ng,
+            expected: StatusKind.Ok);
+        if (databaseConnected)
+            summaryHealthy.Add("DB connected");
+
         var vaultAvailable = Directory.Exists(AoiDatabase.ImageVaultPath);
-        SetStatus(HomeDatabaseStatusBorder, HomeDatabaseStatusText, databaseConnected ? "Connected" : "Not Connected", databaseConnected ? StatusKind.Ok : StatusKind.Unavailable);
-        SetStatus(HomeImageVaultStatusBorder, HomeImageVaultStatusText, vaultAvailable ? "Available" : "Not Available", vaultAvailable ? StatusKind.Ok : StatusKind.Unavailable);
+        SetStatus(HomeImageVaultStatusBorder, HomeImageVaultStatusText,
+            vaultAvailable ? "Available" : "Not Available",
+            vaultAvailable ? StatusKind.Ok : StatusKind.Ng,
+            expected: StatusKind.Ok);
+        if (vaultAvailable)
+            summaryHealthy.Add("vault available");
 
         var engineStatus = InspectionModelConfigurationService.GetStatus();
         var engineStatusText = InspectionModelConfigurationService.GetStatusText();
@@ -71,13 +82,19 @@ public partial class HomeView : UserControl
                     InspectionEngineStatus.MlInvalidLabelMap or
                     InspectionEngineStatus.MlUnsupportedOutputFormat => StatusKind.Ng,
                 _ => StatusKind.Warning,
-            });
+            },
+            expected: null);
         HomeEngineStatusText.ToolTip = engineStatusText;
 
         var cameraStatus = CameraSourceFactory.ActiveSource.ConnectionStatus;
-        SetStatus(
-            HomeCameraStatusBorder,
-            HomeCameraStatusText,
+        var cameraKind = cameraStatus switch
+        {
+            CameraSourceStatus.Ready => StatusKind.Ok,
+            CameraSourceStatus.Simulated => StatusKind.Simulated,
+            CameraSourceStatus.Error => StatusKind.Ng,
+            _ => StatusKind.Unavailable,
+        };
+        SetStatus(HomeCameraStatusBorder, HomeCameraStatusText,
             cameraStatus switch
             {
                 CameraSourceStatus.Ready => "Connected",
@@ -85,80 +102,49 @@ public partial class HomeView : UserControl
                 CameraSourceStatus.Error => "Error",
                 _ => "Not Connected",
             },
-            cameraStatus switch
-            {
-                CameraSourceStatus.Ready => StatusKind.Ok,
-                CameraSourceStatus.Simulated => StatusKind.Simulated,
-                CameraSourceStatus.Error => StatusKind.Ng,
-                _ => StatusKind.Unavailable,
-            });
+            cameraKind,
+            expected: StatusKind.Unavailable);
+        if (cameraKind == StatusKind.Unavailable)
+            summaryAbsent.Add("camera");
 
-        SetIntegrationStatus(HomeLightingStatusBorder, HomeLightingStatusText, IntegrationBoundaryRegistry.LightingController);
-        SetIntegrationStatus(HomeRobotStatusBorder, HomeRobotStatusText, IntegrationBoundaryRegistry.RobotController);
-        SetStatus(
-            HomeMesStatusBorder,
-            HomeMesStatusText,
-            ToStatusDisplay(CombineStatuses(
-                IntegrationBoundaryRegistry.MesClient.Status,
-                IntegrationBoundaryRegistry.TraceabilityUploader.Status)),
-            ToStatusKind(CombineStatuses(
-                IntegrationBoundaryRegistry.MesClient.Status,
-                IntegrationBoundaryRegistry.TraceabilityUploader.Status)));
+        if (SetIntegrationStatus(HomeLightingStatusBorder, HomeLightingStatusText, IntegrationBoundaryRegistry.LightingController))
+            summaryAbsent.Add("lighting");
+        if (SetIntegrationStatus(HomeRobotStatusBorder, HomeRobotStatusText, IntegrationBoundaryRegistry.RobotController))
+            summaryAbsent.Add("robot");
+
+        var mesCombined = CombineStatuses(
+            IntegrationBoundaryRegistry.MesClient.Status,
+            IntegrationBoundaryRegistry.TraceabilityUploader.Status);
+        SetStatus(HomeMesStatusBorder, HomeMesStatusText,
+            ToStatusDisplay(mesCombined), ToStatusKind(mesCombined),
+            expected: StatusKind.Unavailable);
         HomeMesStatusText.ToolTip = $"{IntegrationBoundaryRegistry.MesClient.StatusMessage} {IntegrationBoundaryRegistry.TraceabilityUploader.StatusMessage}";
-        SetIntegrationStatus(HomeEStopStatusBorder, HomeEStopStatusText, IntegrationBoundaryRegistry.EmergencyStopMonitor);
+        if (ToStatusKind(mesCombined) == StatusKind.Unavailable)
+            summaryAbsent.Add("MES");
 
-        var state = WorkflowState.Instance;
-        HomeSampleText.Text = string.IsNullOrWhiteSpace(state.SampleImagePath) ? "none" : Path.GetFileName(state.SampleImagePath);
-        HomeSampleText.ToolTip = string.IsNullOrWhiteSpace(state.SampleImagePath) ? "No sample image selected." : state.SampleImagePath;
-        HomeGoldenText.Text = string.IsNullOrWhiteSpace(state.GoldenImagePath) ? "none" : Path.GetFileName(state.GoldenImagePath);
-        HomeGoldenText.ToolTip = string.IsNullOrWhiteSpace(state.GoldenImagePath) ? "No golden reference selected." : state.GoldenImagePath;
-        HomeRecipeText.Text = string.IsNullOrWhiteSpace(state.LastAnalysis?.RecipeName)
-            ? state.ModelVersion
-            : $"{state.LastAnalysis.RecipeName} / {state.LastAnalysis.RecipeRevision}";
-        HomeRecipeText.ToolTip = HomeRecipeText.Text;
+        if (SetIntegrationStatus(HomeEStopStatusBorder, HomeEStopStatusText, IntegrationBoundaryRegistry.EmergencyStopMonitor))
+            summaryAbsent.Add("E-Stop");
 
-        if (state.LastAnalysis is null)
-        {
-            HomeScoreText.Text = "--";
-            HomeVerdictText.Text = "REVIEW";
-            SetVerdict(StatusKind.Warning);
-        }
-        else
-        {
-            HomeScoreText.Text = $"{state.LastAnalysis.DifferenceScore:F1}%";
-            HomeScoreText.ToolTip = $"Difference score: {state.LastAnalysis.DifferenceScore:F1}%.";
-            HomeVerdictText.Text = state.LastAnalysis.Verdict;
-            if (state.LastAnalysis.Verdict.Equals("OK", StringComparison.OrdinalIgnoreCase))
-                SetVerdict(StatusKind.Ok);
-            else if (state.LastAnalysis.Verdict.Equals("NG", StringComparison.OrdinalIgnoreCase))
-                SetVerdict(StatusKind.Ng);
-            else
-                SetVerdict(StatusKind.Warning);
-        }
-
+        var parts = new List<string>();
+        if (summaryHealthy.Count > 0)
+            parts.Add(string.Join(", ", summaryHealthy));
+        if (summaryAbsent.Count > 0)
+            parts.Add($"{string.Join(", ", summaryAbsent)} not connected (Stage 1 image-only)");
+        HomeStatusSummaryText.Text = parts.Count > 0
+            ? $"{string.Join(" · ", parts)} — details: Hardware Readiness."
+            : "All monitored states are shown as chips above.";
     }
 
-    private static void SetIntegrationStatus(Border border, TextBlock textBlock, IIntegrationEndpoint endpoint)
+    /// <summary>Returns true when the endpoint sits in the expected not-connected baseline (collapsed into the summary).</summary>
+    private static bool SetIntegrationStatus(Border border, TextBlock textBlock, IIntegrationEndpoint endpoint)
     {
-        SetStatus(border, textBlock, ToStatusDisplay(endpoint.Status), ToStatusKind(endpoint.Status));
+        var kind = ToStatusKind(endpoint.Status);
+        SetStatus(border, textBlock, ToStatusDisplay(endpoint.Status), kind, expected: StatusKind.Unavailable);
         textBlock.ToolTip = $"{endpoint.Name}: {endpoint.StatusMessage}";
+        return kind == StatusKind.Unavailable;
     }
 
-    private void SetVerdict(StatusKind kind)
-    {
-        // Swap the shared verdict-banner style; the shared soft brushes color the text.
-        // Raw hex assignments here would escape the tokenized palette the WCAG contract
-        // test covers.
-        HomeVerdictBorder.Style = (Style)FindResource(kind switch
-        {
-            StatusKind.Ok => "HmiVerdictBannerOk",
-            StatusKind.Ng => "HmiVerdictBannerNg",
-            _ => "HmiVerdictBannerWarn",
-        });
-        HomeVerdictText.Foreground = (System.Windows.Media.Brush)FindResource(SoftBrushKey(kind));
-    }
-
-    private static void SetStatus(Border border, TextBlock textBlock, string text, StatusKind kind)
+    private static void SetStatus(Border border, TextBlock textBlock, string text, StatusKind kind, StatusKind? expected)
     {
         textBlock.Text = text;
         textBlock.ToolTip = text;
@@ -171,6 +157,7 @@ public partial class HomeView : UserControl
             StatusKind.Simulated => "HmiAdaptiveStatusSimulated",
             _ => "HmiAdaptiveStatusUnavailable",
         });
+        border.Visibility = expected is null || kind != expected ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private static string SoftBrushKey(StatusKind kind) => kind switch
@@ -210,7 +197,6 @@ public partial class HomeView : UserControl
         IntegrationConnectionStatus.Error => StatusKind.Ng,
         _ => StatusKind.Unavailable,
     };
-
 
     private enum StatusKind
     {

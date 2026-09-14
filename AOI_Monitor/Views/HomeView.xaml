@@ -13,214 +13,173 @@
       <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}"/>
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
     </Style>
+    <Style x:Key="HomeGroupHeader" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource HmiTextLabelBrush}"/>
+      <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+    <DataTemplate x:Key="HomeModuleTileTemplate">
+      <Button Style="{StaticResource HomeModuleButton}"
+              AutomationProperties.Name="{Binding Title}"
+              IsEnabled="{Binding IsEnabled}"
+              Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+              CommandParameter="{Binding Key}">
+        <Grid Margin="12,10">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="44"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+          <Border Width="34"
+                  Height="34"
+                  Background="{DynamicResource BlueBrush}"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Center">
+            <TextBlock Text="{Binding Number}"
+                       Foreground="White"
+                       FontSize="{StaticResource HmiFontSizeBody}"
+                       FontWeight="ExtraBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+          </Border>
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Title}"
+                       Foreground="{DynamicResource TextBrush}"
+                       FontSize="{StaticResource HmiFontSizeBody}"
+                       FontWeight="ExtraBold"
+                       TextWrapping="Wrap"
+                       LineHeight="25"/>
+            <TextBlock Text="{Binding Subtitle}"
+                       Foreground="{DynamicResource MutedBrush}"
+                       FontSize="{StaticResource HmiFontSizeBody}"
+                       TextWrapping="Wrap"
+                       LineHeight="25"
+                       Margin="0,3,0,0"/>
+          </StackPanel>
+        </Grid>
+      </Button>
+    </DataTemplate>
   </UserControl.Resources>
 
   <ScrollViewer Style="{StaticResource FactoryViewportFillPage}">
-    <!-- Fill the viewport: the workflow tiles absorb the spare height (audit metric
-         TrailingVoidPercent held 37.6% dead space at 1080p before this). Small screens keep
-         scrolling because MinHeight never shrinks content below its natural size. The page
-         inset lives on the ScrollViewer Padding, never on this Grid: a Margin here adds to
-         the scroll extent and re-creates the permanent sliver of scroll. -->
+    <!-- The menu shows only what changes a decision: the engine truth chip, any
+         ABNORMAL status as a chip (healthy and expected-absent states collapse into
+         the one summary line), the grouped destination tiles, and the evidence
+         boundary. Live inspection state lives on Run Inspection, hardware detail on
+         Hardware Readiness. The page inset lives on the ScrollViewer Padding, never
+         on this Grid: a Margin here adds to the scroll extent and re-creates the
+         permanent sliver of scroll. -->
     <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="8"/>
         <RowDefinition Height="*"/>
+        <RowDefinition Height="8"/>
+        <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
-      <Grid Grid.Row="0">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="5"/>
-          <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <DockPanel LastChildFill="True">
-          <!-- The alarm summary that used to sit here duplicated the always-visible topbar
-               Alarms control (DESIGN.md forbids duplicated status panels); the topbar chip is
-               the single source now. -->
-          <TextBlock Text="Home"
-                     Style="{StaticResource HmiPageTitleText}"
-                     VerticalAlignment="Center"
-                     TextWrapping="NoWrap"/>
-        </DockPanel>
-
-        <WrapPanel Grid.Row="2" Orientation="Horizontal">
-          <Border x:Name="HomeDatabaseStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
-            <DockPanel LastChildFill="True">
-              <TextBlock Text="DB" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeDatabaseStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
-            </DockPanel>
-          </Border>
-          <Border x:Name="HomeImageVaultStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
-            <DockPanel LastChildFill="True">
-              <TextBlock Text="Vault" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeImageVaultStatusText" Text="Not Available" Style="{StaticResource HmiAdaptiveStatusText}"/>
-            </DockPanel>
-          </Border>
+      <StackPanel Grid.Row="0">
+        <WrapPanel Orientation="Horizontal">
           <Border x:Name="HomeEngineStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
               <TextBlock Text="Engine" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
               <TextBlock x:Name="HomeEngineStatusText" Text="Pixel Difference Prototype Engine" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeCameraStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
+          <Border x:Name="HomeDatabaseStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
+            <DockPanel LastChildFill="True">
+              <TextBlock Text="DB" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeDatabaseStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
+            </DockPanel>
+          </Border>
+          <Border x:Name="HomeImageVaultStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
+            <DockPanel LastChildFill="True">
+              <TextBlock Text="Vault" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeImageVaultStatusText" Text="Not Available" Style="{StaticResource HmiAdaptiveStatusText}"/>
+            </DockPanel>
+          </Border>
+          <Border x:Name="HomeCameraStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
             <DockPanel LastChildFill="True">
               <TextBlock Text="Camera" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
               <TextBlock x:Name="HomeCameraStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeLightingStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
+          <Border x:Name="HomeLightingStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
             <DockPanel LastChildFill="True">
               <TextBlock Text="Light" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
               <TextBlock x:Name="HomeLightingStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeRobotStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
+          <Border x:Name="HomeRobotStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
             <DockPanel LastChildFill="True">
               <TextBlock Text="Robot" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
               <TextBlock x:Name="HomeRobotStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeMesStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
+          <Border x:Name="HomeMesStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
             <DockPanel LastChildFill="True">
               <TextBlock Text="MES" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
               <TextBlock x:Name="HomeMesStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeEStopStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
+          <Border x:Name="HomeEStopStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}" Visibility="Collapsed">
             <DockPanel LastChildFill="True">
               <TextBlock Text="E-Stop" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
               <TextBlock x:Name="HomeEStopStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
         </WrapPanel>
-      </Grid>
+        <TextBlock x:Name="HomeStatusSummaryText"
+                   Text="Status summary loading..."
+                   Foreground="{DynamicResource MutedBrush}"
+                   FontSize="{StaticResource HmiFontSizeBody}"
+                   TextWrapping="Wrap"
+                   Margin="0,2,0,0"
+                   ToolTip="Healthy and Stage-1-expected states are summarized here; anything abnormal appears as a colored chip above. Full hardware detail: Hardware Readiness."/>
+      </StackPanel>
 
       <Grid Grid.Row="2">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
-          <RowDefinition Height="6"/>
           <RowDefinition Height="*"/>
-          <RowDefinition Height="12"/>
           <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="AOI Workflow Menus" Style="{StaticResource HmiSectionHeaderText}"/>
-
-        <ItemsControl x:Name="HomeModuleItems" Grid.Row="2" ItemsSource="{Binding NavPages}">
+        <TextBlock Text="Operate" Style="{StaticResource HomeGroupHeader}"/>
+        <ItemsControl x:Name="HomeModuleItems" Grid.Row="1" ItemsSource="{Binding OperatePages}" ItemTemplate="{StaticResource HomeModuleTileTemplate}">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-              <UniformGrid Columns="4"/>
+              <UniformGrid Columns="4" Rows="1"/>
             </ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Button Style="{StaticResource HomeModuleButton}"
-                      AutomationProperties.Name="{Binding Title}"
-                      IsEnabled="{Binding IsEnabled}"
-                      Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                      CommandParameter="{Binding Key}">
-                <Grid Margin="12,10">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="44"/>
-                    <ColumnDefinition Width="*"/>
-                  </Grid.ColumnDefinitions>
-                  <Border Width="34"
-                          Height="34"
-                          Background="{DynamicResource BlueBrush}"
-                          HorizontalAlignment="Left"
-                          VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Number}"
-                               Foreground="White"
-                               FontSize="{StaticResource HmiFontSizeBody}"
-                               FontWeight="ExtraBold"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                  </Border>
-                  <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Title}"
-                               Foreground="{DynamicResource TextBrush}"
-                               FontSize="{StaticResource HmiFontSizeBody}"
-                               FontWeight="ExtraBold"
-                               TextWrapping="Wrap"
-                               LineHeight="25"/>
-                    <TextBlock Text="{Binding Subtitle}"
-                               Foreground="{DynamicResource MutedBrush}"
-                               FontSize="{StaticResource HmiFontSizeBody}"
-                               TextWrapping="Wrap"
-                               LineHeight="25"
-                               Margin="0,3,0,0"/>
-                  </StackPanel>
-                </Grid>
-              </Button>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- Full-width status band: Current State + Evidence Boundary side by side -->
-        <Grid Grid.Row="4">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="1.25*"/>
-          </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="2" Text="Analyze &amp; Evidence" Style="{StaticResource HomeGroupHeader}" Margin="0,6,0,4"/>
+        <ItemsControl x:Name="HomeAnalyzeItems" Grid.Row="3" ItemsSource="{Binding AnalyzePages}" ItemTemplate="{StaticResource HomeModuleTileTemplate}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="4" Rows="1"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
 
-          <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="5"/>
-              <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Text="Current State" Style="{StaticResource HmiSectionHeaderText}"/>
-            <Border Grid.Row="2" Style="{StaticResource FactoryCard}" Padding="10">
-              <Grid>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="4"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="4"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="4"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="*"/>
-                  <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="Auto" MinWidth="96"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Sample" Style="{StaticResource FactoryFormFieldLabel}"/>
-                <TextBlock x:Name="HomeSampleText" Grid.Column="1" Text="none" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <TextBlock Grid.Row="2" Text="Golden" Style="{StaticResource FactoryFormFieldLabel}"/>
-                <TextBlock x:Name="HomeGoldenText" Grid.Row="2" Grid.Column="1" Text="none" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <TextBlock Grid.Row="4" Text="Score" Style="{StaticResource FactoryFormFieldLabel}"/>
-                <TextBlock x:Name="HomeScoreText" Grid.Row="4" Grid.Column="1" Text="--" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <TextBlock Grid.Row="6" Text="Recipe" Style="{StaticResource FactoryFormFieldLabel}"/>
-                <TextBlock x:Name="HomeRecipeText" Grid.Row="6" Grid.Column="1" Text="PIXEL_DIFF_0.2" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <Border x:Name="HomeVerdictBorder" Grid.Row="8" Grid.ColumnSpan="2" Style="{StaticResource HmiVerdictBannerWarn}" Margin="0,8,0,0">
-                  <DockPanel LastChildFill="True">
-                    <TextBlock Text="Verdict" Foreground="{DynamicResource MutedBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="HomeVerdictText" Text="REVIEW" Foreground="{DynamicResource HmiWarnSoftBrush}" FontSize="{StaticResource HmiFontSizeVerdict}" FontWeight="ExtraBold" HorizontalAlignment="Right" TextAlignment="Right"/>
-                  </DockPanel>
-                </Border>
-              </Grid>
-            </Border>
-          </Grid>
-
-          <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="5"/>
-              <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Text="Evidence Boundary" Style="{StaticResource HmiSectionHeaderText}"/>
-            <Border Grid.Row="2" Style="{StaticResource HmiPlainLanguageNote}" Padding="10" VerticalAlignment="Stretch">
-              <TextBlock Text="Stage 1 image-validation evidence is for review. Camera, lighting, robot, safety, and MES readiness still require Hardware Readiness evidence before any real factory-integration claim."
-                         Style="{StaticResource HmiPageSubtitleText}" LineHeight="25" VerticalAlignment="Center"/>
-            </Border>
-          </Grid>
-        </Grid>
+        <TextBlock Grid.Row="4" Text="Machine &amp; System" Style="{StaticResource HomeGroupHeader}" Margin="0,6,0,4"/>
+        <ItemsControl x:Name="HomeSystemItems" Grid.Row="5" ItemsSource="{Binding SystemPages}" ItemTemplate="{StaticResource HomeModuleTileTemplate}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="4" Rows="1"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
       </Grid>
+
+      <Border Grid.Row="4" Style="{StaticResource HmiPlainLanguageNote}" Padding="10">
+        <TextBlock Text="Stage 1 image-validation evidence is for review. Camera, lighting, robot, safety, and MES readiness still require Hardware Readiness evidence before any real factory-integration claim."
+                   Style="{StaticResource HmiPageSubtitleText}" TextWrapping="Wrap"/>
+      </Border>
     </Grid>
   </ScrollViewer>
 </UserControl>
