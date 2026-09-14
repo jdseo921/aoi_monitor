@@ -12,7 +12,54 @@ A Windows WPF (.NET 10) desktop console for Stage-1, image-only PCB AOI: load bo
 
 Engines (all implement `IInspectionEngine`): *Pixel Difference Prototype* (default) — deterministic golden-vs-sample difference, labeled prototype; *Learned PCB Visual Model v1* — statistical template learning (alignment, brightness normalization, per-pixel tolerance map, threshold calibrated on OK/NG validation sets); optional *ONNX Runtime engine* — the seam for a future production ML detector; no model ships by default. Recipes hold normalized ROIs (`RecipeDocument`), drawn by hand or auto-generated from pick-and-place centroid CSVs (`CentroidRoiImportService`; approximate placement, review required).
 
-False-call/escape rates carry exact Clopper-Pearson 95% confidence intervals and PPM (`BinomialConfidence`); `RobustnessStudyService` runs an MSA-adapted perturbation stability study; validation packages, threshold sweeps, audit trail, and export verification are first-class services. Storage: local SQLite (`AoiDatabase`, ~40 tables), a managed image vault, per-run export folders — no cloud, no central DB in Stage 1. Quality gates: Windows CI build + 450+ unit/UI tests, HMI layout audit (clipping/DPI), PR gates (font/size floors, fixed-width warnings, overclaim wording, repo hygiene), EN/KO localization parity test.
+False-call/escape rates carry exact Clopper-Pearson 95% confidence intervals and PPM (`BinomialConfidence`); `RobustnessStudyService` runs an MSA-adapted perturbation stability study; validation packages, threshold sweeps, audit trail, and export verification are first-class services. Storage: local SQLite (`AoiDatabase`, 60+ tables), a managed image vault, per-run export folders — no cloud, no central DB in Stage 1. Quality gates: Windows CI build + 590+ unit/UI test methods, HMI layout audit (clipping/DPI), PR gates (font/size floors, fixed-width warnings, overclaim wording, repo hygiene), EN/KO localization parity test.
+
+## Stage 1 at a Glance
+
+Compact catalogue of the essential components and the two Stage-1 pipelines. Detail lives in the sections below and the linked docs — this table is the map, not the territory.
+
+| Component | What it is | Where |
+|---|---|---|
+| WPF shell, 13 windows | Home + 12 role-gated workflow destinations (roster in `AGENTS.md`); shared HMI styles | `MainWindow`, `Views/`, `Styles/FactoryHmiLayout.xaml` |
+| Inspection engines (3) | Pixel Difference Prototype (default, deterministic); Learned PCB Visual Model v1 (statistical OK-learning); optional ONNX seam, no model shipped | `InspectionEngineFactory`, `Services/*Engine*.cs` |
+| Recipes & ROIs | Normalized ROIs, per-ROI thresholds, revisions, lock, centroid-CSV auto-import | `RecipeDocument`, `CentroidRoiImportService` |
+| Storage | SQLite (60+ tables, 31 additive migrations), image vault with SHA-256, 13 settings JSON files | `Data/AoiDatabase.*`, storage root |
+| Camera seam | `ICameraSource`: Null / Folder-simulation / GenericVisionAdapter + manifest plugin loader; simulation always labeled | `CameraSourceFactory`, `VisionCameraAdapters.cs` |
+| Integration boundaries | Lighting, robot/PLC/E-stop, MES/traceability, central sync — fail-safe Null defaults, labeled Simulated/Mock modes | `IntegrationContracts.cs`, `IntegrationBoundaryRegistry` |
+| Metrics & validation | Batch validation with manifests, confusion metrics + Clopper-Pearson CIs, false-call/escape workflow, threshold profiles, robustness study | `FalseCallReductionService`, batch validation services |
+| Evidence & export | CSV/PNG/PDF/JSON/HTML exports with SHA-256 verification, customer validation package, factory-style audit trail | `ExportVerificationService`, Stage-1 package services |
+| Readiness gates | Profile-based Go/No-Go (Stage 1 → Full Factory), completion scoring real vs simulated, machine-interface JSON contract | `FactoryReadinessService`, `CompletionAssessmentService` |
+| Quality gates & tests | 590+ unit/UI test methods, HMI layout audit at 100/125/150%, nav-perf smoke, PR/claim gates, CI | `Scripts/run-quality-gates.ps1`, `.github/workflows/` |
+
+**Data pipeline (live Stage-1 inspection, image-only):**
+
+```mermaid
+flowchart LR
+    IMP[Import PNG/JPG to vault + SHA-256] --> SEL[Board + view selection]
+    SEL --> ENG{Engine: OK / REVIEW / NG}
+    ENG --> OVR[Defect overlays + grid]
+    OVR --> DISP[Disposition: false call / possible escape]
+    DISP --> DB[(SQLite + audit)]
+    DB --> EXP[Verified exports]
+    EXP --> PKG[Customer validation package]
+```
+
+**Stage-1 exit work pipeline** (each step persists evidence the readiness report checks; CLI verbs from `AOI_Monitor.Tools`, chain scripted by `Scripts/run-stage1-testing.ps1`):
+
+```mermaid
+flowchart LR
+    DS[prepare-dataset: images + manifest + truth labels] --> PF[Dataset preflight PASS]
+    PF --> BV[Batch validation: metrics + timing]
+    BV --> LRN[learn-from-images: visual learning report]
+    LRN --> FC[False-call review + threshold approval]
+    FC --> BM[benchmark: p50/p95/p99]
+    BM --> SOAK[batch-soak: 8 h artifact]
+    SOAK --> RDY[stage1-readiness: 15/15 PASS]
+    RDY --> PKG2[Package export + verification]
+    PKG2 --> SIGN[Customer review + deviation sign-off]
+```
+
+Other Tools verbs: `client-image-learning-demo` (labeled synthetic demo), `import-image-learning-project`, `record-build-evidence` (records outcomes — it does not run gates), `camera-adapter-validate` / `stage2-camera-pilot` (Stage-2 tooling). Full procedures: `Docs/VALIDATION.md`; acceptance numbers: `Docs/METRICS_VAL.md`; open exit blockers: `Docs/ROADMAP.md`.
 
 ## Layers and Dependency Rules
 
@@ -161,15 +208,15 @@ Priorities: P1 = before any Stage 2 pilot commitment · P2 = before the relevant
 
 | ID | Pri | Effort | Item |
 |---|---|---|---|
-| DR-01 | P1 | moderate | Decide the camera pixel-transport rule: hard-fail acceptance on missing `SourcePath` via criteria (tests updated), or `GenericVisionCameraSource` bridges buffer frames to the image vault. Today's WARN is a stopgap. |
+| DR-01 | P1 | moderate | Decide the camera pixel-transport rule: hard-fail acceptance on missing `SourcePath` via criteria (tests updated), or `GenericVisionCameraSource` bridges buffer frames to the image vault. Today's WARN is a stopgap. Decision recorded: ADR-0001 (hard-fail; implementation W1). |
 | DR-02 | P1 | moderate | `GenericVisionCameraSource`: reconnect (or refuse frames) on `SelectedView` change while acquiring; never relabel an adapter frame whose view mismatches the request; contract test with a recording adapter. |
-| DR-03 | P1 | moderate | Lighting vendor path: either wire `AdapterFolder`/external mode through `LightingControllerFactory` + Settings (mirror camera), or retitle the loader and correct guide/template so vendors target the TCP/serial text protocol. |
+| DR-03 | P1 | moderate | Lighting vendor path: either wire `AdapterFolder`/external mode through `LightingControllerFactory` + Settings (mirror camera), or retitle the loader and correct guide/template so vendors target the TCP/serial text protocol. Decision recorded: ADR-0002 (wire plugin mode; implementation W3). |
 | DR-04 | P1 | moderate | Lighting sync failure policy (`BlockAcquisitionOnSyncFailure`, default on for real transports): halt the cycle with an alarm instead of inspecting under wrong illumination. |
 | DR-05 | P2 (S2 w/ 3D scope) | moderate | 3D seam parity: `Profile3DAdapterTemplate`, factory + manifest plugin loader, persisted source setting incl. backup coverage; ProfileView `LoadFrame` path so a live sensor is visible in the viewer. |
 | DR-06 | P2 (S3) | moderate | Robot state-machine hardening: misbehaving-adapter test matrix (delay/hang/throw/reject/e-stop mid-command), `MaxCommandDuration` with linked cancellation (closes VOL11 N-2). |
 | DR-07 | P2 (S3) | moderate | Safety fault-injection contract interface replacing `Simulated*` hard casts in both acceptance harnesses; replace the `SafetySourceKind=="Real"` waiver with recorded hardware-in-the-loop fault evidence. |
 | DR-08 | P1 | moderate | Recipe-revision restore preserving identity (idempotent upsert on RecipeName+Revision incl. CreatedAtUtc/Operator/Notes); round-trip test; keeps threshold-profile traceability intact. |
-| DR-09 | P1 | cheap+decision | Fail-closed corrupt-settings startup for storage-root / operating-mode / authentication files: block with an explicit operator decision + audit event instead of silently defaulting (storage root) or downgrading to Demo/password-less (security posture). Needs a product decision on lockout UX. |
+| DR-09 | P1 | cheap+decision | Fail-closed corrupt-settings startup for storage-root / operating-mode / authentication files: block with an explicit operator decision + audit event instead of silently defaulting (storage root) or downgrading to Demo/password-less (security posture). Needs a product decision on lockout UX. Decision recorded: ADR-0003 (fail closed, most-restrictive defaults; implementation W4). |
 | DR-10 | P2 (2H-2027) | moderate | Extend localization parity scan to all operator views (grow the honest ledger first — it quantifies the ~560-literal backlog), and extend the extraction regex to Header=/ToolTip=. |
 | DR-11 | P2 | moderate | Settings robustness bundle: `schemaVersion` on all settings POCOs, atomic temp-write-then-replace via a shared writer, string-enum serialization, audit-event (not Trace) on load-fallback. |
 | DR-12 | P2 | cheap | Adapter manifest `contractVersion` handshake (camera + lighting loaders) with an actionable rebuild message. |
@@ -185,6 +232,71 @@ Priorities: P1 = before any Stage 2 pilot commitment · P2 = before the relevant
 **Localization readiness (2H-2027 third language).** Honest cost: a moderate structural refactor plus a large translation backlog — not "a dictionary away", not a rewrite. Carries over: the language-agnostic walker, canonical persistence, enum-safe preferences (`Language=3` degrades safely), the standard's locale gates (LOC-001/002/011/012, UTF-8-only, font-fallback, +35% layout expansion). Gaps: dictionary keyed by literal English strings (silent orphaning on copy edits); 70+ hard-coded bilingual ternaries; alarm/MessageBox text is free-form English persisted at raise time (LOC-012/013 message-ID catalog is a prerequisite); `DefectTaxonomyEntry` lacks a localized-name facet (ride the next taxonomy migration); evidence reports EN-only by documented decision OD-VOL12-2. Do the structural moves (keyed text API, centralized language metadata, extended parity scan, taxonomy facet) before translating.
 
 **Configuration/versioning verdict.** No destructive migration is required for a Stage 2 pilot: the migration chain is additive and transactional, model/threshold/recipe/taxonomy stores are revisioned, and MES/camera settings tolerate field additions. Pilot-day risks: silent-default settings loads (DR-09, DR-11), the disclosed calibration backup gap, recipe-restore identity loss (DR-08), missing manifest contract-version handshake (DR-12); likeliest pain is the settings-file family — DR-11 bundles the fix.
+
+## Stage 2 Code-Readiness Plan (2026-09-09)
+
+Execution structure for closing the software-side Stage 2 gaps: the open DR-01..DR-20 register items plus the VOL10 (CAM-xxx/THD-xxx) requirements that are implementable without hardware. **Boundary statement:** this plan produces code readiness and simulation evidence only. It does not close any ROADMAP Stage 2 blocker that requires real hardware — vendor adapter acceptance, real camera/lighting/3D runs, the CAM-045 hardware-in-the-loop checklist, and the pilot readiness package remain hardware-gated and NOT VALIDATED until real-device evidence exists.
+
+**Decisions recorded** (`Docs/records/adr/2026/`, filed per VOL18 §57; Proposed until the Software Architect's recorded acceptance): ADR-0001 on-disk frame transport with hard-fail acceptance (DR-01); ADR-0002 lighting vendor path via the plugin loader (DR-03); ADR-0003 fail-closed corrupt-settings startup with most-restrictive defaults (DR-09); ADR-0004 operator-paced pull acquisition retained for the pilot, CAM-034 queue bound to the future free-running-acquisition change.
+
+### Target live-acquisition pipeline
+
+Current flow with the planned gates marked; today's code runs this shape minus the DR-02/DR-04/ADR-0001 guards and the camera state machine (wave references below).
+
+```mermaid
+flowchart TD
+    OP[Operator: Start / Next Board / robot inspect step] --> LS{Lighting sync for selected view}
+    LS -->|accepted, or mode none/simulated| CSM{Camera state}
+    LS -->|failed + real transport, W2 DR-04| HALT[Halt cycle: lighting alarm, no frame grab]
+    CSM -->|Faulted blocks starts, W6 CAM-021| ALARM[HMI alarm until recovery or labeled simulation switch]
+    CSM -->|Connected / Acquiring| TRIG[Trigger + TryGetFrame under TriggerTimeoutMs / FrameTimeoutMs]
+    TRIG -->|view/device binding verified, mismatched frame refused, W1 DR-02| VAL{Frame valid?}
+    VAL -->|no on-disk SourcePath ADR-0001, bad metadata| FAILRES[Explicit acquisition-failure result + counters]
+    VAL -->|valid| CTX[BoardImageContext, IsSimulated propagated unchanged]
+    TRIG -->|no frame| FB[Labeled fallback: image-vault queue, then sample file]
+    FB --> CTX
+    CTX --> ENG[IInspectionEngine.Analyze on background thread]
+    ENG --> STAMP[Verdict + frame identity + latency trace]
+    STAMP --> DB[(SQLite: InspectionResults + Defects, transactional + audit)]
+    DB --> MI[Machine-interface JSON export + SHA verification]
+    MI -.->|async, non-blocking| MES[MES traceability upload / spool]
+    DB --> EVID[Acceptance + readiness evidence plane, Stage2CameraPilot profile]
+```
+
+### Vendor plugin intake pipeline
+
+Target intake shape shared by the camera and (after ADR-0002) lighting loaders. Steps marked with waves do not exist yet.
+
+```mermaid
+flowchart LR
+    PKG[Vendor package folder: manifest + adapter DLL] --> DISC[Unified manifest discovery, one rule for loader and validator, W1 DR-17]
+    DISC --> CV{contractVersion handshake, W3 DR-12}
+    CV -->|mismatch| REJ1[Fail closed: actionable rebuild message]
+    CV -->|match| INTEG{Integrity: assemblySha256 CAM-004, signature allowlist CAM-003, bitness CAM-009, W7}
+    INTEG -->|fail| REJ2[Diagnostic null adapter, reason recorded]
+    INTEG -->|pass| LOAD[Assembly.LoadFrom + factory identity validation]
+    LOAD --> ACC[Acceptance run per view: timing, metadata, IsRealHardware gating]
+    ACC --> PV[Package validator JSON/HTML evidence]
+    PV --> NV[NOT VALIDATED unless live frames with real device identity, CAM-015/044]
+```
+
+### Execution waves
+
+Discipline per wave: one primary purpose (CHG-027), ≤800 changed logical lines (CHG-021, AR-01), CEC record per GOV-005, AGENTS.md Definition-of-Done gates, simulator evidence labeled simulated for device-facing behavior (CEC-M12). Waves W1–W5 close the register's P1 pilot-commitment items; W6–W7 are VOL10 Plan(S2) obligations before Stage 2 entry (CHG-049); W8 runs only if 3D is in pilot scope; W9 is required before real lighting acceptance evidence.
+
+| Wave | Primary purpose | Scope | Plan records | Key surfaces |
+|---|---|---|---|---|
+| W1 | Camera frame integrity | DR-01 (ADR-0001), DR-02, DR-17; improves CAM-030 | CIA | GenericVisionCameraSource, CameraAcceptanceTestService, CameraSourceFactory, CameraSourceContractTests |
+| W2 | Lighting acquisition honesty | DR-04, DR-13 | CIA | LightingSettings, MonitorView sync call sites, TcpText/SerialText controllers |
+| W3 | Lighting vendor path | DR-03 (ADR-0002), DR-12 both loaders | CIA, THR | LightingControllerFactory, both manifest POCOs, templates, Settings UI, backup coverage |
+| W4 | Configuration robustness | DR-11 shared SettingsFileStore, DR-09 (ADR-0003), DR-19 startup guard | CIA, THR | all 13 settings services, MainWindow startup, AoiDatabaseMigrations.ApplyPending |
+| W5 | Recipe restore identity | DR-08: upsert on RecipeName+Revision, Notes capture, unique index | CIA, DBM | ConfigurationBackupService, AoiDatabase.Recipes, migration 32 |
+| W6 | Camera lifecycle | CAM-018/019/020/021/040/041 state machine; CAM-022 correlation, CAM-029 sequence, CAM-031/032 counters (split A: states+timeouts, B: reconnect/health/counters) | ADR (new), CIA, PTR | GenericVisionCameraSource, CameraFrame, MonitorView gating |
+| W7 | Plugin intake security (P0) | CAM-003, CAM-004, CAM-009, CAM-010, CAM-012 | CIA, THR; Security Lead role-hat, CHG-034 cooling ≥24 h | both plugin loaders, manifest schemas, startup checks |
+| W8 | 3D parity + measurement honesty (conditional on pilot scope) | DR-05 template/loader/settings/LoadFrame; DR-16 THD-005/010/021, RecipeView disclosure | CIA, DBM if schema | Profile3DSourceService, ProfileView, new Profile3DAdapterTemplate |
+| W9 | Lighting profile store | CAM-025/026/027 versioned profiles, ACK classification | ADR (new), CIA, DBM | lighting settings/services, recipe linkage, acceptance evidence |
+
+**Out of code scope (hardware- or process-gated, tracked on the ROADMAP Stage 2 blockers):** CAM-006 compatibility matrix, CAM-007 SBOM entries (FF-SBOM-01 Plan), CAM-016 network segmentation, CAM-035 vendor buffer-lifecycle review, CAM-045 HIL checklist with signed per-station evidence; THD-006 precision statements, THD-013 coplanarity, THD-014 temperature ranges (all blocked on OD-VOL10-1 sensor selection); FF-CAM-02/FF-THD-03 NetArchTest fitness rules land with the §52 catalogue work.
 
 ## Related Documents
 
