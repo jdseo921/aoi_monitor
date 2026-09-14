@@ -2412,6 +2412,136 @@ public sealed class AoiDatabaseTests : IDisposable
         Assert.Contains(package.Manifest.BreakdownSummary.DefectClassMetrics, metric => metric.Key == "BRIDGE");
     }
 
+    private static readonly JsonSerializerOptions BenchmarkSummaryJson = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+    };
+
+    private string SeedLatestBenchmark(string sourceFolder, string csvContent)
+    {
+        Directory.CreateDirectory(BenchmarkInspectionService.BenchmarkRoot);
+        var csvPath = Path.Combine(BenchmarkInspectionService.BenchmarkRoot, "seeded_benchmark_results.csv");
+        File.WriteAllText(csvPath, csvContent, Encoding.UTF8);
+        var summary = new BenchmarkInspectionResult
+        {
+            SourceKind = BenchmarkInspectionSourceKind.ImageFolder,
+            SourceDescription = sourceFolder,
+            CsvPath = csvPath,
+            CompletedCount = 5,
+            Status = "PASS",
+        };
+        File.WriteAllText(
+            BenchmarkInspectionService.LatestSummaryPath,
+            JsonSerializer.Serialize(summary, BenchmarkSummaryJson),
+            Encoding.UTF8);
+        return csvPath;
+    }
+
+    private CustomerValidationPackageResult CreateMinimalPackage(string datasetFolder)
+    {
+        var rows = new[]
+        {
+            ScoredRow("NG", 0.8, expectedClass: "BRIDGE", predictedClass: "BRIDGE"),
+            ScoredRow("OK", 0.2, expectedClass: "OK", predictedClass: "OK"),
+        };
+        return CustomerValidationPackageService.CreatePackage(new CustomerValidationPackageRequest
+        {
+            OutputRoot = Path.Combine(_root, "packages"),
+            RunId = null,
+            OperatorId = "Engineer01",
+            OperatorRole = "Engineer",
+            DatasetFolder = datasetFolder,
+            Metrics = BatchValidationService.CalculateMetrics(rows),
+            PerformanceSummary = BatchValidationService.CalculatePerformanceSummary(rows),
+            Rows = rows,
+        });
+    }
+
+    [Fact]
+    public void ValidationPackageEmbedsBenchmarkMeasuredOnTheSameDataset()
+    {
+        // D26 provenance guard: a benchmark run on this dataset's images folder is
+        // legitimate evidence and must be embedded byte-for-byte, with no provenance warning.
+        AoiDatabase.Initialize();
+        var datasetRoot = Path.Combine(_root, "dataset_a");
+        Directory.CreateDirectory(Path.Combine(datasetRoot, "images"));
+        const string csvContent = "Sequence,FrameId\n1,\"a.png\"\n";
+        SeedLatestBenchmark(Path.Combine(datasetRoot, "images"), csvContent);
+
+        var package = CreateMinimalPackage(datasetRoot);
+
+        Assert.Equal(csvContent, File.ReadAllText(Path.Combine(package.PackageFolder, "benchmark_results.csv")));
+        Assert.DoesNotContain(package.Warnings, warning => warning.Contains("different image source", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void ValidationPackageExcludesBenchmarkFromADifferentDataset()
+    {
+        // D26: the latest recorded benchmark belongs to another dataset; embedding it would
+        // present that dataset's timing numbers as this package's evidence.
+        AoiDatabase.Initialize();
+        var datasetRoot = Path.Combine(_root, "dataset_a");
+        Directory.CreateDirectory(Path.Combine(datasetRoot, "images"));
+        SeedLatestBenchmark(Path.Combine(_root, "dataset_b", "images"), "Sequence,FrameId\n1,\"other.png\"\n");
+
+        var package = CreateMinimalPackage(datasetRoot);
+
+        var embedded = File.ReadAllText(Path.Combine(package.PackageFolder, "benchmark_results.csv"));
+        Assert.Contains("PROVENANCE_MISMATCH", embedded, StringComparison.Ordinal);
+        Assert.DoesNotContain("other.png", embedded, StringComparison.Ordinal);
+        Assert.Contains(package.Warnings, warning =>
+            warning.Contains("different image source", StringComparison.OrdinalIgnoreCase) &&
+            warning.Contains("Performance Benchmark", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains("different image source", File.ReadAllText(Path.Combine(package.PackageFolder, "limitations.txt")), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void ValidationPackageWithoutAnyBenchmarkKeepsTheNotRunPlaceholder()
+    {
+        AoiDatabase.Initialize();
+        var datasetRoot = Path.Combine(_root, "dataset_a");
+        Directory.CreateDirectory(Path.Combine(datasetRoot, "images"));
+
+        var package = CreateMinimalPackage(datasetRoot);
+
+        Assert.Contains("NOT_RUN", File.ReadAllText(Path.Combine(package.PackageFolder, "benchmark_results.csv")), StringComparison.Ordinal);
+        Assert.Contains(package.Warnings, warning => warning.Contains("No recent benchmark_results.csv", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void BenchmarkProvenanceComparesDatasetRootAndImagesSubfolderInBothDirections()
+    {
+        var datasetRoot = Path.Combine(_root, "dataset_a");
+        var images = Path.Combine(datasetRoot, "images");
+        var folderBenchmark = new BenchmarkInspectionResult { SourceKind = BenchmarkInspectionSourceKind.ImageFolder };
+
+        folderBenchmark.SourceDescription = images;
+        Assert.Equal(CustomerValidationPackageService.BenchmarkDatasetProvenance.MatchesDataset,
+            CustomerValidationPackageService.ResolveBenchmarkProvenance(folderBenchmark, datasetRoot));
+        Assert.Equal(CustomerValidationPackageService.BenchmarkDatasetProvenance.MatchesDataset,
+            CustomerValidationPackageService.ResolveBenchmarkProvenance(folderBenchmark, images));
+
+        folderBenchmark.SourceDescription = datasetRoot;
+        Assert.Equal(CustomerValidationPackageService.BenchmarkDatasetProvenance.MatchesDataset,
+            CustomerValidationPackageService.ResolveBenchmarkProvenance(folderBenchmark, images));
+
+        folderBenchmark.SourceDescription = Path.Combine(_root, "dataset_b", "images");
+        Assert.Equal(CustomerValidationPackageService.BenchmarkDatasetProvenance.DifferentDataset,
+            CustomerValidationPackageService.ResolveBenchmarkProvenance(folderBenchmark, datasetRoot));
+
+        Assert.Equal(CustomerValidationPackageService.BenchmarkDatasetProvenance.NotVerifiable,
+            CustomerValidationPackageService.ResolveBenchmarkProvenance(folderBenchmark, "  "));
+
+        var cameraBenchmark = new BenchmarkInspectionResult
+        {
+            SourceKind = BenchmarkInspectionSourceKind.ActiveCameraSource,
+            SourceDescription = "Active camera source: Generic Vision Adapter",
+        };
+        Assert.Equal(CustomerValidationPackageService.BenchmarkDatasetProvenance.NotVerifiable,
+            CustomerValidationPackageService.ResolveBenchmarkProvenance(cameraBenchmark, datasetRoot));
+    }
+
     [Fact]
     public void ActiveThresholdLookupSelectsMostSpecificRule()
     {

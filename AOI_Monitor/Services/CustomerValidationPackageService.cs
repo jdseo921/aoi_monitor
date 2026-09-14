@@ -250,14 +250,14 @@ public static class CustomerValidationPackageService
             cancellationToken);
         var latestBenchmark = BenchmarkInspectionService.GetLatestBenchmark();
         var packageWarnings = new List<string>();
-        CopyLatestBenchmarkCsv(latestBenchmark, benchmarkCsvPath, packageWarnings);
+        var benchmarkProvenanceNote = CopyLatestBenchmarkCsv(latestBenchmark, request.DatasetFolder, benchmarkCsvPath, packageWarnings);
         CopySourceManifest(request.GroundTruthCsvPath, sourceManifestCopyPath, packageWarnings);
         var learnedVisualModel = CopyLearnedVisualModelEvidence(
             request.LearnedVisualModel ?? LearnedVisualModelRegistryService.GetActiveSummary(),
             learnedVisualModelFolder,
             learnedVisualModelSummaryPath,
             packageWarnings);
-        File.WriteAllText(limitationsPath, BuildLimitationsText(), Encoding.UTF8);
+        File.WriteAllText(limitationsPath, BuildLimitationsText(benchmarkProvenanceNote), Encoding.UTF8);
         var warnings = request.Warnings
             .Concat(packageWarnings)
             .Concat(preflight.Warnings)
@@ -449,19 +449,105 @@ public static class CustomerValidationPackageService
         return CustomerDatasetPreflightService.Validate(request.DatasetFolder, request.GroundTruthCsvPath);
     }
 
-    private static void CopyLatestBenchmarkCsv(
+    /// <summary>
+    /// How the latest recorded benchmark relates to the dataset a validation package covers.
+    /// </summary>
+    public enum BenchmarkDatasetProvenance
+    {
+        /// <summary>The benchmark was measured on this package's dataset images.</summary>
+        MatchesDataset,
+
+        /// <summary>The benchmark was measured on a different image folder (defect D26).</summary>
+        DifferentDataset,
+
+        /// <summary>No folder comparison is possible (camera-source benchmark, or no dataset folder on the request).</summary>
+        NotVerifiable,
+    }
+
+    /// <summary>
+    /// Provenance guard for defect D26: "latest benchmark" is station-global state, so a
+    /// package exported after a different dataset's benchmark would embed that dataset's
+    /// numbers byte-for-byte. Only an image-folder benchmark whose source folder is the
+    /// package's dataset folder (or its <c>images</c> subfolder, in either direction) counts
+    /// as this dataset's performance evidence.
+    /// </summary>
+    public static BenchmarkDatasetProvenance ResolveBenchmarkProvenance(
+        BenchmarkInspectionResult benchmark,
+        string? datasetFolder)
+    {
+        if (benchmark.SourceKind != BenchmarkInspectionSourceKind.ImageFolder)
+            return BenchmarkDatasetProvenance.NotVerifiable;
+
+        var benchmarkFolder = NormalizeFolderForComparison(benchmark.SourceDescription);
+        var dataset = NormalizeFolderForComparison(datasetFolder);
+        if (benchmarkFolder is null || dataset is null)
+            return BenchmarkDatasetProvenance.NotVerifiable;
+
+        if (string.Equals(benchmarkFolder, dataset, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(benchmarkFolder, dataset + Path.DirectorySeparatorChar + "images", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(dataset, benchmarkFolder + Path.DirectorySeparatorChar + "images", StringComparison.OrdinalIgnoreCase))
+        {
+            return BenchmarkDatasetProvenance.MatchesDataset;
+        }
+
+        return BenchmarkDatasetProvenance.DifferentDataset;
+    }
+
+    private static string? NormalizeFolderForComparison(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        try
+        {
+            return Path.GetFullPath(path.Trim())
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+        catch (Exception ex) when (ex is ArgumentException or PathTooLongException or NotSupportedException or IOException or System.Security.SecurityException)
+        {
+            return null;
+        }
+    }
+
+    private static string? CopyLatestBenchmarkCsv(
         BenchmarkInspectionResult? latestBenchmark,
+        string? datasetFolder,
         string benchmarkCsvPath,
         IList<string> warnings)
     {
+        string? provenanceNote = null;
         if (latestBenchmark is not null &&
             !string.IsNullOrWhiteSpace(latestBenchmark.CsvPath) &&
             File.Exists(latestBenchmark.CsvPath))
         {
+            switch (ResolveBenchmarkProvenance(latestBenchmark, datasetFolder))
+            {
+                case BenchmarkDatasetProvenance.DifferentDataset:
+                    provenanceNote =
+                        $"The latest benchmark was measured on a different image source ('{latestBenchmark.SourceDescription}') " +
+                        $"than this package's dataset ('{datasetFolder}'), so benchmark_results.csv was excluded from this package. " +
+                        "Run Readiness & QA > Performance Benchmark against this dataset's images folder, then re-export the package.";
+                    warnings.Add(provenanceNote);
+                    File.WriteAllText(
+                        benchmarkCsvPath,
+                        "Metric,Value" + Environment.NewLine +
+                        "Status,PROVENANCE_MISMATCH" + Environment.NewLine +
+                        $"\"Message\",\"The latest recorded benchmark was measured on '{latestBenchmark.SourceDescription}', not this package's dataset ('{datasetFolder}'). Run the performance benchmark on this dataset's images folder and re-export the package.\"" + Environment.NewLine,
+                        Encoding.UTF8);
+                    return provenanceNote;
+
+                case BenchmarkDatasetProvenance.NotVerifiable:
+                    provenanceNote =
+                        $"The latest benchmark's source ('{latestBenchmark.SourceDescription}') is not this package's dataset folder, " +
+                        "so its provenance could not be verified; it is embedded as station-latest benchmark evidence only.";
+                    warnings.Add(provenanceNote);
+                    break;
+            }
+
             try
             {
                 File.Copy(latestBenchmark.CsvPath, benchmarkCsvPath, overwrite: true);
-                return;
+                return provenanceNote;
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or PathTooLongException)
             {
@@ -479,6 +565,7 @@ public static class CustomerValidationPackageService
             "Status,NOT_RUN" + Environment.NewLine +
             "\"Message\",\"No recent performance benchmark CSV was available when this validation package was generated.\"" + Environment.NewLine,
             Encoding.UTF8);
+        return provenanceNote;
     }
 
     private static void CopySourceManifest(
@@ -763,13 +850,15 @@ public static class CustomerValidationPackageService
         }
     }
 
-    private static string BuildLimitationsText()
+    private static string BuildLimitationsText(string? benchmarkProvenanceNote)
     {
         var sb = new StringBuilder();
         sb.AppendLine("AOI Monitor Stage 1 Prototype Limitations");
         sb.AppendLine();
         foreach (var limitation in CustomerValidationReportContext.DefaultPrototypeLimitations)
             sb.AppendLine($"- {limitation}");
+        if (!string.IsNullOrWhiteSpace(benchmarkProvenanceNote))
+            sb.AppendLine($"- {benchmarkProvenanceNote}");
         sb.AppendLine();
         sb.AppendLine("Generated sample datasets and Folder Camera Simulation are not real camera, lighting, robot, PLC, MES, ERP, safety, cybersecurity, or factory acceptance evidence.");
         return sb.ToString();
