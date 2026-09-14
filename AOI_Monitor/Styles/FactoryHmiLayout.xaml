@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework">
+                    xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+                    xmlns:controls="clr-namespace:AOI_Monitor.Controls">
 
   <!-- Industrial HMI design tokens. Keep these self-contained: this dictionary is
        merged before App.xaml's legacy styles. -->
@@ -150,6 +151,22 @@
     <Setter Property="Padding" Value="8,4"/>
     <Setter Property="MinHeight" Value="36"/>
     <Setter Property="SnapsToDevicePixels" Value="True"/>
+  </Style>
+
+  <!-- Read-only detail pane for wide evidence tables: identity/status columns stay in the
+       DataGrid; long free-text fields (steps, expected/actual behavior, evidence paths,
+       notes) read here for the selected row instead of forcing horizontal grid scroll. -->
+  <Style x:Key="HmiDetailFieldLabel" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource HmiTextLabelBrush}"/>
+    <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
+    <Setter Property="Margin" Value="0,0,0,2"/>
+  </Style>
+
+  <Style x:Key="HmiDetailFieldValue" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource HmiTextBodyBrush}"/>
+    <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+    <Setter Property="Margin" Value="0,0,0,12"/>
   </Style>
 
   <!-- Empty-state overlay text for tables/canvases: one voice for "nothing here yet". -->
@@ -540,6 +557,9 @@
   <Style x:Key="FactoryTable" TargetType="DataGrid">
     <Setter Property="MinHeight" Value="120"/>
     <Setter Property="MinColumnWidth" Value="84"/>
+    <!-- Over-long cell values truncate with a visible ellipsis instead of cropping
+         mid-glyph; long free-text belongs in a detail pane or tooltip, not the cell. -->
+    <Setter Property="controls:HmiTableCellTrimming.Enabled" Value="True"/>
     <Setter Property="Background" Value="{DynamicResource HmiSurfaceBrush}"/>
     <Setter Property="BorderBrush" Value="{DynamicResource HmiBorderBrush}"/>
     <Setter Property="BorderThickness" Value="1"/>

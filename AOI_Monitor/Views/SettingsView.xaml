@@ -396,197 +396,265 @@
       </TabItem>
 
       <TabItem Header="AI">
-        <ScrollViewer Style="{StaticResource FactoryScrollablePage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <Grid Margin="10">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="12"/>
-              <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- The AI settings split into Engine (configuration + verdict governance) and
+             Model Lifecycle (registry, acceptance, release) sub-tabs so each fills the
+             viewport with star-sized tables instead of fixed-height grids in one long
+             scrolling column. -->
+        <TabControl x:Name="AiCategoryTabs" Background="{DynamicResource Bg}" BorderBrush="{DynamicResource LineBrush}">
+          <TabItem Header="Engine">
+            <ScrollViewer Style="{StaticResource FactoryViewportFillPage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+              <Grid Grid.IsSharedSizeScope="True"
+                    MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="12"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <TextBlock Text="Inspection Engine Configuration" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock Text="ONNX is the production ML path. Pixel Difference is a prototype fallback. Learned PCB Visual Model is image-only Stage 1 learning and is not live camera validation." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
+                <Border Style="{StaticResource SettingsPanel}" Margin="0">
+                  <StackPanel>
+                    <TextBlock Text="Inspection Engine Configuration" Style="{StaticResource HmiSectionHeaderText}"/>
+                    <TextBlock Text="ONNX is the production ML path. Pixel Difference is a prototype fallback. Learned PCB Visual Model is image-only Stage 1 learning and is not live camera validation." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Selected Engine" Style="{StaticResource SettingsLabel}"/>
-                    <ComboBox x:Name="InspectionEngineCombo" AutomationProperties.Name="Selected inspection engine" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}" ToolTip="ONNX is the supported ML model format. Pixel Difference is a prototype fallback engine.">
-                      <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Pixel Difference Prototype Engine"/>
-                      <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="ONNX ML Model"/>
-                      <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Learned PCB Visual Model"/>
-                    </ComboBox>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Selected Engine" Style="{StaticResource SettingsLabel}"/>
+                      <ComboBox x:Name="InspectionEngineCombo" AutomationProperties.Name="Selected inspection engine" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}" ToolTip="ONNX is the supported ML model format. Pixel Difference is a prototype fallback engine.">
+                        <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Pixel Difference Prototype Engine"/>
+                        <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="ONNX ML Model"/>
+                        <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Learned PCB Visual Model"/>
+                      </ComboBox>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Model Path" Style="{StaticResource SettingsLabel}"/>
-                    <TextBox x:Name="ModelPathText" AutomationProperties.Name="Model path" Grid.Column="1" MinHeight="34"/>
-                    <Button x:Name="BrowseModelBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseModelClick"/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Model Path" Style="{StaticResource SettingsLabel}"/>
+                      <TextBox x:Name="ModelPathText" AutomationProperties.Name="Model path" Grid.Column="1" MinHeight="34"/>
+                      <Button x:Name="BrowseModelBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseModelClick"/>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Model Version" Style="{StaticResource SettingsLabel}"/>
-                    <TextBox x:Name="ModelVersionText" AutomationProperties.Name="Model version" Grid.Column="1" MinHeight="34" Text="UNCONFIGURED"/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Model Version" Style="{StaticResource SettingsLabel}"/>
+                      <TextBox x:Name="ModelVersionText" AutomationProperties.Name="Model version" Grid.Column="1" MinHeight="34" Text="UNCONFIGURED"/>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Label Map Path" Style="{StaticResource SettingsLabel}"/>
-                    <TextBox x:Name="LabelMapPathText" AutomationProperties.Name="Label map path" Grid.Column="1" MinHeight="34"/>
-                    <Button x:Name="BrowseLabelMapBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseLabelMapClick"/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Label Map Path" Style="{StaticResource SettingsLabel}"/>
+                      <TextBox x:Name="LabelMapPathText" AutomationProperties.Name="Label map path" Grid.Column="1" MinHeight="34"/>
+                      <Button x:Name="BrowseLabelMapBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseLabelMapClick"/>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Confidence" Style="{StaticResource SettingsLabel}" ToolTip="Threshold: the score limit used to decide OK, REVIEW, or NG."/>
-                    <TextBox x:Name="ConfidenceThresholdText" AutomationProperties.Name="Confidence threshold" Grid.Column="1" MinHeight="34" Text="0.65" ToolTip="Threshold value. Higher values usually reduce false calls but may increase possible escapes."/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Confidence" Style="{StaticResource SettingsLabel}" ToolTip="Threshold: the score limit used to decide OK, REVIEW, or NG."/>
+                      <TextBox x:Name="ConfidenceThresholdText" AutomationProperties.Name="Confidence threshold" Grid.Column="1" MinHeight="34" Text="0.65" ToolTip="Threshold value. Higher values usually reduce false calls but may increase possible escapes."/>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Input Size" Style="{StaticResource SettingsLabel}"/>
-                    <TextBox x:Name="InputWidthText" AutomationProperties.Name="Model input width" Grid.Column="1" MinHeight="34" Text="640"/>
-                    <TextBox x:Name="InputHeightText" AutomationProperties.Name="Model input height" Grid.Column="3" MinHeight="34" Text="640"/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Input Size" Style="{StaticResource SettingsLabel}"/>
+                      <TextBox x:Name="InputWidthText" AutomationProperties.Name="Model input width" Grid.Column="1" MinHeight="34" Text="640"/>
+                      <TextBox x:Name="InputHeightText" AutomationProperties.Name="Model input height" Grid.Column="3" MinHeight="34" Text="640"/>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Input Tensor" Style="{StaticResource SettingsLabel}"/>
-                    <TextBox x:Name="InputTensorNameText" AutomationProperties.Name="Input tensor name" Grid.Column="1" MinHeight="34" ToolTip="Required for model readiness test."/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Input Tensor" Style="{StaticResource SettingsLabel}"/>
+                      <TextBox x:Name="InputTensorNameText" AutomationProperties.Name="Input tensor name" Grid.Column="1" MinHeight="34" ToolTip="Required for model readiness test."/>
+                    </Grid>
 
-                  <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <TextBlock Text="Output Tensor" Style="{StaticResource SettingsLabel}"/>
-                    <TextBox x:Name="OutputTensorNameText" AutomationProperties.Name="Output tensor name" Grid.Column="1" MinHeight="34" ToolTip="Required for model readiness test."/>
-                  </Grid>
+                    <Grid Margin="{StaticResource HmiRowGap}">
+                      <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                      <TextBlock Text="Output Tensor" Style="{StaticResource SettingsLabel}"/>
+                      <TextBox x:Name="OutputTensorNameText" AutomationProperties.Name="Output tensor name" Grid.Column="1" MinHeight="34" ToolTip="Required for model readiness test."/>
+                    </Grid>
 
-                  <UniformGrid Columns="2" Margin="0,4,0,0">
-                    <TextBlock Text="Runtime status" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="EngineRuntimeStatusText" Text="Pixel Difference Prototype Engine" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                    <TextBlock Text="Saved version" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="EngineVersionText" Text="PIXEL_DIFF_0.2" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                    <TextBlock Text="Last model check" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="ModelCheckResultText" Text="Not Tested" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                    <TextBlock Text="Checked at" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="ModelCheckTimestampText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                  </UniformGrid>
-                  <TextBlock x:Name="ModelCheckMessageText" Text="No model configuration test has been run." Style="{StaticResource HmiTechnicalHintText}" Margin="0,8,0,0"/>
-                  <Button x:Name="TestModelBtn" Style="{StaticResource ActionBtnBlue}" Content="Test Model Configuration" Click="OnTestModelConfigurationClick" Margin="0,10,0,0" HorizontalAlignment="Left"/>
-                </StackPanel>
-              </Border>
-
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <TextBlock Text="Learned PCB Visual Models" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock Text="Image-only Stage 1 models learned from Golden / OK image groups. Setting active here does not claim live camera validation or production acceptance." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,8"/>
-                  <DataGrid x:Name="LearnedVisualModelGrid" Height="170" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Learned visual models are selected by model ID and training project. Hover long values to inspect.">
-                    <DataGrid.Columns>
-                      <DataGridTextColumn Header="Model" Binding="{Binding ModelId}" Width="*"/>
-                      <DataGridTextColumn Header="Version" Binding="{Binding ModelVersion}" Width="92"/>
-                      <DataGridTextColumn Header="Project" Binding="{Binding ProjectName}" Width="140"/>
-                      <DataGridTextColumn Header="Learned" Binding="{Binding ImagesLearnedFrom}" Width="78"/>
-                      <DataGridTextColumn Header="False Target" Binding="{Binding FalseCallTargetDisplay}" Width="100"/>
-                      <DataGridTextColumn Header="Threshold" Binding="{Binding RecommendedThresholdDisplay}" Width="86"/>
-                      <DataGridTextColumn Header="Artifacts" Binding="{Binding ArtifactStatus}" Width="105"/>
-                      <DataGridTextColumn Header="Active" Binding="{Binding ActiveDisplay}" Width="64"/>
-                    </DataGrid.Columns>
-                  </DataGrid>
-                  <WrapPanel Margin="0,8,0,0">
-                    <Button x:Name="SetActiveLearnedVisualModelBtn" Style="{StaticResource MiniBtnAmber}" Content="Set as Active Inspection Model" MinWidth="230" Margin="0,0,8,8" Click="OnSetActiveLearnedVisualModelClick"/>
-                    <TextBlock x:Name="LearnedVisualModelStatusText" Text="No learned visual model selected." Style="{StaticResource HmiTechnicalHintText}" VerticalAlignment="Center"/>
-                  </WrapPanel>
-                </StackPanel>
-              </Border>
-
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <TextBlock Text="Defect Taxonomy" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock x:Name="TaxonomySummaryText" Text="Active taxonomy not loaded." Style="{StaticResource HmiTechnicalHintText}" Margin="0,6,0,8"/>
-                  <WrapPanel>
-                    <Button x:Name="ImportTaxonomyBtn" Style="{StaticResource MiniBtn}" Content="Import CSV" Margin="0,0,8,8" Click="OnImportTaxonomyClick"/>
-                    <Button x:Name="ExportTaxonomyBtn" MinHeight="40" MinWidth="120" Style="{StaticResource MiniBtn}" Content="Export CSV" Margin="0,0,0,8" Click="OnExportTaxonomyClick"/>
-                  </WrapPanel>
-                  <TextBlock Text="Engineer/Admin only. Label aliases, customer display names, model label IDs, and MES defect codes are audited through the active taxonomy."
-                             Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
-                </StackPanel>
-              </Border>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2">
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <TextBlock Text="Local Model Registry" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <DataGrid x:Name="ModelRegistryGrid" Height="190" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Model IDs and paths may be long. Hover rows/cells to inspect the full value." Margin="0,8,0,0">
-                    <DataGrid.Columns>
-                      <DataGridTextColumn Header="Model" Binding="{Binding DisplayName}" Width="*"/>
-                      <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="86"/>
-                      <DataGridTextColumn Header="Lifecycle" Binding="{Binding LifecycleState}" Width="120"/>
-                      <DataGridTextColumn Header="Runtime" Binding="{Binding ValidationStatus}" Width="90"/>
-                      <DataGridTextColumn Header="Acceptance" Binding="{Binding LatestAcceptanceStatus}" Width="100"/>
-                      <DataGridTextColumn Header="Active" Binding="{Binding ActiveDisplay}" Width="64"/>
-                    </DataGrid.Columns>
-                  </DataGrid>
-                  <WrapPanel Margin="0,8,0,0">
-                    <Button x:Name="RegisterModelBtn" Style="{StaticResource MiniBtnGreen}" Content="Register Model" Margin="0,0,8,8" Click="OnRegisterModelClick"/>
-                    <Button x:Name="ValidateRegisteredModelBtn" Style="{StaticResource MiniBtn}" Content="Validate" Margin="0,0,8,8" Click="OnValidateRegisteredModelClick"/>
-                    <Button x:Name="SetActiveModelBtn" Style="{StaticResource MiniBtnAmber}" Content="Set Active" Margin="0,0,8,8" Click="OnSetActiveModelClick"/>
-                    <Button x:Name="RunModelAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="Run Model Acceptance" MinWidth="170" Margin="0,0,8,8" Click="OnRunModelAcceptanceClick" ToolTip="Acceptance means evidence review against configured criteria; it does not automatically approve production release."/>
-                    <Button x:Name="CancelModelAcceptanceBtn" Style="{StaticResource MiniBtnAmber}" Content="Cancel Acceptance" MinWidth="150" Margin="0,0,8,8" Click="OnCancelModelAcceptanceClick" IsEnabled="False"/>
-                    <Button x:Name="ViewModelAcceptanceRunsBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="View Acceptance Runs" MinWidth="170" Margin="0,0,8,8" Click="OnViewModelAcceptanceRunsClick"/>
-                    <Button x:Name="CreateModelReleasePackageBtn" Style="{StaticResource MiniBtnGreen}" Content="Create Model Release Package" MinWidth="220" Margin="0,0,8,8" Click="OnCreateModelReleasePackageClick"/>
-                    <Button x:Name="PromoteProductionCandidateBtn" Style="{StaticResource MiniBtnAmber}" Content="Promote to Production Candidate" MinWidth="230" Margin="0,0,8,8" Click="OnPromoteProductionCandidateClick"/>
-                    <Button x:Name="DeployModelBtn" Style="{StaticResource MiniBtnGreen}" Content="Deploy" Margin="0,0,8,8" Click="OnDeployModelClick"/>
-                    <Button x:Name="WaiveDeployModelBtn" Style="{StaticResource MiniBtnAmber}" Content="Deploy with Waiver" MinWidth="160" Margin="0,0,8,8" Click="OnWaiveDeployModelClick"/>
-                    <Button x:Name="RetireModelBtn" Style="{StaticResource MiniBtn}" Content="Retire" Margin="0,0,0,8" Click="OnRetireModelClick"/>
-                  </WrapPanel>
-                  <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                    <ProgressBar x:Name="ModelAcceptanceProgressBar" Width="190" Height="12" Minimum="0" Maximum="100" Value="0" IsIndeterminate="False" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="ModelAcceptanceProgressText" Text="Model acceptance idle." Style="{StaticResource HmiTechnicalHintText}" VerticalAlignment="Center"/>
+                    <Grid Margin="0,4,0,0">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
+                        <ColumnDefinition Width="*"/>
+                      </Grid.ColumnDefinitions>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                      </Grid.RowDefinitions>
+                      <TextBlock Text="Runtime status" Style="{StaticResource SettingsLabel}" Margin="0,0,12,4"/>
+                      <TextBlock x:Name="EngineRuntimeStatusText" Grid.Column="1" Text="Pixel Difference Prototype Engine" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                      <TextBlock Grid.Row="1" Text="Saved version" Style="{StaticResource SettingsLabel}" Margin="0,0,12,4"/>
+                      <TextBlock x:Name="EngineVersionText" Grid.Row="1" Grid.Column="1" Text="PIXEL_DIFF_0.2" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                      <TextBlock Grid.Row="2" Text="Last model check" Style="{StaticResource SettingsLabel}" Margin="0,0,12,4"/>
+                      <TextBlock x:Name="ModelCheckResultText" Grid.Row="2" Grid.Column="1" Text="Not Tested" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                      <TextBlock Grid.Row="3" Text="Checked at" Style="{StaticResource SettingsLabel}" Margin="0,0,12,0"/>
+                      <TextBlock x:Name="ModelCheckTimestampText" Grid.Row="3" Grid.Column="1" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap"/>
+                    </Grid>
+                    <TextBlock x:Name="ModelCheckMessageText" Text="No model configuration test has been run." Style="{StaticResource HmiTechnicalHintText}" Margin="0,8,0,0"/>
+                    <Button x:Name="TestModelBtn" Style="{StaticResource ActionBtnBlue}" Content="Test Model Configuration" Click="OnTestModelConfigurationClick" Margin="0,10,0,0" HorizontalAlignment="Left"/>
                   </StackPanel>
-                  <DataGrid x:Name="ModelAcceptanceRunsGrid" Height="120" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Model acceptance run history. REVIEW or CONDITIONAL status requires engineer/admin review.">
-                    <DataGrid.Columns>
-                      <DataGridTextColumn Header="Run" Binding="{Binding Id}" Width="56"/>
-                      <DataGridTextColumn Header="Model" Binding="{Binding ModelId}" Width="*"/>
-                      <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="86"/>
-                      <DataGridTextColumn Header="Dataset" Binding="{Binding DatasetName}" Width="130"/>
-                      <DataGridTextColumn Header="Candidate" Binding="{Binding CandidateDisplay}" Width="90"/>
-                    </DataGrid.Columns>
-                  </DataGrid>
-                </StackPanel>
-              </Border>
+                </Border>
 
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <DockPanel Margin="0,0,0,8">
-                    <WrapPanel DockPanel.Dock="Right">
-                      <Button x:Name="ApproveThresholdProfileBtn" Style="{StaticResource MiniBtn}" Content="Approve" Margin="{StaticResource HmiButtonGap}" Click="OnApproveThresholdProfileClick"/>
-                      <Button x:Name="DeployThresholdProfileBtn" Style="{StaticResource MiniBtnAmber}" Content="Deploy" Click="OnDeployThresholdProfileClick"/>
-                    </WrapPanel>
+                <Grid Grid.Column="2">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="240"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+
+                  <Border Style="{StaticResource SettingsPanel}" Margin="0">
+                    <Grid>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*" MinHeight="150"/>
+                      </Grid.RowDefinitions>
+                      <DockPanel Margin="0,0,0,8">
+                        <WrapPanel DockPanel.Dock="Right">
+                          <Button x:Name="ApproveThresholdProfileBtn" Style="{StaticResource MiniBtn}" Content="Approve" Margin="{StaticResource HmiButtonGap}" Click="OnApproveThresholdProfileClick"/>
+                          <Button x:Name="DeployThresholdProfileBtn" Style="{StaticResource MiniBtnAmber}" Content="Deploy" Click="OnDeployThresholdProfileClick"/>
+                        </WrapPanel>
+                        <StackPanel>
+                          <TextBlock Text="Threshold Profiles" Style="{StaticResource HmiSectionHeaderText}"/>
+                          <TextBlock x:Name="ActiveThresholdProfileText" Text="Active profile: none" Style="{StaticResource HmiTechnicalHintText}"/>
+                        </StackPanel>
+                      </DockPanel>
+                      <DataGrid x:Name="ThresholdProfilesGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Threshold profiles control OK/REVIEW/NG limits. Approve and deploy only after validation evidence is reviewed.">
+                        <DataGrid.Columns>
+                          <DataGridTextColumn Header="Profile" Binding="{Binding ProfileId}" Width="*"/>
+                          <DataGridTextColumn Header="Rev" Binding="{Binding Revision}" Width="62"/>
+                          <DataGridTextColumn Header="Board Model" Binding="{Binding BoardModel}" Width="150"/>
+                          <DataGridTextColumn Header="Recipe" Binding="{Binding RecipeName}" Width="100"/>
+                          <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="96"/>
+                          <DataGridTextColumn Header="Rules" Binding="{Binding RuleCount}" Width="62"/>
+                        </DataGrid.Columns>
+                      </DataGrid>
+                    </Grid>
+                  </Border>
+
+                  <Border Grid.Row="2" Style="{StaticResource SettingsPanel}" Margin="0">
                     <StackPanel>
-                      <TextBlock Text="Threshold Profiles" Style="{StaticResource HmiSectionHeaderText}"/>
-                      <TextBlock x:Name="ActiveThresholdProfileText" Text="Active profile: none" Style="{StaticResource HmiTechnicalHintText}"/>
+                      <TextBlock Text="Defect Taxonomy" Style="{StaticResource HmiSectionHeaderText}"/>
+                      <TextBlock x:Name="TaxonomySummaryText" Text="Active taxonomy not loaded." Style="{StaticResource HmiTechnicalHintText}" Margin="0,6,0,8"/>
+                      <WrapPanel>
+                        <Button x:Name="ImportTaxonomyBtn" Style="{StaticResource MiniBtn}" Content="Import CSV" Margin="0,0,8,8" Click="OnImportTaxonomyClick"/>
+                        <Button x:Name="ExportTaxonomyBtn" MinHeight="40" MinWidth="120" Style="{StaticResource MiniBtn}" Content="Export CSV" Margin="0,0,0,8" Click="OnExportTaxonomyClick"/>
+                      </WrapPanel>
+                      <TextBlock Text="Engineer/Admin only. Label aliases, customer display names, model label IDs, and MES defect codes are audited through the active taxonomy."
+                                 Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
                     </StackPanel>
-                  </DockPanel>
-                  <DataGrid x:Name="ThresholdProfilesGrid" Height="150" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Threshold profiles control OK/REVIEW/NG limits. Approve and deploy only after validation evidence is reviewed.">
-                    <DataGrid.Columns>
-                      <DataGridTextColumn Header="Profile" Binding="{Binding ProfileId}" Width="*"/>
-                      <DataGridTextColumn Header="Rev" Binding="{Binding Revision}" Width="62"/>
-                      <DataGridTextColumn Header="Board Model" Binding="{Binding BoardModel}" Width="106"/>
-                      <DataGridTextColumn Header="Recipe" Binding="{Binding RecipeName}" Width="110"/>
-                      <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="84"/>
-                      <DataGridTextColumn Header="Rules" Binding="{Binding RuleCount}" Width="62"/>
-                    </DataGrid.Columns>
-                  </DataGrid>
-                </StackPanel>
-              </Border>
-            </StackPanel>
-          </Grid>
-        </ScrollViewer>
+                  </Border>
+                </Grid>
+              </Grid>
+            </ScrollViewer>
+          </TabItem>
+
+          <TabItem Header="Model Lifecycle">
+            <ScrollViewer Style="{StaticResource FactoryViewportFillPage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+              <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="1.25*"/>
+                  <ColumnDefinition Width="12"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource SettingsPanel}" Margin="0">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*" MinHeight="150"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*" MinHeight="110"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Local Model Registry" Style="{StaticResource HmiSectionHeaderText}"/>
+                    <DataGrid x:Name="ModelRegistryGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Model IDs and paths may be long. Hover rows/cells to inspect the full value." Margin="0,8,0,0">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Model" Binding="{Binding DisplayName}" Width="*"/>
+                        <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="86"/>
+                        <DataGridTextColumn Header="Lifecycle" Binding="{Binding LifecycleState}" Width="120"/>
+                        <DataGridTextColumn Header="Runtime" Binding="{Binding ValidationStatus}" Width="90"/>
+                        <DataGridTextColumn Header="Acceptance" Binding="{Binding LatestAcceptanceStatus}" Width="100"/>
+                        <DataGridTextColumn Header="Active" Binding="{Binding ActiveDisplay}" Width="64"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+                    <WrapPanel Grid.Row="2" Margin="0,8,0,0">
+                      <StackPanel Margin="0,0,18,0">
+                        <TextBlock Text="Registry" Style="{StaticResource SettingsLabel}" Margin="0,0,0,4"/>
+                        <WrapPanel>
+                          <Button x:Name="RegisterModelBtn" Style="{StaticResource MiniBtnGreen}" Content="Register Model" Margin="0,0,8,8" Click="OnRegisterModelClick"/>
+                          <Button x:Name="ValidateRegisteredModelBtn" Style="{StaticResource MiniBtn}" Content="Validate" Margin="0,0,8,8" Click="OnValidateRegisteredModelClick"/>
+                          <Button x:Name="SetActiveModelBtn" Style="{StaticResource MiniBtnAmber}" Content="Set Active" Margin="0,0,8,8" Click="OnSetActiveModelClick"/>
+                        </WrapPanel>
+                      </StackPanel>
+                      <StackPanel Margin="0,0,18,0">
+                        <TextBlock Text="Acceptance" Style="{StaticResource SettingsLabel}" Margin="0,0,0,4"/>
+                        <WrapPanel>
+                          <Button x:Name="RunModelAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="Run Model Acceptance" MinWidth="170" Margin="0,0,8,8" Click="OnRunModelAcceptanceClick" ToolTip="Acceptance means evidence review against configured criteria; it does not automatically approve production release."/>
+                          <Button x:Name="CancelModelAcceptanceBtn" Style="{StaticResource MiniBtnAmber}" Content="Cancel Acceptance" MinWidth="150" Margin="0,0,8,8" Click="OnCancelModelAcceptanceClick" IsEnabled="False"/>
+                          <Button x:Name="ViewModelAcceptanceRunsBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="View Acceptance Runs" MinWidth="170" Margin="0,0,8,8" Click="OnViewModelAcceptanceRunsClick"/>
+                        </WrapPanel>
+                      </StackPanel>
+                      <StackPanel>
+                        <TextBlock Text="Release" Style="{StaticResource SettingsLabel}" Margin="0,0,0,4"/>
+                        <WrapPanel>
+                          <Button x:Name="CreateModelReleasePackageBtn" Style="{StaticResource MiniBtnGreen}" Content="Create Model Release Package" MinWidth="220" Margin="0,0,8,8" Click="OnCreateModelReleasePackageClick"/>
+                          <Button x:Name="PromoteProductionCandidateBtn" Style="{StaticResource MiniBtnAmber}" Content="Promote to Production Candidate" MinWidth="230" Margin="0,0,8,8" Click="OnPromoteProductionCandidateClick"/>
+                          <Button x:Name="DeployModelBtn" Style="{StaticResource MiniBtnGreen}" Content="Deploy" Margin="0,0,8,8" Click="OnDeployModelClick"/>
+                          <Button x:Name="WaiveDeployModelBtn" Style="{StaticResource MiniBtnAmber}" Content="Deploy with Waiver" MinWidth="160" Margin="0,0,8,8" Click="OnWaiveDeployModelClick"/>
+                          <Button x:Name="RetireModelBtn" Style="{StaticResource MiniBtn}" Content="Retire" Margin="0,0,0,8" Click="OnRetireModelClick"/>
+                        </WrapPanel>
+                      </StackPanel>
+                    </WrapPanel>
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
+                      <ProgressBar x:Name="ModelAcceptanceProgressBar" Width="190" Height="12" Minimum="0" Maximum="100" Value="0" IsIndeterminate="False" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                      <TextBlock x:Name="ModelAcceptanceProgressText" Text="Model acceptance idle." Style="{StaticResource HmiTechnicalHintText}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <DataGrid x:Name="ModelAcceptanceRunsGrid" Grid.Row="4" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Model acceptance run history. REVIEW or CONDITIONAL status requires engineer/admin review.">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Run" Binding="{Binding Id}" Width="56"/>
+                        <DataGridTextColumn Header="Model" Binding="{Binding ModelId}" Width="*"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="86"/>
+                        <DataGridTextColumn Header="Dataset" Binding="{Binding DatasetName}" Width="130"/>
+                        <DataGridTextColumn Header="Candidate" Binding="{Binding CandidateDisplay}" Width="90"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+                  </Grid>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource SettingsPanel}" Margin="0">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*" MinHeight="150"/>
+                      <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                      <TextBlock Text="Learned PCB Visual Models" Style="{StaticResource HmiSectionHeaderText}"/>
+                      <TextBlock Text="Image-only Stage 1 models learned from Golden / OK image groups. Setting active here does not claim live camera validation or production acceptance." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,8"/>
+                    </StackPanel>
+                    <DataGrid x:Name="LearnedVisualModelGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" HeadersVisibility="Column" CanUserAddRows="False" Style="{StaticResource HmiTable}" ToolTip="Learned visual models are selected by model ID and training project. Hover long values to inspect.">
+                      <DataGrid.Columns>
+                        <DataGridTextColumn Header="Model" Binding="{Binding ModelId}" Width="*"/>
+                        <DataGridTextColumn Header="Version" Binding="{Binding ModelVersion}" Width="92"/>
+                        <DataGridTextColumn Header="Project" Binding="{Binding ProjectName}" Width="140"/>
+                        <DataGridTextColumn Header="Learned" Binding="{Binding ImagesLearnedFrom}" Width="78"/>
+                        <DataGridTextColumn Header="False Target" Binding="{Binding FalseCallTargetDisplay}" Width="100"/>
+                        <DataGridTextColumn Header="Threshold" Binding="{Binding RecommendedThresholdDisplay}" Width="86"/>
+                        <DataGridTextColumn Header="Artifacts" Binding="{Binding ArtifactStatus}" Width="105"/>
+                        <DataGridTextColumn Header="Active" Binding="{Binding ActiveDisplay}" Width="64"/>
+                      </DataGrid.Columns>
+                    </DataGrid>
+                    <WrapPanel Grid.Row="2" Margin="0,8,0,0">
+                      <Button x:Name="SetActiveLearnedVisualModelBtn" Style="{StaticResource MiniBtnAmber}" Content="Set as Active Inspection Model" MinWidth="230" Margin="0,0,8,8" Click="OnSetActiveLearnedVisualModelClick"/>
+                      <TextBlock x:Name="LearnedVisualModelStatusText" Text="No learned visual model selected." Style="{StaticResource HmiTechnicalHintText}" VerticalAlignment="Center"/>
+                    </WrapPanel>
+                  </Grid>
+                </Border>
+              </Grid>
+            </ScrollViewer>
+          </TabItem>
+        </TabControl>
       </TabItem>
 
       <TabItem Header="Hardware">

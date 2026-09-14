@@ -43,6 +43,29 @@ public sealed class LocalizationDynamicTextTests
     }
 
     [Fact]
+    public void WalkerNeverDetachesDataBoundText()
+    {
+        UiNavigationSmokeTests.RunOnStaForTests(() =>
+        {
+            // The Readiness & QA detail panes bind TextBlock.Text to the grid's SelectedItem.
+            // Regression: the walker used to assign Text locally on every TextBlock, which
+            // replaces the binding expression - the pane then stayed blank forever.
+            var source = new System.Windows.Controls.Primitives.ToggleButton { Tag = "bound runtime value" };
+            var bound = new TextBlock();
+            System.Windows.Data.BindingOperations.SetBinding(bound, TextBlock.TextProperty,
+                new System.Windows.Data.Binding("Tag") { Source = source });
+            Assert.Equal("bound runtime value", bound.Text);
+
+            UiPreferencesService.ApplyLocalization(bound, UiLanguage.Korean);
+            UiPreferencesService.ApplyLocalization(bound, UiLanguage.English);
+
+            Assert.NotNull(System.Windows.Data.BindingOperations.GetBindingBase(bound, TextBlock.TextProperty));
+            source.Tag = "updated after localization";
+            Assert.Equal("updated after localization", bound.Text);
+        });
+    }
+
+    [Fact]
     public void ReapplyKeepsRuntimeUpdatedToolTipText()
     {
         UiNavigationSmokeTests.RunOnStaForTests(() =>

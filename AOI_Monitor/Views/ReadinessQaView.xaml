@@ -91,25 +91,73 @@
                 <Button Style="{StaticResource ActionBtn}" Content="Export Issue Report" Click="OnExportPilotIssueReportClick"/>
                 <TextBlock x:Name="PilotIssueSummaryText" Text="Pilot issues not loaded." Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center" Margin="12,0,0,0"/>
               </WrapPanel>
-              <DataGrid x:Name="PilotIssuesGrid" Grid.Row="1" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" MinWidth="1900" ToolTip="Use this list to close manual test findings before a client demo. False Call means a good board was marked defect. Possible Escape means a real defect may have been missed.">
-                <DataGrid.Columns>
-                  <DataGridTextColumn Header="ID" Binding="{Binding IssueId}" Width="140" MinWidth="140"/>
-                  <DataGridTextColumn Header="Created" Binding="{Binding CreatedLocal}" SortMemberPath="CreatedAtUtc" Width="130" MinWidth="130"/>
-                  <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="125" MinWidth="125"/>
-                  <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="110" MinWidth="110"/>
-                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" MinWidth="110"/>
-                  <DataGridTextColumn Header="Page" Binding="{Binding PageName}" Width="140" MinWidth="140"/>
-                  <DataGridTextColumn Header="Steps" Binding="{Binding ReproductionSteps}" Width="210" MinWidth="210"/>
-                  <DataGridTextColumn Header="Expected" Binding="{Binding ExpectedBehavior}" Width="190" MinWidth="190"/>
-                  <DataGridTextColumn Header="Actual" Binding="{Binding ActualBehavior}" Width="190" MinWidth="190"/>
-                  <DataGridTextColumn Header="Evidence" Binding="{Binding ScreenshotPath}" Width="200" MinWidth="200"/>
-                  <DataGridTextColumn Header="Board" Binding="{Binding BoardModel}" Width="115" MinWidth="115"/>
-                  <DataGridTextColumn Header="Lot" Binding="{Binding LotId}" Width="100" MinWidth="100"/>
-                  <DataGridTextColumn Header="Inspection" Binding="{Binding RelatedInspectionId}" Width="110" MinWidth="110"/>
-                  <DataGridTextColumn Header="Owner" Binding="{Binding Owner}" Width="120" MinWidth="120"/>
-                  <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="220" MinWidth="220"/>
-                </DataGrid.Columns>
-              </DataGrid>
+              <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2.6*" MinWidth="760"/>
+                  <ColumnDefinition Width="8"/>
+                  <ColumnDefinition Width="*" MinWidth="330"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid x:Name="PilotIssuesGrid" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" ToolTip="Use this list to close manual test findings before a client demo. False Call means a good board was marked defect. Possible Escape means a real defect may have been missed. Select a row to read its full text in the details pane.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding IssueId}" Width="140" MinWidth="140"/>
+                    <DataGridTextColumn Header="Created" Binding="{Binding CreatedLocal}" SortMemberPath="CreatedAtUtc" Width="130" MinWidth="130"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="125" MinWidth="125"/>
+                    <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="110" MinWidth="110"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" MinWidth="110"/>
+                    <DataGridTextColumn Header="Page" Binding="{Binding PageName}" Width="140" MinWidth="140"/>
+                    <DataGridTextColumn Header="Board" Binding="{Binding BoardModel}" Width="115" MinWidth="115"/>
+                    <DataGridTextColumn Header="Lot" Binding="{Binding LotId}" Width="96" MinWidth="96"/>
+                    <DataGridTextColumn Header="Inspection" Binding="{Binding RelatedInspectionId}" Width="104" MinWidth="104"/>
+                    <DataGridTextColumn Header="Owner" Binding="{Binding Owner}" Width="*" MinWidth="110"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <Border Grid.Column="2" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource HmiPanelHeader}">
+                      <TextBlock Text="Selected Issue" Style="{StaticResource HmiSectionHeaderText}"/>
+                    </Border>
+                    <TextBlock Grid.Row="1" Text="Select an issue to read its full steps, expected and actual behavior, evidence path, and notes.">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource HmiEmptyStateText}">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=PilotIssuesGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10">
+                      <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=PilotIssuesGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ScrollViewer.Style>
+                      <StackPanel>
+                        <TextBlock Text="Steps" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.ReproductionSteps, ElementName=PilotIssuesGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Expected" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.ExpectedBehavior, ElementName=PilotIssuesGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Actual" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.ActualBehavior, ElementName=PilotIssuesGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Evidence" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.ScreenshotPath, ElementName=PilotIssuesGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Notes" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.Notes, ElementName=PilotIssuesGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                      </StackPanel>
+                    </ScrollViewer>
+                  </Grid>
+                </Border>
+              </Grid>
               <TextBlock Grid.Row="2"
                          Text="Filtered inspection rows (select one, then capture Good Board Marked Defect or Possible Missed Defect)"
                          Foreground="{DynamicResource HmiTextLabelBrush}"
@@ -372,18 +420,65 @@
                            VerticalAlignment="Center"
                            Margin="0,0,12,0"/>
               </DockPanel>
-              <DataGrid x:Name="StandardsTraceabilityGrid" Grid.Row="1" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="1500" ToolTip="Long evidence paths and notes are available through hover when truncated.">
-                <DataGrid.Columns>
-                  <DataGridTextColumn Header="Source" Binding="{Binding StandardOrSource}" Width="180" MinWidth="180"/>
-                  <DataGridTextColumn Header="Requirement" Binding="{Binding PrincipleOrRequirement}" Width="300" MinWidth="300"/>
-                  <DataGridTextColumn Header="ID" Binding="{Binding ProjectRequirementId}" Width="110" MinWidth="110"/>
-                  <DataGridTextColumn Header="Evidence Type" Binding="{Binding EvidenceType}" Width="170" MinWidth="170"/>
-                  <DataGridTextColumn Header="Evidence Path" Binding="{Binding EvidencePath}" Width="280" MinWidth="280"/>
-                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
-                  <DataGridTextColumn Header="Blocking" Binding="{Binding BlockingLevel}" Width="130" MinWidth="130"/>
-                  <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="310" MinWidth="310"/>
-                </DataGrid.Columns>
-              </DataGrid>
+              <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2.4*" MinWidth="700"/>
+                  <ColumnDefinition Width="8"/>
+                  <ColumnDefinition Width="*" MinWidth="330"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid x:Name="StandardsTraceabilityGrid" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" ToolTip="Select a row to read its full requirement text, evidence path, and notes in the details pane.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Source" Binding="{Binding StandardOrSource}" Width="170" MinWidth="170"/>
+                    <DataGridTextColumn Header="Requirement" Binding="{Binding PrincipleOrRequirement}" Width="*" MinWidth="240"/>
+                    <DataGridTextColumn Header="ID" Binding="{Binding ProjectRequirementId}" Width="105" MinWidth="105"/>
+                    <DataGridTextColumn Header="Evidence Type" Binding="{Binding EvidenceType}" Width="150" MinWidth="150"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" MinWidth="110"/>
+                    <DataGridTextColumn Header="Blocking" Binding="{Binding BlockingLevel}" Width="120" MinWidth="120"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <Border Grid.Column="2" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource HmiPanelHeader}">
+                      <TextBlock Text="Selected Requirement" Style="{StaticResource HmiSectionHeaderText}"/>
+                    </Border>
+                    <TextBlock Grid.Row="1" Text="Select a checklist row to read its full requirement text, evidence path, and notes.">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource HmiEmptyStateText}">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=StandardsTraceabilityGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10">
+                      <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=StandardsTraceabilityGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ScrollViewer.Style>
+                      <StackPanel>
+                        <TextBlock Text="Requirement" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.PrincipleOrRequirement, ElementName=StandardsTraceabilityGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Evidence Path" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.EvidencePath, ElementName=StandardsTraceabilityGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Notes" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.Notes, ElementName=StandardsTraceabilityGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                      </StackPanel>
+                    </ScrollViewer>
+                  </Grid>
+                </Border>
+              </Grid>
             </Grid>
           </TabItem>
           <TabItem Header="Evidence Completion" ToolTip="Shows missing evidence by stage. Completion is not the same as production release approval.">
@@ -396,15 +491,61 @@
                 <Button Style="{StaticResource ActionBtnBlue}" Content="Refresh Evidence List" Click="OnRefreshCompletionMatrixClick"/>
                 <TextBlock x:Name="CompletionMatrixSummaryText" Text="Evidence list not loaded." Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="12,0,0,0"/>
               </StackPanel>
-              <DataGrid x:Name="CompletionMatrixGrid" Grid.Row="1" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="1360">
-                <DataGrid.Columns>
-                  <DataGridTextColumn Header="Stage" Binding="{Binding Stage}" Width="220" MinWidth="220"/>
-                  <DataGridTextColumn Header="Complete" Binding="{Binding PercentDisplay}" Width="110" MinWidth="110"/>
-                  <DataGridTextColumn Header="Evidence Score" Binding="{Binding EvidenceSummary}" Width="310" MinWidth="310"/>
-                  <DataGridTextColumn Header="Missing" Binding="{Binding MissingEvidenceDisplay}" Width="360" MinWidth="360"/>
-                  <DataGridTextColumn Header="Next Action" Binding="{Binding NextActionsDisplay}" Width="360" MinWidth="360"/>
-                </DataGrid.Columns>
-              </DataGrid>
+              <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="1.6*" MinWidth="560"/>
+                  <ColumnDefinition Width="8"/>
+                  <ColumnDefinition Width="*" MinWidth="330"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid x:Name="CompletionMatrixGrid" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" ToolTip="Select a stage row to read its missing evidence and next actions in the details pane.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Stage" Binding="{Binding Stage}" Width="*" MinWidth="240"/>
+                    <DataGridTextColumn Header="Complete" Binding="{Binding PercentDisplay}" Width="110" MinWidth="110"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <Border Grid.Column="2" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource HmiPanelHeader}">
+                      <TextBlock Text="Selected Stage" Style="{StaticResource HmiSectionHeaderText}"/>
+                    </Border>
+                    <TextBlock Grid.Row="1" Text="Select a stage row to read its missing evidence and next actions.">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource HmiEmptyStateText}">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=CompletionMatrixGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10">
+                      <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=CompletionMatrixGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ScrollViewer.Style>
+                      <StackPanel>
+                        <TextBlock Text="Evidence Score" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.EvidenceSummary, ElementName=CompletionMatrixGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Missing" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.MissingEvidenceDisplay, ElementName=CompletionMatrixGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Next Action" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.NextActionsDisplay, ElementName=CompletionMatrixGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                      </StackPanel>
+                    </ScrollViewer>
+                  </Grid>
+                </Border>
+              </Grid>
             </Grid>
           </TabItem>
           <TabItem Header="Factory Acceptance" ToolTip="Factory acceptance checklist for evidence collection and signoff. Do not overclaim production readiness from a single checklist row.">
@@ -419,18 +560,66 @@
                 <Button Style="{StaticResource ActionBtnBlue}" Content="Generate Checklist" Margin="8,0,0,0" Click="OnGenerateFactoryAcceptanceChecklistClick"/>
                 <Button Style="{StaticResource ActionBtnAmber}" Content="Export FAT Package" Margin="8,0,0,0" Click="OnExportFactoryAcceptanceChecklistClick"/>
               </StackPanel>
-              <DataGrid x:Name="FactoryAcceptanceGrid" Grid.Row="1" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="1480" ToolTip="Evidence paths and notes may be long; hover cells to inspect full values.">
-                <DataGrid.Columns>
-                  <DataGridTextColumn Header="ID" Binding="{Binding RequirementId}" Width="110" MinWidth="110"/>
-                  <DataGridTextColumn Header="Requirement" Binding="{Binding RequirementText}" Width="260" MinWidth="260"/>
-                  <DataGridTextColumn Header="Required Evidence" Binding="{Binding RequiredEvidence}" Width="270" MinWidth="270"/>
-                  <DataGridTextColumn Header="Evidence Path" Binding="{Binding CurrentEvidencePath}" Width="260" MinWidth="260"/>
-                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
-                  <DataGridTextColumn Header="Signoff Role" Binding="{Binding SignoffRole}" Width="130" MinWidth="130"/>
-                  <DataGridTextColumn Header="Signed By" Binding="{Binding SignedBy}" Width="120" MinWidth="120"/>
-                  <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="310" MinWidth="310"/>
-                </DataGrid.Columns>
-              </DataGrid>
+              <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2*" MinWidth="620"/>
+                  <ColumnDefinition Width="8"/>
+                  <ColumnDefinition Width="*" MinWidth="330"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid x:Name="FactoryAcceptanceGrid" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" ToolTip="Select a checklist row to read its full requirement, required evidence, evidence path, and notes in the details pane.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding RequirementId}" Width="105" MinWidth="105"/>
+                    <DataGridTextColumn Header="Requirement" Binding="{Binding RequirementText}" Width="*" MinWidth="240"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="150" MinWidth="150"/>
+                    <DataGridTextColumn Header="Signoff Role" Binding="{Binding SignoffRole}" Width="125" MinWidth="125"/>
+                    <DataGridTextColumn Header="Signed By" Binding="{Binding SignedBy}" Width="115" MinWidth="115"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <Border Grid.Column="2" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource HmiPanelHeader}">
+                      <TextBlock Text="Selected Checklist Item" Style="{StaticResource HmiSectionHeaderText}"/>
+                    </Border>
+                    <TextBlock Grid.Row="1" Text="Select a checklist row to read its full requirement, required evidence, evidence path, and notes.">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource HmiEmptyStateText}">
+                          <Setter Property="Visibility" Value="Collapsed"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=FactoryAcceptanceGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="10">
+                      <ScrollViewer.Style>
+                        <Style TargetType="ScrollViewer">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem, ElementName=FactoryAcceptanceGrid}" Value="{x:Null}">
+                              <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ScrollViewer.Style>
+                      <StackPanel>
+                        <TextBlock Text="Requirement" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.RequirementText, ElementName=FactoryAcceptanceGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Required Evidence" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.RequiredEvidence, ElementName=FactoryAcceptanceGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Evidence Path" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.CurrentEvidencePath, ElementName=FactoryAcceptanceGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                        <TextBlock Text="Notes" Style="{StaticResource HmiDetailFieldLabel}"/>
+                        <TextBlock Text="{Binding SelectedItem.Notes, ElementName=FactoryAcceptanceGrid}" Style="{StaticResource HmiDetailFieldValue}"/>
+                      </StackPanel>
+                    </ScrollViewer>
+                  </Grid>
+                </Border>
+              </Grid>
             </Grid>
           </TabItem>
         </TabControl>

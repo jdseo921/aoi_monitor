@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -88,6 +89,27 @@ public static class UiPreferencesService
         DependencyProperty.RegisterAttached("LastAppliedToolTip", typeof(string), typeof(UiPreferencesService));
     private static readonly Dictionary<string, string> KoreanText = new(StringComparer.Ordinal)
     {
+        // -- Settings AI sub-tabs and Readiness & QA master-detail panes (2026-09-14):
+        //    machine-assisted translations; flagged for native-speaker review.
+        ["Registry"] = "레지스트리",
+        ["Release"] = "릴리스",
+        ["Model Lifecycle"] = "모델 수명주기",
+        ["Selected Issue"] = "선택된 이슈",
+        ["Selected Requirement"] = "선택된 요구사항",
+        ["Selected Stage"] = "선택된 단계",
+        ["Selected Checklist Item"] = "선택된 체크리스트 항목",
+        ["Steps"] = "재현 절차",
+        ["Expected"] = "예상 동작",
+        ["Actual"] = "실제 동작",
+        ["Requirement"] = "요구사항",
+        ["Evidence Path"] = "증빙 경로",
+        ["Evidence Score"] = "증빙 점수",
+        ["Required Evidence"] = "필요 증빙",
+        ["Missing"] = "누락",
+        ["Select an issue to read its full steps, expected and actual behavior, evidence path, and notes."] = "이슈를 선택하면 전체 재현 절차, 예상/실제 동작, 증빙 경로, 비고를 볼 수 있습니다.",
+        ["Select a checklist row to read its full requirement text, evidence path, and notes."] = "체크리스트 행을 선택하면 전체 요구사항, 증빙 경로, 비고를 볼 수 있습니다.",
+        ["Select a stage row to read its missing evidence and next actions."] = "단계 행을 선택하면 누락된 증빙과 다음 조치를 볼 수 있습니다.",
+        ["Select a checklist row to read its full requirement, required evidence, evidence path, and notes."] = "체크리스트 행을 선택하면 전체 요구사항, 필요 증빙, 증빙 경로, 비고를 볼 수 있습니다.",
 
         // -- DR-10 full-app sweep (2026-09-14): machine-assisted translations for
         //    every operator-facing literal; flagged for native-speaker review.
@@ -1186,7 +1208,11 @@ public static class UiPreferencesService
         if (!visited.Add(root))
             return;
 
-        if (root is TextBlock textBlock && textBlock.Name != "PageTitleText")
+        // Data-bound properties are runtime data, not translatable chrome: writing a local
+        // value would silently detach the binding (a WPF local set replaces the expression),
+        // so bound targets are skipped everywhere below.
+        if (root is TextBlock textBlock && textBlock.Name != "PageTitleText" &&
+            BindingOperations.GetBindingBase(textBlock, TextBlock.TextProperty) is null)
         {
             var original = ResolveTranslationKey(textBlock, OriginalTextProperty, LastAppliedTextProperty, textBlock.Text);
             var translated = Translate(original, language);
@@ -1194,7 +1220,8 @@ public static class UiPreferencesService
             textBlock.SetValue(LastAppliedTextProperty, translated);
         }
 
-        if (root is ContentControl contentControl && contentControl.Content is string content)
+        if (root is ContentControl contentControl && contentControl.Content is string content &&
+            BindingOperations.GetBindingBase(contentControl, ContentControl.ContentProperty) is null)
         {
             var original = ResolveTranslationKey(contentControl, OriginalContentProperty, LastAppliedContentProperty, content);
             var translated = Translate(original, language);
@@ -1202,7 +1229,8 @@ public static class UiPreferencesService
             contentControl.SetValue(LastAppliedContentProperty, translated);
         }
 
-        if (root is HeaderedContentControl headered && headered.Header is string header)
+        if (root is HeaderedContentControl headered && headered.Header is string header &&
+            BindingOperations.GetBindingBase(headered, HeaderedContentControl.HeaderProperty) is null)
         {
             var original = ResolveTranslationKey(headered, OriginalHeaderProperty, LastAppliedHeaderProperty, header);
             var translated = Translate(original, language);
@@ -1210,7 +1238,8 @@ public static class UiPreferencesService
             headered.SetValue(LastAppliedHeaderProperty, translated);
         }
 
-        if (root is HeaderedItemsControl headeredItems && headeredItems.Header is string itemHeader)
+        if (root is HeaderedItemsControl headeredItems && headeredItems.Header is string itemHeader &&
+            BindingOperations.GetBindingBase(headeredItems, HeaderedItemsControl.HeaderProperty) is null)
         {
             var original = ResolveTranslationKey(headeredItems, OriginalHeaderProperty, LastAppliedHeaderProperty, itemHeader);
             var translated = Translate(original, language);
@@ -1218,7 +1247,8 @@ public static class UiPreferencesService
             headeredItems.SetValue(LastAppliedHeaderProperty, translated);
         }
 
-        if (root is FrameworkElement element && element.ToolTip is string toolTip)
+        if (root is FrameworkElement element && element.ToolTip is string toolTip &&
+            BindingOperations.GetBindingBase(element, FrameworkElement.ToolTipProperty) is null)
         {
             var original = ResolveTranslationKey(element, OriginalToolTipProperty, LastAppliedToolTipProperty, toolTip);
             var translated = Translate(original, language);
@@ -1230,7 +1260,8 @@ public static class UiPreferencesService
         {
             foreach (var column in dataGrid.Columns)
             {
-                if (column.Header is not string columnHeader)
+                if (column.Header is not string columnHeader ||
+                    BindingOperations.GetBindingBase(column, DataGridColumn.HeaderProperty) is not null)
                     continue;
 
                 var original = ResolveTranslationKey(column, OriginalHeaderProperty, LastAppliedHeaderProperty, columnHeader);
