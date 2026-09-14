@@ -20,6 +20,21 @@ public class LocalizationParityTests
         "ReviewView.xaml",
         "RecipeView.xaml",
         "AIModelTestView.xaml",
+        // DR-10: the parity scan now covers every operator-facing screen plus the shell.
+        "HomeView.xaml",
+        "LibraryView.xaml",
+        "CompareView.xaml",
+        "SpcView.xaml",
+        "ReportsView.xaml",
+        "ReadinessQaView.xaml",
+        "CalibrationView.xaml",
+        "ProfileView.xaml",
+        "PilotWizardView.xaml",
+        "InstallView.xaml",
+        "SettingsView.xaml",
+        "GuideView.xaml",
+        "AiTrainingSetupView.xaml",
+        "..\\MainWindow.xaml",
     };
 
     /// <summary>
@@ -74,6 +89,45 @@ public class LocalizationParityTests
         // -- TextBox.Text placeholders: the localization walker translates TextBlock/
         //    ContentControl/headers/tooltips but intentionally never rewrites TextBox.Text
         //    (editable inputs hold data), so translating these keys would have no effect.
+
+        // -- DR-10 full-app sweep: data tokens, protocol names, and endpoint paths
+        //    that must stay English (reasons per entry).
+        // Default REST endpoint path value in the MES image-path TextBox; a URL data token, not operator prose.
+        "/api/aoi/images",
+        // Default REST endpoint path value in the MES result-path TextBox; a URL data token, not operator prose.
+        "/api/aoi/results",
+        // Product/brand title in the shell header (BrandTitleText); product proper noun, user-replaceable via Program Assets console title
+        "AOI MONITOR",
+        // Sample station id value displayed after the Station label (StationNameText)
+        "AOI-LIB",
+        // Default lighting program identifier (TextBox value substituted into the hardware command template SET {view} {program}); translating would change the command sent to hardware.
+        "BOTTOM",
+        // HTTP authorization scheme name standing alone as an Auth Mode combo item; protocol token paired with the Bearer option, kept English.
+        "Basic",
+        // HTTP authorization scheme name standing alone as an Auth Mode combo item; protocol token, kept English like ONNX/CSV.
+        "Bearer",
+        // On-image overlay marker tag on the demo defect canvas (beside U107 BRIDGE); industry AOI token used like OK/NG, kept as-is
+        "DIFF",
+        // AuthenticationMode enum identifier shown in the auth-mode combo; quoted verbatim in operator warnings and audit/traceability events
+        "DemoLocalRoleSelector",
+        // Demo sample subtitle: image id plus AI/GT verdict tokens (OK/NG) only, nothing translatable
+        "IMG_0241 / AI OK / GT NG",
+        // AuthenticationMode enum identifier shown in the auth-mode combo; quoted verbatim in operator warnings and audit/traceability events
+        "LocalUsers",
+        // AuthenticationMode enum identifier shown in the auth-mode combo; matches the enum name used by code-behind and boundary messaging
+        "MesAuthenticationBoundary",
+        // Industry verdict tokens standing alone as a fixed label skeleton over the '0 / 0 / 0' count in SpcView; the dictionary keeps OK/NG/REVIEW untranslated everywhere.
+        "OK / NG / REVIEW",
+        // Default value of the lighting side-program TextBox (LightingSideProgramText, SettingsView.xaml line 761) alongside TOP/BOTTOM; a device program identifier that round-trips as hardware configuration data, not UI chrome.
+        "SIDE",
+        // Technical proper noun standing alone as the footer DB link value (FooterIndexText)
+        "SQLite",
+        // Sample-data board program id shown as a footer value
+        "TBOX_TOP_V1.2",
+        // Default value of the editable Model Version TextBox (ModelVersionText, SettingsView.xaml line 433); a sentinel token persisted as model-version configuration data, so translating it would alter stored data.
+        "UNCONFIGURED",
+        // Standard HTTP header name; default value of the MES API key header TextBox (MesApiKeyHeaderText) sent on REST requests and persisted as integration configuration.
+        "X-API-Key",
         "No folder selected",
         "No CSV selected",
 

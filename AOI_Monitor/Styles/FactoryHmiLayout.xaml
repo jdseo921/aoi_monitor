@@ -168,6 +168,7 @@
        Backgrounds/borders mirror the adaptive status chip states; code-behind swaps the
        style per verdict instead of assigning raw hex brushes. -->
   <sys:Double x:Key="HmiFontSizeVerdict" xmlns:sys="clr-namespace:System;assembly=mscorlib">24</sys:Double>
+  <sys:Double x:Key="HmiFontSizeDisplay" xmlns:sys="clr-namespace:System;assembly=mscorlib">32</sys:Double>
   <Style x:Key="HmiVerdictBanner" TargetType="Border">
     <Setter Property="BorderThickness" Value="2"/>
     <Setter Property="Padding" Value="8,5"/>

@@ -165,7 +165,7 @@
             <!-- Score -->
             <Border Grid.Row="1" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" MinHeight="78" Padding="8" Margin="0,0,0,6">
               <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" TextBlock.TextAlignment="Center">
-                <TextBlock x:Name="DiffScoreText" Text="87%" FontSize="32" FontWeight="ExtraBold" Foreground="{DynamicResource HmiTextBrush}" TextAlignment="Center"/>
+                <TextBlock x:Name="DiffScoreText" Text="87%" FontSize="{StaticResource HmiFontSizeDisplay}" FontWeight="ExtraBold" Foreground="{DynamicResource HmiTextBrush}" TextAlignment="Center"/>
                 <TextBlock Text="Difference Score" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextAlignment="Center"/>
                 <TextBlock x:Name="DiffSummaryText" Text="ROI mismatch vs golden" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextAlignment="Center"/>
               </StackPanel>

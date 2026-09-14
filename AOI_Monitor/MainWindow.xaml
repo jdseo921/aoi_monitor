@@ -34,7 +34,7 @@
           </Grid.ColumnDefinitions>
           <Border Grid.Column="0" BorderBrush="#2B4658" BorderThickness="0,0,1,0">
             <TextBlock Text="{Binding ClockText}"
-                       FontFamily="Consolas"
+                       FontFamily="{StaticResource MonoFont}"
                        FontSize="{StaticResource HmiFontSizeSection}"
                        FontWeight="SemiBold"
                        Foreground="{DynamicResource HmiTextBrush}"

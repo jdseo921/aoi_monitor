@@ -112,7 +112,7 @@
                         Tag="{Binding Role}" AllowDrop="True" DragOver="OnRoleCardDragOver" Drop="OnRoleCardDrop">
                   <StackPanel>
                     <DockPanel>
-                      <TextBlock DockPanel.Dock="Right" Text="{Binding ImageCount}" Foreground="{DynamicResource HmiTextBrush}" FontWeight="Bold" FontSize="20"/>
+                      <TextBlock DockPanel.Dock="Right" Text="{Binding ImageCount}" Foreground="{DynamicResource HmiTextBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeSection}"/>
                       <TextBlock Text="{Binding Title}" Foreground="{DynamicResource HmiTextBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeSection}" TextWrapping="Wrap"/>
                     </DockPanel>
                     <TextBlock Text="{Binding Explanation}" Foreground="{DynamicResource HmiMutedTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="0,5,0,6"/>
@@ -231,7 +231,7 @@
                   <Border Style="{StaticResource HmiKpiCard}" Width="250" MinHeight="98" Margin="0,0,8,8">
                     <StackPanel>
                       <TextBlock Text="{Binding Label}" Foreground="{DynamicResource HmiMutedTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
-                      <TextBlock Text="{Binding Value}" Foreground="{DynamicResource HmiTextBrush}" FontWeight="Bold" FontSize="20" Margin="0,4,0,2"/>
+                      <TextBlock Text="{Binding Value}" Foreground="{DynamicResource HmiTextBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeSection}" Margin="0,4,0,2"/>
                       <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
                     </StackPanel>
                   </Border>

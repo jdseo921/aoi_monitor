@@ -26,12 +26,13 @@
     <SolidColorBrush x:Key="PurpleBrush" Color="{StaticResource HmiSimulatedColor}"/>
 
     <!-- Fonts -->
-    <FontFamily x:Key="MonoFont">Consolas</FontFamily>
+    <FontFamily x:Key="HmiFontFamily">Segoe UI, Malgun Gothic</FontFamily>
+    <FontFamily x:Key="MonoFont">Consolas, Malgun Gothic</FontFamily>
 
     <!-- Base text -->
     <Style TargetType="TextBlock">
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-      <Setter Property="FontFamily" Value="Segoe UI"/>
+      <Setter Property="FontFamily" Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"   Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
       <Setter Property="TextTrimming" Value="None"/>
@@ -46,7 +47,7 @@
       <Setter Property="Padding"       Value="12,6"/>
       <Setter Property="MinHeight"     Value="36"/>
       <Setter Property="MinWidth"      Value="96"/>
-      <Setter Property="FontFamily"    Value="Segoe UI"/>
+      <Setter Property="FontFamily"    Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"      Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="Cursor"        Value="Hand"/>
       <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -131,7 +132,7 @@
       <Setter Property="Margin"        Value="0,0,0,4"/>
       <Setter Property="Padding"       Value="0"/>
       <Setter Property="Cursor"        Value="Hand"/>
-      <Setter Property="FontFamily"    Value="Segoe UI"/>
+      <Setter Property="FontFamily"    Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"      Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
       <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -167,7 +168,7 @@
       <Setter Property="MinHeight"     Value="34"/>
       <Setter Property="Padding"       Value="8,5"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="FontFamily"    Value="Segoe UI"/>
+      <Setter Property="FontFamily"    Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"      Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="ToolTip"       Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
       <Setter Property="Template">
@@ -216,7 +217,7 @@
       <Setter Property="MinHeight"     Value="36"/>
       <Setter Property="Padding"       Value="8,5"/>
       <Setter Property="VerticalContentAlignment" Value="Center"/>
-      <Setter Property="FontFamily"    Value="Segoe UI"/>
+      <Setter Property="FontFamily"    Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"      Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="Template">
         <Setter.Value>
@@ -266,7 +267,7 @@
       <Setter Property="Foreground"    Value="{DynamicResource TextBrush}"/>
       <Setter Property="MinHeight"     Value="34"/>
       <Setter Property="Padding"       Value="8,5"/>
-      <Setter Property="FontFamily"    Value="Segoe UI"/>
+      <Setter Property="FontFamily"    Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"      Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="MaxDropDownHeight" Value="360"/>
       <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=SelectionBoxItem}"/>
@@ -406,7 +407,7 @@
       <Setter Property="BorderBrush"             Value="{DynamicResource LineBrush}"/>
       <Setter Property="BorderThickness"         Value="1"/>
       <Setter Property="Foreground"              Value="{DynamicResource TextBrush}"/>
-      <Setter Property="FontFamily"              Value="Segoe UI"/>
+      <Setter Property="FontFamily"              Value="{DynamicResource HmiFontFamily}"/>
       <Setter Property="FontSize"                Value="{StaticResource HmiFontSizeBody}"/>
       <Setter Property="RowBackground"           Value="{DynamicResource CellBg}"/>
       <Setter Property="AlternatingRowBackground" Value="{DynamicResource Cell2Bg}"/>

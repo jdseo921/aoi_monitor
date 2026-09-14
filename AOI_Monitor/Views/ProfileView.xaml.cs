@@ -657,7 +657,7 @@ public partial class ProfileView : UserControl, IReleasablePageResources, IDispo
             {
                 Text = sample.Height.ToString("F2", CultureInfo.InvariantCulture),
                 Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0xCF, 0x9A)),
-                FontSize = 14,
+                FontSize = (double)Application.Current.FindResource("HmiFontSizeBody"),
             };
             Canvas.SetLeft(label, Math.Min(width - 36, cx + 5));
             Canvas.SetTop(label, Math.Max(0, cy - 17));

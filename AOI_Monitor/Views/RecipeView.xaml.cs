@@ -549,7 +549,7 @@ public partial class RecipeView : UserControl, IReleasablePageResources, IAsyncN
                 Text = roi.RoiType,
                 Foreground = stroke,
                 Background = Brushes.Black,
-                FontSize = 14,
+                FontSize = (double)Application.Current.FindResource("HmiFontSizeBody"),
                 FontWeight = FontWeights.Bold,
                 Padding = new Thickness(3, 1, 3, 1),
             };

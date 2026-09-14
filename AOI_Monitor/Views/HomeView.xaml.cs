@@ -54,19 +54,23 @@ public partial class HomeView : UserControl
 
         var databaseConnected = File.Exists(AoiDatabase.DatabasePath);
         SetStatus(HomeDatabaseStatusBorder, HomeDatabaseStatusText,
-            databaseConnected ? "Connected" : "Not Connected",
+            databaseConnected
+                ? UiPreferencesService.Text("Connected", "연결됨")
+                : UiPreferencesService.Text("Not Connected", "연결 안 됨"),
             databaseConnected ? StatusKind.Ok : StatusKind.Ng,
             expected: StatusKind.Ok);
         if (databaseConnected)
-            summaryHealthy.Add("DB connected");
+            summaryHealthy.Add(UiPreferencesService.Text("DB connected", "DB 연결됨"));
 
         var vaultAvailable = Directory.Exists(AoiDatabase.ImageVaultPath);
         SetStatus(HomeImageVaultStatusBorder, HomeImageVaultStatusText,
-            vaultAvailable ? "Available" : "Not Available",
+            vaultAvailable
+                ? UiPreferencesService.Text("Available", "사용 가능")
+                : UiPreferencesService.Text("Not Available", "사용 불가"),
             vaultAvailable ? StatusKind.Ok : StatusKind.Ng,
             expected: StatusKind.Ok);
         if (vaultAvailable)
-            summaryHealthy.Add("vault available");
+            summaryHealthy.Add(UiPreferencesService.Text("vault available", "보관소 사용 가능"));
 
         var engineStatus = InspectionModelConfigurationService.GetStatus();
         var engineStatusText = InspectionModelConfigurationService.GetStatusText();
@@ -97,20 +101,20 @@ public partial class HomeView : UserControl
         SetStatus(HomeCameraStatusBorder, HomeCameraStatusText,
             cameraStatus switch
             {
-                CameraSourceStatus.Ready => "Connected",
-                CameraSourceStatus.Simulated => "Simulated",
-                CameraSourceStatus.Error => "Error",
-                _ => "Not Connected",
+                CameraSourceStatus.Ready => UiPreferencesService.Text("Connected", "연결됨"),
+                CameraSourceStatus.Simulated => UiPreferencesService.Text("Simulated", "시뮬레이션"),
+                CameraSourceStatus.Error => UiPreferencesService.Text("Error", "오류"),
+                _ => UiPreferencesService.Text("Not Connected", "연결 안 됨"),
             },
             cameraKind,
             expected: StatusKind.Unavailable);
         if (cameraKind == StatusKind.Unavailable)
-            summaryAbsent.Add("camera");
+            summaryAbsent.Add(UiPreferencesService.Text("camera", "카메라"));
 
         if (SetIntegrationStatus(HomeLightingStatusBorder, HomeLightingStatusText, IntegrationBoundaryRegistry.LightingController))
-            summaryAbsent.Add("lighting");
+            summaryAbsent.Add(UiPreferencesService.Text("lighting", "조명"));
         if (SetIntegrationStatus(HomeRobotStatusBorder, HomeRobotStatusText, IntegrationBoundaryRegistry.RobotController))
-            summaryAbsent.Add("robot");
+            summaryAbsent.Add(UiPreferencesService.Text("robot", "로봇"));
 
         var mesCombined = CombineStatuses(
             IntegrationBoundaryRegistry.MesClient.Status,
@@ -123,16 +127,20 @@ public partial class HomeView : UserControl
             summaryAbsent.Add("MES");
 
         if (SetIntegrationStatus(HomeEStopStatusBorder, HomeEStopStatusText, IntegrationBoundaryRegistry.EmergencyStopMonitor))
-            summaryAbsent.Add("E-Stop");
+            summaryAbsent.Add(UiPreferencesService.Text("E-Stop", "비상정지"));
 
         var parts = new List<string>();
         if (summaryHealthy.Count > 0)
             parts.Add(string.Join(", ", summaryHealthy));
         if (summaryAbsent.Count > 0)
-            parts.Add($"{string.Join(", ", summaryAbsent)} not connected (Stage 1 image-only)");
+            parts.Add(string.Join(", ", summaryAbsent) + UiPreferencesService.Text(
+                " not connected (Stage 1 image-only)", " 미연결 (1단계 이미지 전용)"));
         HomeStatusSummaryText.Text = parts.Count > 0
-            ? $"{string.Join(" · ", parts)} — details: Hardware Readiness."
-            : "All monitored states are shown as chips above.";
+            ? string.Join(" · ", parts) + UiPreferencesService.Text(
+                " — details: Hardware Readiness.", " — 상세: 하드웨어 준비성.")
+            : UiPreferencesService.Text(
+                "All monitored states are shown as chips above.",
+                "모니터링되는 모든 상태가 위 칩으로 표시됩니다.");
     }
 
     /// <summary>Returns true when the endpoint sits in the expected not-connected baseline (collapsed into the summary).</summary>
@@ -184,10 +192,10 @@ public partial class HomeView : UserControl
 
     private static string ToStatusDisplay(IntegrationConnectionStatus status) => status switch
     {
-        IntegrationConnectionStatus.Ready => "Ready",
-        IntegrationConnectionStatus.Simulated => "Simulated",
-        IntegrationConnectionStatus.Error => "Error",
-        _ => "Not Connected",
+        IntegrationConnectionStatus.Ready => UiPreferencesService.Text("Ready", "준비됨"),
+        IntegrationConnectionStatus.Simulated => UiPreferencesService.Text("Simulated", "시뮬레이션"),
+        IntegrationConnectionStatus.Error => UiPreferencesService.Text("Error", "오류"),
+        _ => UiPreferencesService.Text("Not Connected", "연결 안 됨"),
     };
 
     private static StatusKind ToStatusKind(IntegrationConnectionStatus status) => status switch

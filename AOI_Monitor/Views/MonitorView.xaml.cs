@@ -1047,7 +1047,7 @@ public partial class MonitorView : UserControl, IReleasablePageResources, IAsync
                 Background = new SolidColorBrush(Color.FromArgb(210, 5, 6, 7)),
                 Foreground = new SolidColorBrush(ToVerdictColor(_currentAnalysis.Verdict)),
                 FontWeight = FontWeights.Bold,
-                FontSize = 20,
+                FontSize = (double)Application.Current.FindResource("HmiFontSizeSection"),
                 Padding = new Thickness(5, 2, 5, 2),
             };
 
