@@ -8,7 +8,7 @@ Architecture reference for AOI Monitor: read before changing layer/service bound
 
 ## System Overview
 
-A Windows WPF (.NET 10) desktop console for Stage-1, image-only PCB AOI: load board images, learn "normal" from OK samples, flag anomalies, disposition defects, export customer evidence. Camera, robot, and MES are simulated or mocked by design. `MainWindow` hosts 13 focused workflow pages (roster in `AGENTS.md`); shared session state lives in `WorkflowState`; the shared design system is `AOI_Monitor/Styles/FactoryHmiLayout.xaml`.
+A Windows WPF (.NET 10) desktop console for Stage-1, image-only PCB AOI: load board images, learn "normal" from OK samples, flag anomalies, disposition defects, export customer evidence. Camera, robot, and MES are simulated or mocked by design. `MainWindow` hosts 14 focused workflow pages (roster in `AGENTS.md`); shared session state lives in `WorkflowState`; the shared design system is `AOI_Monitor/Styles/FactoryHmiLayout.xaml`.
 
 Engines (all implement `IInspectionEngine`): *Pixel Difference Prototype* (default) — deterministic golden-vs-sample difference, labeled prototype; *Learned PCB Visual Model v1* — statistical template learning (alignment, brightness normalization, per-pixel tolerance map, threshold calibrated on OK/NG validation sets); optional *ONNX Runtime engine* — the seam for a future production ML detector; no model ships by default. Recipes hold normalized ROIs (`RecipeDocument`), drawn by hand or auto-generated from pick-and-place centroid CSVs (`CentroidRoiImportService`; approximate placement, review required).
 
@@ -20,7 +20,7 @@ Compact catalogue of the essential components and the two Stage-1 pipelines. Det
 
 | Component | What it is | Where |
 |---|---|---|
-| WPF shell, 13 windows | Home + 12 role-gated workflow destinations (roster in `AGENTS.md`); shared HMI styles | `MainWindow`, `Views/`, `Styles/FactoryHmiLayout.xaml` |
+| WPF shell, 14 windows | Home + 13 role-gated workflow destinations (roster in `AGENTS.md`); shared HMI styles | `MainWindow`, `Views/`, `Styles/FactoryHmiLayout.xaml` |
 | Inspection engines (3) | Pixel Difference Prototype (default, deterministic); Learned PCB Visual Model v1 (statistical OK-learning); optional ONNX seam, no model shipped | `InspectionEngineFactory`, `Services/*Engine*.cs` |
 | Recipes & ROIs | Normalized ROIs, per-ROI thresholds, revisions, lock, centroid-CSV auto-import | `RecipeDocument`, `CentroidRoiImportService` |
 | Storage | SQLite (60+ tables, 31 additive migrations), image vault with SHA-256, 13 settings JSON files | `Data/AoiDatabase.*`, storage root |
@@ -187,9 +187,9 @@ Visible, role-gated operator paths for major backend services. "Simulated" evide
 | RobotAcceptanceTestService / RobotCellAcceptanceTestService | Settings > Robot Cell Acceptance | Admin | Run Robot Cell Acceptance | exports/robot_cell_acceptance | ROBOT_CELL_ACCEPTANCE, ROBOT_CELL_ACCEPTANCE_EXPORT | UI coverage smoke test; robot integration tests | Default boundary is Not Connected; simulated PLC/robot evidence is not safety certification or real production robot validation. |
 | TraceabilityAcceptanceTestService | Reports > Run Traceability Test | Admin | Run MES Traceability Acceptance | traceability report HTML/JSON under exports | MES_TRACEABILITY_TEST | UI coverage smoke test; MES REST integration tests | Production MES proof requires configured REST endpoint and accepted credentials. |
 | CentralSyncService | Reports > Central Sync Queue | Admin | View queue; Queue Central Sync; Retry Selected/All Central; Export report | central sync queue report under exports | CENTRAL_SYNC_QUEUE, CENTRAL_SYNC_RETRY, CENTRAL_SYNC_EXPORT | UI coverage smoke test; central sync database tests | Production database mode remains an explicit boundary until a real adapter is accepted. |
-| FactoryReadinessService | Reports > Factory Readiness | Admin for package export | Export Go/No-Go Package | exports/factory_readiness | FACTORY_READINESS_EXPORT | Factory readiness tests; UI coverage smoke test | Stage 1 readiness is scoped and does not imply full factory readiness. |
-| FactoryAcceptanceChecklistService | Reports > Factory Acceptance | Admin for export; Admin-gated Reports page for generation | Generate Checklist; Export FAT Package | exports/factory_acceptance or package folder | FACTORY_ACCEPTANCE_EXPORT | Factory readiness/checklist tests; UI coverage smoke test | Manual signoff fields remain blank until completed by authorized reviewers. |
-| BuildTestEvidenceService | Reports footer | Admin | Import Build/Test Evidence; Open Build Evidence Folder | exports/build_evidence | BUILD_TEST_EVIDENCE | Factory readiness build evidence tests; UI coverage smoke test | None. |
+| FactoryReadinessService | Readiness & QA > Factory Readiness | Admin for package export | Export Go/No-Go Package | exports/factory_readiness | FACTORY_READINESS_EXPORT | Factory readiness tests; UI coverage smoke test | Stage 1 readiness is scoped and does not imply full factory readiness. |
+| FactoryAcceptanceChecklistService | Readiness & QA > Factory Acceptance | Admin for export | Generate Checklist; Export FAT Package | exports/factory_acceptance or package folder | FACTORY_ACCEPTANCE_EXPORT | Factory readiness/checklist tests; UI coverage smoke test | Manual signoff fields remain blank until completed by authorized reviewers. |
+| BuildTestEvidenceService | Readiness & QA footer | Admin | Import Build/Test Evidence; Open Build Evidence Folder | exports/build_evidence | BUILD_TEST_EVIDENCE | Factory readiness build evidence tests; UI coverage smoke test | None. |
 | ExportVerificationService | Reports > Export History and export workflows | Admin | Verify Selected Export; automatic verification on package/report exports | exports/export_verification plus ExportVerification SQLite rows | EXPORT_VERIFY, EXPORT_VERIFY_WARN, EXPORT_VERIFY_ERROR | Export verification/database tests; UI coverage smoke test | None. |
 
 ## Stage 2–4 De-risking Review (2026-07-30)

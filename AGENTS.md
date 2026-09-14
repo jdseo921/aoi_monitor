@@ -25,7 +25,7 @@ Before changing production code or UI, read the relevant current contracts and s
 
 Documentation is deliberately consolidated into a small fixed set (see the documentation map in `README.md`): root `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`, `DESIGN.md`, the themed documents under `Docs/` (`ARCHITECTURE.md`, `DATA_PIPELINE.md`, `API_SPEC.md`, `DEPLOYMENT.md`, `RUNBOOK.md`, `CALIBRATION.md`, `METRICS_VAL.md`, `SECURITY.md`, `VALIDATION.md`, `ROADMAP.md`, `USER_MANUAL.md`, plus the three kept traceability documents), the canonical standard under `Docs/standard/`, and the customer source specifications under `Docs/customer-specs/`. Do not create new standalone markdown documents; extend the correct consolidated document instead. Every markdown file in this repository must keep its first-line reviewer notice exactly as written.
 
-The current focused workflow windows are Home, Board & Images, Run Inspection, Golden Compare, Defect Review, Recipe Rules, AI / Models, Yield Analytics, Export & Trace, Calibration, 3D Profile, Hardware Readiness, and System Settings. Keep the shell, Home module map, route handling, role authorization, HMI layout audit, navigation smoke tests, and documentation aligned when any workflow changes.
+The current focused workflow windows are Home, Board & Images, Run Inspection, Golden Compare, Defect Review, Recipe Rules, AI / Models, Yield Analytics, Export & Trace, Readiness & QA, Calibration, 3D Profile, Hardware Readiness, and System Settings. Keep the shell, Home module map, route handling, role authorization, HMI layout audit, navigation smoke tests, and documentation aligned when any workflow changes.
 
 ## Architecture Contract
 

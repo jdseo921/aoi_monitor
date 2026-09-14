@@ -50,7 +50,7 @@ public sealed class MainWindowLoadingOverlayTests
             var panel = Assert.IsType<UniformGrid>(navItems.ItemsPanel.LoadContent());
             var keys = viewModel.NavPages.Select(page => page.Key).ToArray();
 
-            Assert.Equal(12, viewModel.NavPages.Count);
+            Assert.Equal(13, viewModel.NavPages.Count);
             Assert.Equal(4, panel.Columns);
             Assert.Equal(
                 new[]
@@ -63,6 +63,7 @@ public sealed class MainWindowLoadingOverlayTests
                     "modeltest",
                     "spc",
                     "reports",
+                    "readiness",
                     "calibration",
                     "profile",
                     "pilot",

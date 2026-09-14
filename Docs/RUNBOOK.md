@@ -85,7 +85,7 @@ AOI Monitor is currently a Stage 1 proof of concept with visibly labeled simulat
 ### Action is blocked with a permission-denied message
 
 - Restricted actions show permission-denied messages and are recorded in the local event log.
-- Confirm the selected local role: exporting and deleting logs, Mock MES upload, and Soak Test are Admin-only; Operator and Engineer roles review `Export & Trace` read-only.
+- Confirm the selected local role: exporting and deleting logs, Mock MES upload, and Soak Test are Admin-only; Operator and Engineer roles review `Export & Trace` and `Readiness & QA` read-only.
 
 ## Configuration Backup
 
@@ -126,14 +126,14 @@ Rollback is complete only when the restored app produces the expected audit even
 
 ## Collecting Evidence For Support
 
-`Export & Trace` is the audit review and evidence surface. Operator and Engineer roles can review Inspection History, Review/Disposition Events, Export History, and the Audit Trail in read-only mode; export, delete, Mock MES upload, and Soak Test actions are Admin-only. An Admin can:
+`Export & Trace` is the audit review surface and `Readiness & QA` is the stage-gate/acceptance evidence surface. Operator and Engineer roles can review Inspection History, Review/Disposition Events, Export History, and the Audit Trail in read-only mode; export, delete, Mock MES upload, and Soak Test actions are Admin-only. An Admin can:
 
-- Apply filters by date, board/model, operator, or result; the Audit Trail tab also filters by date, user, role, and action type.
-- Export inspection history CSV, review log CSV, and audit trail CSV. The audit CSV includes UTC timestamp, local timestamp, user ID, user role, station ID, action category, action detail, and related record/image/path fields where available.
-- Export annotated overlays.
-- Run `DB Integrity` for a local database health report, and `Rebuild image index`.
-- Create a Stage 1 Customer Package: a timestamped folder with HTML and Markdown reports, batch/history/review/audit CSVs, annotated images and overlays, engine/model configuration, database health, recipe revision, and calibration profile summaries, a README, and warnings (full contents in `Docs/USER_MANUAL.md`).
-- Run a local Soak Test: repeatedly inspects images from a selected folder through Folder Camera Simulation for the requested duration, supports cancellation, and exports an HTML report with cycle counts, success/failure counts, timing, memory estimates, start/end time, and errors. Use a short duration such as 2 minutes before running an 8-hour evidence soak.
+- Apply filters by date, board/model, operator, or result; the Audit Trail tab also filters by date, user, role, and action type (`Export & Trace`).
+- Export inspection history CSV, review log CSV, and audit trail CSV (`Export & Trace`). The audit CSV includes UTC timestamp, local timestamp, user ID, user role, station ID, action category, action detail, and related record/image/path fields where available.
+- Export annotated overlays (`Export & Trace`).
+- Run `DB Integrity` for a local database health report, and `Rebuild image index` (`Export & Trace`).
+- Create a Stage 1 Customer Package (`Readiness & QA`): a timestamped folder with HTML and Markdown reports, batch/history/review/audit CSVs, annotated images and overlays, engine/model configuration, database health, recipe revision, and calibration profile summaries, a README, and warnings (full contents in `Docs/USER_MANUAL.md`).
+- Run a local Soak Test (`Readiness & QA`): repeatedly inspects images from a selected folder through Folder Camera Simulation for the requested duration, supports cancellation, and exports an HTML report with cycle counts, success/failure counts, timing, memory estimates, start/end time, and errors. Use a short duration such as 2 minutes before running an 8-hour evidence soak.
 
 The alarm/event log on the operator screen updates as inspection starts, stops, advances to the next board, completes analysis, saves results, or encounters errors, and records every simulated robot/handler event with cycle time.
 

@@ -41,6 +41,7 @@ public partial class MainWindow : Window, IDisposable
         ["modeltest"] = "AI / MODEL EVIDENCE AND FALSE-CALL CONTROL",
         ["spc"] = "YIELD ANALYTICS / SPC, PARETO, TRENDS",
         ["reports"] = "EXPORT & TRACE / PACKAGE, AUDIT, MES",
+        ["readiness"] = "READINESS & QA / STAGE GATES, CHECKLISTS, ACCEPTANCE",
         ["pilot"] = "CUSTOMER PILOT WIZARD / STAGE 1-2 EVIDENCE",
         ["profile"] = "3D PROFILE VIEWER / SAMPLE DATA MODE",
         ["calibration"] = "CALIBRATION / 2D TRANSFORM AND STAGE 2 PREP",
@@ -292,9 +293,10 @@ public partial class MainWindow : Window, IDisposable
             "Settings" => "settings",
             "Calibration" => "calibration",
             "3D Profile Viewer" => "profile",
-            "Management Dashboard" => "reports",
-            "Factory Readiness" => "reports",
-            "Factory Acceptance Checklist" => "reports",
+            "Readiness & QA" => "readiness",
+            "Management Dashboard" => "readiness",
+            "Factory Readiness" => "readiness",
+            "Factory Acceptance Checklist" => "readiness",
             "Model Registry / Acceptance" => "settings",
             "MES Queue" => "reports",
             "Central Sync" => "reports",
@@ -337,6 +339,7 @@ public partial class MainWindow : Window, IDisposable
             "calibration" => new CalibrationView(),
             "spc" => new SpcView(),
             "reports" => new ReportsView(),
+            "readiness" => new ReadinessQaView(),
             "pilot" => new PilotWizardView(),
             "install" => new InstallView(),
             "settings" => new SettingsView(_vm),
@@ -748,8 +751,8 @@ public partial class MainWindow : Window, IDisposable
             var created = PilotIssueService.Create(issue, WorkflowState.Instance.OperatorWithRole);
             WorkflowState.Instance.AddEvent("PILOT_ISSUE_CREATE", $"Manual issue reported: {created.IssueId}; {created.Category}; {created.Severity}.");
             MessageBox.Show($"Issue recorded:\n{created.IssueId}", "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
-            if (PageContent.Content is ReportsView reports)
-                reports.RefreshFromState();
+            if (PageContent.Content is ReadinessQaView readiness)
+                readiness.RefreshFromState();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
@@ -970,6 +973,7 @@ public partial class MainWindow : Window, IDisposable
                 "modeltest" => "AI / \uBAA8\uB378 \uC99D\uBE59 \uBC0F \uD5C8\uC704 \uAC80\uCD9C \uC81C\uC5B4",
                 "spc" => "\uC218\uC728 \uBD84\uC11D / SPC, \uD30C\uB808\uD1A0, \uCD94\uC138",
                 "reports" => "\uB0B4\uBCF4\uB0B4\uAE30 / \uCD94\uC801 / \uD328\uD0A4\uC9C0, \uAC10\uC0AC, MES",
+                "readiness" => "\uC900\uBE44\uB3C4 / \uD488\uC9C8 / \uB2E8\uACC4 \uAC8C\uC774\uD2B8, \uCCB4\uD06C\uB9AC\uC2A4\uD2B8, \uC2B9\uC778",
                 "pilot" => "\uACE0\uAC1D \uD30C\uC77C\uB7FF \uB9C8\uBC95\uC0AC / 1-2\uB2E8\uACC4 \uC99D\uBE59",
                 "profile" => "3D \uD504\uB85C\uD30C\uC77C \uBDF0\uC5B4 / \uC0D8\uD50C \uB370\uC774\uD130",
                 "calibration" => "\uBCF4\uC815 / 2D \uBCC0\uD658 \uBC0F 2\uB2E8\uACC4 \uC900\uBE44",

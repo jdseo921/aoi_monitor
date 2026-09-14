@@ -146,7 +146,7 @@ Run §5.3-5.4 with `Test Image Folder` = `SampleData/DemoSet_Quick/images`, `Gro
 
 ### 4.2 Performance benchmark
 
-`Export & Trace > Performance Benchmark` > `Image folder` > `SampleData/DemoSet_Quick/images`; select `SampleData/DemoSet_Quick/golden/tbox_ref_top.png` as golden so the benchmark measures the operator golden-compare workload (otherwise the default engine measures the lighter no-reference path; the report says so); default run count, warm-up 1 for a cold-start figure; `Run`. Headless equivalent:
+`Readiness & QA > Performance Benchmark` > `Image folder` > `SampleData/DemoSet_Quick/images`; select `SampleData/DemoSet_Quick/golden/tbox_ref_top.png` as golden so the benchmark measures the operator golden-compare workload (otherwise the default engine measures the lighter no-reference path; the report says so); default run count, warm-up 1 for a cold-start figure; `Run`. Headless equivalent:
 
 ```powershell
 dotnet run --project AOI_Monitor.Tools -c Release -- benchmark `
@@ -162,7 +162,7 @@ Outputs: `benchmark_report.html`/`.pdf`/`.json`, `benchmark_results.csv`, latest
 
 ### 4.3 Stage 1 readiness report
 
-After preflight, batch validation, false-call review, package export, benchmark: `Export & Trace > Stage 1 Readiness` > `Refresh`; check overall status, missing evidence, preflight/batch/benchmark summaries, package path, next action; `Export Report` writes `stage1_readiness_report.html`, `.pdf`, `.json`. Handoff gate for uploaded-image validation only: can pass with no real camera/lighting/robot/MES evidence but must keep that limitation visible. (Content requirements: §5.7.)
+After preflight, batch validation, false-call review, package export, benchmark: `Readiness & QA > Stage 1 Readiness` > `Refresh`; check overall status, missing evidence, preflight/batch/benchmark summaries, package path, next action; `Export Report` writes `stage1_readiness_report.html`, `.pdf`, `.json`. Handoff gate for uploaded-image validation only: can pass with no real camera/lighting/robot/MES evidence but must keep that limitation visible. (Content requirements: §5.7.)
 
 ### 4.4 Folder Camera Simulation
 
@@ -267,7 +267,7 @@ With preflight `PASS` (or accepted `CONDITIONAL`): `Run Batch Inspection`; revie
 
 ### 5.5 Benchmark and model acceptance
 
-Benchmark: `Export & Trace > Performance Benchmark` > `Image folder` > the same `images/` folder; review p50, p95, p99, max frame-to-overlay, images-per-minute, over-one-second count; required for a Stage 1 readiness PASS; local image-folder timing evidence only. Model acceptance (ONNX): register + validate in `Settings`, set active; `Run Model Acceptance` with the validation dataset folder + formal manifest CSV; review PASS/CONDITIONAL/FAIL, preflight summary, dataset quality, performance, limitations; release-package only when evidence suits the claim; promote a production candidate only from a PASS run; scoped to the supplied dataset and criteria.
+Benchmark: `Readiness & QA > Performance Benchmark` > `Image folder` > the same `images/` folder; review p50, p95, p99, max frame-to-overlay, images-per-minute, over-one-second count; required for a Stage 1 readiness PASS; local image-folder timing evidence only. Model acceptance (ONNX): register + validate in `Settings`, set active; `Run Model Acceptance` with the validation dataset folder + formal manifest CSV; review PASS/CONDITIONAL/FAIL, preflight summary, dataset quality, performance, limitations; release-package only when evidence suits the claim; promote a production candidate only from a PASS run; scoped to the supplied dataset and criteria.
 
 ### 5.6 Customer package
 
@@ -275,7 +275,7 @@ Benchmark: `Export & Trace > Performance Benchmark` > `Image folder` > the same 
 
 ### 5.7 Readiness report and status meanings
 
-After preflight, batch, false-call review, package export, benchmark: `Export & Trace > Stage 1 Readiness` > `Refresh`; verify overall status, missing evidence, preflight summary, latest batch run, benchmark p95 + over-one-second count, latest package path, next action; `Export Report` (`stage1_readiness_report.html`/`.pdf`/`.json`). The report must identify what was tested, data used, row counts, false calls, possible escapes, p95 timing, over-one-second count, reports generated, missing evidence, limitations, remaining Stage 2/3/4 work. `PASS` = data, manifest, metrics, dataset quality, configured gates passed for the Stage 1 claim (not full factory readiness); `CONDITIONAL` = no blocking gate failed, warnings need review/waiver/follow-up; `FAIL` = a blocking requirement failed (missing images or manifest columns, all-OK/all-NG data, insufficient OK/NG balance or class coverage, excessive unknown labels, missing goldens under Pixel Difference criteria). Factory readiness stays separate (§9).
+After preflight, batch, false-call review, package export, benchmark: `Readiness & QA > Stage 1 Readiness` > `Refresh`; verify overall status, missing evidence, preflight summary, latest batch run, benchmark p95 + over-one-second count, latest package path, next action; `Export Report` (`stage1_readiness_report.html`/`.pdf`/`.json`). The report must identify what was tested, data used, row counts, false calls, possible escapes, p95 timing, over-one-second count, reports generated, missing evidence, limitations, remaining Stage 2/3/4 work. `PASS` = data, manifest, metrics, dataset quality, configured gates passed for the Stage 1 claim (not full factory readiness); `CONDITIONAL` = no blocking gate failed, warnings need review/waiver/follow-up; `FAIL` = a blocking requirement failed (missing images or manifest columns, all-OK/all-NG data, insufficient OK/NG balance or class coverage, excessive unknown labels, missing goldens under Pixel Difference criteria). Factory readiness stays separate (§9).
 
 ## 6. Client test kit (packaged build evaluation)
 
@@ -400,7 +400,7 @@ Exit code 0 + `Result: PASS` + `8-hour uploaded-image PoC evidence: YES` = accep
 
 ### 8.6 Relationship to other stability evidence
 
-`Export & Trace > Soak Test` (in-app, Admin; Folder Camera Simulation, camera-source seam; Factory PoC 8-hour profile: §9) and `Export & Trace > UI Stability Soak` (WPF shell navigation; client-demo gate) complement this harness, which is the artifact for the 8-hour criterion at Stage 1 scope. Regression tests: `AOI_Monitor.Tests/BatchSoakTestServiceTests.cs` (smoke, memory-trend evaluation, stuck watchdog, unhandled exceptions, truthful labeling, CLI validation).
+`Readiness & QA > Soak Test` (in-app, Admin; Folder Camera Simulation, camera-source seam; Factory PoC 8-hour profile: §9) and `Readiness & QA > UI Stability Test` (WPF shell navigation; client-demo gate) complement this harness, which is the artifact for the 8-hour criterion at Stage 1 scope. Regression tests: `AOI_Monitor.Tests/BatchSoakTestServiceTests.cs` (smoke, memory-trend evaluation, stuck watchdog, unhandled exceptions, truthful labeling, CLI validation).
 
 ## 9. Factory acceptance test plan (Stage 1 vs hardware/MES gates)
 

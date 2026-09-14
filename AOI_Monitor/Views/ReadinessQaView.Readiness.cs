@@ -1,62 +1,32 @@
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Text;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using AOI_Monitor.Data;
 using AOI_Monitor.Models;
 using AOI_Monitor.Services;
-using AOI_Monitor.ViewModels;
 using Microsoft.Win32;
+using static AOI_Monitor.Views.ReportsView;
 
 namespace AOI_Monitor.Views;
 
-public partial class ReportsView
+public partial class ReadinessQaView
 {
-    private void OnGenerateFactoryAcceptanceChecklistClick(object sender, RoutedEventArgs e)
-    {
-        var checklist = FactoryAcceptanceChecklistService.Generate(SelectedFactoryAcceptanceProfile());
-        ReplaceRows(_factoryAcceptanceRows, checklist.Items);
-        StatusText.Text = $"Generated factory acceptance checklist for {checklist.ProfileDisplayName}.";
-    }
-
-    private void OnClearFiltersClick(object sender, RoutedEventArgs e)
-    {
-        FromDatePicker.SelectedDate = DateTime.Today.AddDays(-30);
-        ToDatePicker.SelectedDate = DateTime.Today;
-        BoardFilterText.Text = string.Empty;
-        OperatorFilterText.Text = string.Empty;
-        ResultFilterCombo.SelectedIndex = 0;
-        RoleFilterCombo.SelectedIndex = 0;
-        ActionTypeFilterText.Text = string.Empty;
-        _ = RefreshAsync(CancellationToken.None);
-    }
-
-    private async Task LoadLogsAsync(CancellationToken cancellationToken)
+    private async Task LoadReadinessAsync(CancellationToken cancellationToken)
     {
         var filter = BuildFilter();
         var pilotIssueFilter = BuildPilotIssueFilter();
-        var mesQueueStatus = ComboBoxTokens.SelectedToken(MesQueueStatusFilter, "All");
         var acceptanceProfile = SelectedFactoryAcceptanceProfile();
         var managementFilter = BuildManagementDashboardFilter();
-        StatusText.Text = "Loading logs and factory readiness...";
+        StatusText.Text = "Loading readiness and quality-gate evidence...";
 
         var snapshot = await Task.Run(async () =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             var inspections = AoiDatabase.GetInspectionHistory(filter).Select(InspectionLogRow.FromRecord).ToArray();
             var reviews = AoiDatabase.GetReviewEvents(filter).Select(ReviewLogRow.FromRecord).ToArray();
-            var exports = AoiDatabase.GetExportHistory(filter)
-                .Select(record => ExportHistoryRow.FromRecord(record, AoiDatabase.GetLatestExportVerification(record.Id)))
-                .ToArray();
             var audits = AoiDatabase.GetAuditEvents(filter).Select(AuditLogRow.FromRecord).ToArray();
-            var mesSpool = ApplyMesQueueFilter(AoiDatabase.GetMesSpoolQueue().Select(MesSpoolQueueRow.FromRecord), mesQueueStatus).ToArray();
-            var centralSync = AoiDatabase.GetCentralSyncQueue().Select(CentralSyncQueueRow.FromRecord).ToArray();
             var pilotIssues = AoiDatabase.GetPilotIssues(pilotIssueFilter).Select(PilotIssueRow.FromIssue).ToArray();
             var readinessReport = await FactoryReadinessService.EvaluateAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var readiness = readinessReport.Categories.Select(FactoryReadinessRow.FromCategory).ToArray();
@@ -70,13 +40,10 @@ public partial class ReportsView
             var buildEvidence = BuildTestEvidenceService.GetSummary();
             var managementReport = await ManagementDashboardService.BuildAsync(managementFilter, cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            return new LogLoadSnapshot(
+            return new ReadinessLoadSnapshot(
                 inspections,
                 reviews,
-                exports,
                 audits,
-                mesSpool,
-                centralSync,
                 pilotIssues,
                 readiness,
                 readinessReport.OverallStatus,
@@ -93,10 +60,7 @@ public partial class ReportsView
 
         ReplaceRows(_inspectionRows, snapshot.Inspections);
         ReplaceRows(_reviewRows, snapshot.Reviews);
-        ReplaceRows(_exportRows, snapshot.Exports);
         ReplaceRows(_auditRows, snapshot.Audits);
-        ReplaceRows(_mesSpoolRows, snapshot.MesSpool);
-        ReplaceRows(_centralSyncRows, snapshot.CentralSync);
         ReplaceRows(_pilotIssueRows, snapshot.PilotIssues);
         ReplaceRows(_factoryReadinessRows, snapshot.Readiness);
         ApplyStage1Readiness(snapshot.Stage1Readiness);
@@ -106,13 +70,20 @@ public partial class ReportsView
             ReplaceRows(_factoryAcceptanceRows, snapshot.FactoryAcceptanceRows);
 
         PilotIssueSummaryText.Text = $"Issues total={snapshot.IssueSummary.Total}; open={snapshot.IssueSummary.Open}; critical open={snapshot.IssueSummary.CriticalOpen}.";
-        LogSummaryText.Text = $"{snapshot.Inspections.Length} inspections / {snapshot.Reviews.Length} review events / {snapshot.Exports.Length} exports / {snapshot.Audits.Length} audit rows / {snapshot.MesSpool.Length} MES spool / {snapshot.CentralSync.Length} central sync / {snapshot.PilotIssues.Length} pilot issues / readiness {snapshot.ReadinessOverallStatus}";
+        ReadinessSummaryText.Text = $"{snapshot.PilotIssues.Length} pilot issues / factory readiness {snapshot.ReadinessOverallStatus} / Stage 1 {snapshot.Stage1Readiness.OverallStatus} / evidence completion {snapshot.CompletionOverallPercent:F1}%";
         StandardsTraceabilitySummaryText.Text = snapshot.StandardsTraceabilitySummary;
         CompletionMatrixSummaryText.Text = $"Overall evidence completion {snapshot.CompletionOverallPercent:F1}% across {snapshot.CompletionRows.Length} readiness areas.";
         BuildEvidenceSummaryText.Text = snapshot.BuildEvidenceSummary;
         UpdateClientDemoGateText(ClientDemoReadinessGateService.Evaluate());
-        StatusText.Text = "Loaded real SQLite log records.";
+        StatusText.Text = "Loaded readiness and quality-gate evidence from local records.";
         ApplyManagementDashboard(snapshot.ManagementDashboardReport);
+    }
+
+    private void OnGenerateFactoryAcceptanceChecklistClick(object sender, RoutedEventArgs e)
+    {
+        var checklist = FactoryAcceptanceChecklistService.Generate(SelectedFactoryAcceptanceProfile());
+        ReplaceRows(_factoryAcceptanceRows, checklist.Items);
+        StatusText.Text = $"Generated factory acceptance checklist for {checklist.ProfileDisplayName}.";
     }
 
     private void OnClientDemoReadinessClick(object sender, RoutedEventArgs e)
@@ -194,7 +165,7 @@ public partial class ReportsView
         var button = sender as Button;
         await ErrorBoundaryService.SafeAsyncCommand(
             "Refresh Stage 1 readiness",
-            "Export & Trace",
+            "Readiness & QA",
             async token =>
             {
                 var report = await Task.Run(() => Stage1ReadinessGateService.Evaluate(), token);
@@ -395,9 +366,9 @@ public partial class ReportsView
             return;
         }
 
-        if (InspectionGrid.SelectedItem is not InspectionLogRow row)
+        if (PilotSourceInspectionGrid.SelectedItem is not InspectionLogRow row)
         {
-            MessageBox.Show("Select an inspection history row first.", "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Select a row in the filtered inspection list first.", "AOI Monitor", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -430,7 +401,7 @@ public partial class ReportsView
             return;
         }
 
-        PilotIssueService.Close(row.IssueId, "Closed from Log & Export after engineering review.", WorkflowState.Instance.OperatorWithRole);
+        PilotIssueService.Close(row.IssueId, "Closed from Readiness & QA after engineering review.", WorkflowState.Instance.OperatorWithRole);
         _ = RefreshAsync(CancellationToken.None);
         StatusText.Text = $"Pilot issue closed: {row.IssueId}.";
     }
@@ -492,31 +463,4 @@ public partial class ReportsView
             $"avg/p95={report.AverageInspectionTimeMs:F0}/{report.P95InspectionTimeMs:F0} ms; readiness={report.AcceptanceReadinessStatus}; " +
             $"MES={report.MesSyncStatus}; central={report.CentralSyncStatus}";
     }
-
-    private ManagementDashboardFilter BuildManagementDashboardFilter()
-        => new()
-        {
-            FromDate = FromDatePicker.SelectedDate,
-            ToDate = ToDatePicker.SelectedDate,
-            BoardModel = BoardFilterText.Text.Trim(),
-            LotId = ManagementLotFilterText.Text.Trim(),
-            OperatorId = OperatorFilterText.Text.Trim(),
-            ModelVersion = ManagementModelFilterText.Text.Trim(),
-            DeploymentProfile = SelectedManagementProfile(),
-        };
-
-    private LogFilter BuildFilter()
-    {
-        return new LogFilter
-        {
-            FromDate = FromDatePicker.SelectedDate,
-            ToDate = ToDatePicker.SelectedDate,
-            BoardProgram = NullIfBlank(BoardFilterText.Text),
-            OperatorId = NullIfBlank(OperatorFilterText.Text),
-            Result = ComboBoxTokens.Token(ResultFilterCombo.SelectedItem as ComboBoxItem),
-            UserRole = ComboBoxTokens.Token(RoleFilterCombo.SelectedItem as ComboBoxItem),
-            ActionCategory = NullIfBlank(ActionTypeFilterText.Text),
-        };
-    }
-
 }

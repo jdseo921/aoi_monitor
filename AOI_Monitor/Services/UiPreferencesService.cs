@@ -522,6 +522,12 @@ public static class UiPreferencesService
         ["ROI means inspection area on the board image checked by the model."] = "ROI는 모델이 검사하는 보드 이미지의 검사 영역을 의미합니다.",
         ["AI means inspection result. GT means ground truth."] = "AI는 검사 결과, GT는 실측 판정을 의미합니다.",
         ["Exports the complete Stage 1 package with manifest, preflight, reports, benchmark evidence, limitations, CSV, and annotated image samples."] = "매니페스트, 사전 점검, 보고서, 벤치마크 증빙, 제한 사항, CSV, 주석 이미지 샘플을 포함한 완전한 1단계 패키지를 내보냅니다.",
+        // --- Readiness & QA (ReadinessQaView) ---
+        ["Readiness & QA"] = "준비도 / 품질",
+        ["Readiness Filters"] = "준비도 필터",
+        ["Readiness & QA Evidence"] = "준비도 / 품질 증빙",
+        ["Filter management dashboard, pilot issues, and customer package evidence by date, board, and operator."] = "날짜, 보드, 작업자로 관리 대시보드, 파일럿 이슈, 고객 패키지 증빙을 필터링합니다.",
+        ["Filtered inspection rows (select one, then capture Good Board Marked Defect or Possible Missed Defect)"] = "필터링된 검사 행 (하나를 선택한 뒤 양품 결함 판정 또는 결함 미검출 가능을 캡처)",
     };
 
     /// <summary>

@@ -49,6 +49,9 @@ public static class RoleAuthorization
             "guide" => role >= UserRole.Operator,
             "modeltest" => role >= UserRole.Operator,
             "reports" => role >= UserRole.Operator,
+            // Readiness & QA mirrors Export & Trace: readable by any authenticated role,
+            // with exports and maintenance actions gated by the capability predicates above.
+            "readiness" => role >= UserRole.Operator,
             // Privileged pages.
             "recipe" => CanEditRecipes(role),
             "calibration" => CanEditCalibration(role),

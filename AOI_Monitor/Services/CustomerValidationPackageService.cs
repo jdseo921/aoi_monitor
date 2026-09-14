@@ -470,7 +470,7 @@ public static class CustomerValidationPackageService
         }
         else
         {
-            warnings.Add("No recent benchmark_results.csv was available; run Export & Trace > Performance Benchmark before package export to attach benchmark evidence.");
+            warnings.Add("No recent benchmark_results.csv was available; run Readiness & QA > Performance Benchmark before package export to attach benchmark evidence.");
         }
 
         File.WriteAllText(

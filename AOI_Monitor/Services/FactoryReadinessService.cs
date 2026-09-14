@@ -607,7 +607,7 @@ public static class FactoryReadinessService
 
         if (!criteria.Stage1Only && (criteria.RequireCameraAcceptance || criteria.RequireRealHardwareAcceptance))
         {
-            Add(report, "Inspection performance benchmark", "No-Go", "No performance benchmark evidence has been recorded. Stage 2 and full factory readiness require a real-camera benchmark under the one-second frame-to-overlay threshold.", "Run Log & Export > Performance Benchmark against the active real camera source.");
+            Add(report, "Inspection performance benchmark", "No-Go", "No performance benchmark evidence has been recorded. Stage 2 and full factory readiness require a real-camera benchmark under the one-second frame-to-overlay threshold.", "Run Readiness & QA > Performance Benchmark against the active real camera source.");
             return;
         }
 

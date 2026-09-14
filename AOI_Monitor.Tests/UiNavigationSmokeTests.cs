@@ -61,6 +61,7 @@ public sealed class UiNavigationSmokeTests : IDisposable
                 ("AI / Models", () => new AIModelTestView()),
                 ("Yield Analytics", () => new SpcView()),
                 ("Export & Trace", () => new ReportsView()),
+                ("Readiness & QA", () => new ReadinessQaView()),
                 ("Calibration", () => new CalibrationView()),
                 ("3D Profile", () => new ProfileView()),
                 ("Hardware Readiness", () => new PilotWizardView()),
@@ -100,7 +101,7 @@ public sealed class UiNavigationSmokeTests : IDisposable
             ["Settings"] = @"AOI_Monitor\Views\SettingsView.xaml",
             ["Calibration"] = @"AOI_Monitor\Views\CalibrationView.xaml",
             ["3D Profile Viewer"] = @"AOI_Monitor\Views\ProfileView.xaml",
-            ["Factory / Management Dashboards"] = @"AOI_Monitor\Views\ReportsView.xaml",
+            ["Factory / Management Dashboards"] = @"AOI_Monitor\Views\ReadinessQaView.xaml",
             ["Model Registry / Acceptance"] = @"AOI_Monitor\Views\SettingsView.xaml",
             ["MES / Central Sync / Hardware Acceptance"] = @"AOI_Monitor\Views\SettingsView.xaml",
         };
@@ -111,6 +112,7 @@ public sealed class UiNavigationSmokeTests : IDisposable
             ["Recipe Editor"] = "Fixed editor canvas viewport; ROI table scrolls and commands remain in fixed header/sidebar zones.",
             ["Calibration"] = "Fixed image calibration viewport; point table scrolls and save/reload commands remain in the header.",
             ["3D Profile Viewer"] = "Fixed visual profile viewport; selected detail/status regions wrap and table-like content is not vertically dense.",
+            ["Export & Trace"] = "Fixed page grid after the Readiness & QA split: the six log DataGrids scroll internally and the star row keeps the tab strip and footer reachable without page-level scrolling.",
         };
 
         foreach (var (page, relativePath) in viewFiles)
@@ -173,6 +175,7 @@ public sealed class UiNavigationSmokeTests : IDisposable
             "AI / Models",
             "Yield Analytics",
             "Export & Trace",
+            "Readiness & QA",
             "Management Dashboard",
             "Factory Readiness",
             "Standards & Quality Checklist",

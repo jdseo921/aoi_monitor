@@ -74,7 +74,7 @@ public sealed class HmiLayoutAuditTests : IDisposable
             .Select(view => view.Key)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        Assert.Equal(13, shellRoutes.Length);
+        Assert.Equal(14, shellRoutes.Length);
 
         var requiredRules = new[]
         {
@@ -151,10 +151,11 @@ public sealed class HmiLayoutAuditTests : IDisposable
         AssertDefinitionRequires(definitions, "defect-review", "QueueGrid");
         AssertDefinitionRequires(definitions, "board-image-library", "RecordsGrid");
         AssertDefinitionRequires(definitions, "export-trace", "ExportGrid");
+        AssertDefinitionRequires(definitions, "readiness-qa", "ReadinessSummaryText");
         AssertDefinitionRequires(definitions, "reports-inspection-history", "InspectionGrid");
         AssertDefinitionRequires(definitions, "reports-review-events", "ReviewGrid");
         AssertDefinitionRequires(definitions, "reports-audit-trail", "AuditGrid");
-        AssertDefinitionRequires(definitions, "reports-pilot-issues", "PilotIssuesGrid");
+        AssertDefinitionRequires(definitions, "readiness-pilot-issues", "PilotIssuesGrid");
         AssertDefinitionRequires(definitions, "yield-analytics", "DbHealthGrid");
         AssertDefinitionRequires(definitions, "main-inspection", "DefectGrid");
         AssertDefinitionRequires(definitions, "main-inspection", "CalibrationProfileCombo");

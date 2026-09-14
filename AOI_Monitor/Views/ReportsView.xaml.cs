@@ -1,24 +1,23 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Text;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using AOI_Monitor.Data;
 using AOI_Monitor.Models;
 using AOI_Monitor.Services;
-using AOI_Monitor.ViewModels;
-using Microsoft.Win32;
 
 namespace AOI_Monitor.Views;
 
+/// <summary>
+/// Export &amp; Trace window: operational log grids, verified exports, and the MES /
+/// central-sync queues. The readiness/QA evidence tabs (pilot issues, stage gates,
+/// dashboards, checklists, acceptance) live in <see cref="ReadinessQaView"/> since the
+/// 2026-09-14 split; that view reuses this class's internal row types and pure-static
+/// evidence builders instead of duplicating them.
+/// </summary>
 public partial class ReportsView : UserControl, IAsyncNavigationPage, IDisposable
 {
-    private static readonly Encoding CsvEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+    internal static readonly Encoding CsvEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
     private static readonly HashSet<string> ImageExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff",
@@ -30,19 +29,6 @@ public partial class ReportsView : UserControl, IAsyncNavigationPage, IDisposabl
     private readonly ObservableCollection<AuditLogRow> _auditRows = new();
     private readonly ObservableCollection<MesSpoolQueueRow> _mesSpoolRows = new();
     private readonly ObservableCollection<CentralSyncQueueRow> _centralSyncRows = new();
-    private readonly ObservableCollection<PilotIssueRow> _pilotIssueRows = new();
-    private readonly ObservableCollection<FactoryReadinessRow> _factoryReadinessRows = new();
-    private readonly ObservableCollection<Stage1ReadinessRow> _stage1ReadinessRows = new();
-    private readonly ObservableCollection<StandardsTraceabilityMatrix> _standardsTraceabilityRows = new();
-    private readonly ObservableCollection<CompletionMatrixRow> _completionMatrixRows = new();
-    private readonly ObservableCollection<FactoryAcceptanceChecklistItem> _factoryAcceptanceRows = new();
-    private readonly ObservableCollection<UiNavigationSoakEvent> _uiStabilityEvents = new();
-    private readonly ObservableCollection<ManagementDashboardContributor> _managementDefectRows = new();
-    private readonly ObservableCollection<ManagementDashboardContributor> _managementRoiRows = new();
-    private readonly ObservableCollection<ManagementDashboardTrendPoint> _managementTrendRows = new();
-    private readonly ObservableCollection<ManagementDashboardBreakdown> _managementBreakdownRows = new();
-    private ManagementDashboardReport? _managementDashboardReport;
-    private Stage1ReadinessReport? _latestStage1ReadinessReport;
     private CancellationTokenSource? _workCts;
     private CancellationTokenSource? _refreshCts;
 
@@ -55,20 +41,6 @@ public partial class ReportsView : UserControl, IAsyncNavigationPage, IDisposabl
         AuditGrid.ItemsSource = _auditRows;
         MesSpoolGrid.ItemsSource = _mesSpoolRows;
         CentralSyncGrid.ItemsSource = _centralSyncRows;
-        PilotIssuesGrid.ItemsSource = _pilotIssueRows;
-        FactoryReadinessGrid.ItemsSource = _factoryReadinessRows;
-        Stage1ReadinessGrid.ItemsSource = _stage1ReadinessRows;
-        StandardsTraceabilityGrid.ItemsSource = _standardsTraceabilityRows;
-        CompletionMatrixGrid.ItemsSource = _completionMatrixRows;
-        FactoryAcceptanceGrid.ItemsSource = _factoryAcceptanceRows;
-        UiStabilityEventsGrid.ItemsSource = _uiStabilityEvents;
-        ManagementDefectGrid.ItemsSource = _managementDefectRows;
-        ManagementRoiGrid.ItemsSource = _managementRoiRows;
-        ManagementModelTrendGrid.ItemsSource = _managementTrendRows;
-        ManagementLotModelGrid.ItemsSource = _managementBreakdownRows;
-        PopulateFactoryAcceptanceProfiles();
-        PopulateManagementProfiles();
-        PopulatePilotIssueFilters();
         FromDatePicker.SelectedDate = DateTime.Today.AddDays(-30);
         ToDatePicker.SelectedDate = DateTime.Today;
         StatusText.Text = "Ready. Select Refresh or open this page to load logs.";
@@ -81,32 +53,13 @@ public partial class ReportsView : UserControl, IAsyncNavigationPage, IDisposabl
         _refreshCts?.Cancel();
         _refreshCts?.Dispose();
         _refreshCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        RefreshArchivePolicyText();
         await LoadLogsAsync(_refreshCts.Token);
         await RefreshRetentionWarningAsync(_refreshCts.Token);
     }
 
-    /// <summary>
-    /// Keeps the on-screen policy statement equal to the exported one and to the configured
-    /// retention window. The static XAML text previously described a copy-only archive, which
-    /// contradicted the actual archive-then-purge behaviour.
-    /// </summary>
-    private void RefreshArchivePolicyText()
-    {
-        try
-        {
-            ArchivePolicyText.Text = DescribeRetentionPolicy();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Trace.WriteLine($"Archive policy text not refreshed: {ex.Message}");
-            ArchivePolicyText.Text = "Auto-archive policy unavailable — open Settings > Basics > Data Retention to confirm the configured window.";
-        }
-    }
-
     public void RefreshFromState() => _ = RefreshAsync(CancellationToken.None);
 
-    private static string DescribeRetentionPolicy()
+    internal static string DescribeRetentionPolicy()
     {
         var settings = LogRetentionSettingsService.LoadSettings();
         return settings.Enabled
@@ -186,6 +139,50 @@ public partial class ReportsView : UserControl, IAsyncNavigationPage, IDisposabl
             message => StatusText.Text = message);
     }
 
+    private void OnClearFiltersClick(object sender, RoutedEventArgs e)
+    {
+        FromDatePicker.SelectedDate = DateTime.Today.AddDays(-30);
+        ToDatePicker.SelectedDate = DateTime.Today;
+        BoardFilterText.Text = string.Empty;
+        OperatorFilterText.Text = string.Empty;
+        ResultFilterCombo.SelectedIndex = 0;
+        RoleFilterCombo.SelectedIndex = 0;
+        ActionTypeFilterText.Text = string.Empty;
+        _ = RefreshAsync(CancellationToken.None);
+    }
+
+    private async Task LoadLogsAsync(CancellationToken cancellationToken)
+    {
+        var filter = BuildFilter();
+        var mesQueueStatus = ComboBoxTokens.SelectedToken(MesQueueStatusFilter, "All");
+        StatusText.Text = "Loading logs and queue records...";
+
+        var snapshot = await Task.Run(() =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var inspections = AoiDatabase.GetInspectionHistory(filter).Select(InspectionLogRow.FromRecord).ToArray();
+            var reviews = AoiDatabase.GetReviewEvents(filter).Select(ReviewLogRow.FromRecord).ToArray();
+            var exports = AoiDatabase.GetExportHistory(filter)
+                .Select(record => ExportHistoryRow.FromRecord(record, AoiDatabase.GetLatestExportVerification(record.Id)))
+                .ToArray();
+            var audits = AoiDatabase.GetAuditEvents(filter).Select(AuditLogRow.FromRecord).ToArray();
+            var mesSpool = ApplyMesQueueFilter(AoiDatabase.GetMesSpoolQueue().Select(MesSpoolQueueRow.FromRecord), mesQueueStatus).ToArray();
+            var centralSync = AoiDatabase.GetCentralSyncQueue().Select(CentralSyncQueueRow.FromRecord).ToArray();
+            cancellationToken.ThrowIfCancellationRequested();
+            return new LogLoadSnapshot(inspections, reviews, exports, audits, mesSpool, centralSync);
+        }, cancellationToken);
+
+        ReplaceRows(_inspectionRows, snapshot.Inspections);
+        ReplaceRows(_reviewRows, snapshot.Reviews);
+        ReplaceRows(_exportRows, snapshot.Exports);
+        ReplaceRows(_auditRows, snapshot.Audits);
+        ReplaceRows(_mesSpoolRows, snapshot.MesSpool);
+        ReplaceRows(_centralSyncRows, snapshot.CentralSync);
+
+        LogSummaryText.Text = $"{snapshot.Inspections.Length} inspections / {snapshot.Reviews.Length} review events / {snapshot.Exports.Length} exports / {snapshot.Audits.Length} audit rows / {snapshot.MesSpool.Length} MES spool / {snapshot.CentralSync.Length} central sync";
+        StatusText.Text = "Loaded real SQLite log records.";
+    }
+
     private static IEnumerable<MesSpoolQueueRow> ApplyMesQueueFilter(IEnumerable<MesSpoolQueueRow> rows, string selected)
     {
         return string.Equals(selected, "All", StringComparison.OrdinalIgnoreCase)
@@ -193,72 +190,17 @@ public partial class ReportsView : UserControl, IAsyncNavigationPage, IDisposabl
             : rows.Where(row => row.Status.Equals(selected, StringComparison.OrdinalIgnoreCase));
     }
 
-    private void PopulateFactoryAcceptanceProfiles()
+    private LogFilter BuildFilter()
     {
-        FactoryAcceptanceProfileCombo.Items.Clear();
-        foreach (DeploymentProfile profile in Enum.GetValues<DeploymentProfile>())
+        return new LogFilter
         {
-            FactoryAcceptanceProfileCombo.Items.Add(new ComboBoxItem
-            {
-                Content = FactoryReadinessService.DisplayName(profile),
-                Tag = profile,
-            });
-        }
-
-        FactoryAcceptanceProfileCombo.SelectedIndex = Math.Max(0, (int)DeploymentProfileSettingsService.Load());
-    }
-
-    private DeploymentProfile SelectedFactoryAcceptanceProfile()
-        => (FactoryAcceptanceProfileCombo.SelectedItem as ComboBoxItem)?.Tag is DeploymentProfile profile
-            ? profile
-            : DeploymentProfile.Stage1ImageValidation;
-
-    private void PopulateManagementProfiles()
-    {
-        ManagementDeploymentProfileCombo.Items.Clear();
-        ManagementDeploymentProfileCombo.Items.Add(new ComboBoxItem { Content = "Active deployment profile", Tag = null });
-        foreach (DeploymentProfile profile in Enum.GetValues<DeploymentProfile>())
-        {
-            ManagementDeploymentProfileCombo.Items.Add(new ComboBoxItem
-            {
-                Content = FactoryReadinessService.DisplayName(profile),
-                Tag = profile,
-            });
-        }
-
-        ManagementDeploymentProfileCombo.SelectedIndex = 0;
-    }
-
-    private DeploymentProfile? SelectedManagementProfile()
-        => (ManagementDeploymentProfileCombo.SelectedItem as ComboBoxItem)?.Tag is DeploymentProfile profile
-            ? profile
-            : null;
-
-    private void PopulatePilotIssueFilters()
-    {
-        PilotIssueCategoryFilterCombo.Items.Clear();
-        PilotIssueCategoryFilterCombo.Items.Add(new ComboBoxItem { Content = "All", Tag = null });
-        foreach (PilotIssueCategory category in Enum.GetValues<PilotIssueCategory>())
-            PilotIssueCategoryFilterCombo.Items.Add(new ComboBoxItem { Content = category.ToString(), Tag = category });
-        PilotIssueCategoryFilterCombo.SelectedIndex = 0;
-
-        PilotIssueStatusFilterCombo.Items.Clear();
-        PilotIssueStatusFilterCombo.Items.Add(new ComboBoxItem { Content = "All", Tag = null });
-        foreach (PilotIssueStatus status in Enum.GetValues<PilotIssueStatus>())
-            PilotIssueStatusFilterCombo.Items.Add(new ComboBoxItem { Content = status.ToString(), Tag = status });
-        PilotIssueStatusFilterCombo.SelectedIndex = 0;
-    }
-
-    private PilotIssueFilter BuildPilotIssueFilter()
-        => new()
-        {
-            Category = (PilotIssueCategoryFilterCombo?.SelectedItem as ComboBoxItem)?.Tag is PilotIssueCategory category ? category : null,
-            Status = (PilotIssueStatusFilterCombo?.SelectedItem as ComboBoxItem)?.Tag is PilotIssueStatus status ? status : null,
-            Severity = ComboBoxTokens.SelectedToken(PilotIssueSeverityFilterCombo, "All") == "All"
-                ? string.Empty
-                : ComboBoxTokens.SelectedToken(PilotIssueSeverityFilterCombo, string.Empty),
-            BoardModel = BoardFilterText.Text.Trim(),
-            LotId = ManagementLotFilterText?.Text.Trim() ?? string.Empty,
+            FromDate = FromDatePicker.SelectedDate,
+            ToDate = ToDatePicker.SelectedDate,
+            BoardProgram = NullIfBlank(BoardFilterText.Text),
+            OperatorId = NullIfBlank(OperatorFilterText.Text),
+            Result = ComboBoxTokens.Token(ResultFilterCombo.SelectedItem as ComboBoxItem),
+            UserRole = ComboBoxTokens.Token(RoleFilterCombo.SelectedItem as ComboBoxItem),
+            ActionCategory = NullIfBlank(ActionTypeFilterText.Text),
         };
-
+    }
 }

@@ -154,8 +154,8 @@ $manualSteps = @(
     "Review rows, OK/NG/REVIEW counts, false calls, possible escapes, and selected-row preview.",
     "Export CSV and Export Annotated Images.",
     "Click Export Stage 1 Validation Package.",
-    "Export & Trace > Performance Benchmark: run against $imagesDir.",
-    "Export & Trace > Stage 1 Readiness: click Refresh, then Export Report.",
+    "Readiness & QA > Performance Benchmark: run against $imagesDir.",
+    "Readiness & QA > Stage 1 Readiness: click Refresh, then Export Report.",
     "Open validation_summary.html, customer_validation_report.html, benchmark_report.html, stage1_readiness_report.html, stage1_readiness_report.pdf, stage1_readiness_report.json, benchmark_results.csv, and limitations.txt.",
     "Confirm every report keeps the evidence scoped to Stage 1 uploaded-image validation and does not claim real camera, lighting, robot, MES, or full factory readiness."
 )

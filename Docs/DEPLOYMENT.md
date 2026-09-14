@@ -133,7 +133,7 @@ When no custom storage root is configured, the application creates local PoC dat
 - Managed image vault: `%LOCALAPPDATA%\AOI_Monitor\image_vault\`
 - Training-set candidate images: `%LOCALAPPDATA%\AOI_Monitor\image_vault\training\`
 
-When launched from the Debug build, local export files are commonly written under `AOI_Monitor\bin\Debug\net10.0-windows\exports\`. Customer validation packages are written to the output folder chosen by the user in `Export & Trace`.
+When launched from the Debug build, local export files are commonly written under `AOI_Monitor\bin\Debug\net10.0-windows\exports\`. Customer validation packages are written to the output folder chosen by the user in `Readiness & QA`.
 
 Admin users can change selected local paths in Settings. In this PoC, those settings are local only and are not synchronized with MES or a central configuration server.
 
@@ -195,7 +195,7 @@ After installing or restoring configuration on a customer/factory PC (restore an
    - Stage 2: Camera, lighting, 3D profile, and latency trace evidence.
    - Stage 3: Robot cell and PLC/safety acceptance evidence.
    - Stage 4: MES traceability signoff and MES queue review.
-4. Open `Export & Trace`.
+4. Open `Readiness & QA`.
 5. Export the Factory Readiness Go/No-Go package.
 6. Review the HTML/JSON summary and confirm simulated, mock, CSV sample, fake adapter, and not-connected evidence is not treated as real production readiness.
 

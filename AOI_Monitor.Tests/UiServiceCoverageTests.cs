@@ -39,7 +39,8 @@ public sealed class UiServiceCoverageTests
         var modelTest = ReadRepoFile("AOI_Monitor", "Views", "AIModelTestView.xaml");
         var profile = ReadRepoFile("AOI_Monitor", "Views", "ProfileView.xaml");
         var reports = ReadRepoFile("AOI_Monitor", "Views", "ReportsView.xaml");
-        var combined = settings + modelTest + profile + reports;
+        var readiness = ReadRepoFile("AOI_Monitor", "Views", "ReadinessQaView.xaml");
+        var combined = settings + modelTest + profile + reports + readiness;
 
         foreach (var label in new[]
         {
@@ -92,7 +93,8 @@ public sealed class UiServiceCoverageTests
         var settingsCode = ReadViewCodeBehind("SettingsView");
         var profileCode = ReadViewCodeBehind("ProfileView");
         var reportsCode = ReadViewCodeBehind("ReportsView");
-        var combined = settingsCode + profileCode + reportsCode;
+        var readinessCode = ReadViewCodeBehind("ReadinessQaView");
+        var combined = settingsCode + profileCode + reportsCode + readinessCode;
 
         foreach (var auditEvent in new[]
         {
@@ -123,7 +125,8 @@ public sealed class UiServiceCoverageTests
         var settings = ReadRepoFile("AOI_Monitor", "Views", "SettingsView.xaml");
         var profile = ReadRepoFile("AOI_Monitor", "Views", "ProfileView.xaml");
         var reports = ReadRepoFile("AOI_Monitor", "Views", "ReportsView.xaml");
-        var combined = settings + profile + reports;
+        var readiness = ReadRepoFile("AOI_Monitor", "Views", "ReadinessQaView.xaml");
+        var combined = settings + profile + reports + readiness;
 
         Assert.Contains("Simulation is not production robot validation", combined);
         Assert.Contains("Simulated mode is not real hardware", combined);

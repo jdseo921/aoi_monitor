@@ -1,0 +1,483 @@
+<UserControl x:Class="AOI_Monitor.Views.ReadinessQaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:services="clr-namespace:AOI_Monitor.Services"
+             Background="{DynamicResource HmiBgBrush}">
+  <Grid Margin="8">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="*" MinHeight="340"/>
+      <RowDefinition Height="8"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource Panel}">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" MinHeight="32"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+          <TextBlock Text="Readiness Filters" Style="{StaticResource HmiSectionHeaderText}"/>
+        </Border>
+        <WrapPanel Grid.Row="1" Style="{StaticResource HmiAdaptiveFilterBand}">
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="From" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+            <DatePicker x:Name="FromDatePicker" Style="{StaticResource HmiFieldDatePicker}" MinHeight="36" VerticalAlignment="Top"/>
+          </StackPanel>
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="To" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+            <DatePicker x:Name="ToDatePicker" Style="{StaticResource HmiFieldDatePicker}" MinHeight="36" VerticalAlignment="Top"/>
+          </StackPanel>
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="Model / Board" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+            <TextBox x:Name="BoardFilterText" Text=""/>
+          </StackPanel>
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="Operator" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+            <TextBox x:Name="OperatorFilterText" Text=""/>
+          </StackPanel>
+        </WrapPanel>
+        <DockPanel Grid.Row="2" LastChildFill="True" Margin="8,0,8,8">
+          <WrapPanel DockPanel.Dock="Right" Style="{StaticResource HmiInlineActionBand}" VerticalAlignment="Center">
+            <Button Style="{StaticResource ActionBtnGreen}" Content="Apply Filters" Margin="{StaticResource HmiButtonGap}" Click="OnApplyFiltersClick"/>
+            <Button Style="{StaticResource ActionBtn}" Content="Clear" Click="OnClearFiltersClick"/>
+          </WrapPanel>
+          <TextBlock Text="Filter management dashboard, pilot issues, and customer package evidence by date, board, and operator."
+                     Style="{StaticResource HmiPageSubtitleText}"
+                     VerticalAlignment="Center"
+                     Margin="0,0,12,0"/>
+        </DockPanel>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2" Style="{StaticResource Panel}">
+      <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+          <DockPanel>
+            <TextBlock x:Name="ReadinessSummaryText" DockPanel.Dock="Right" Text="No readiness evidence loaded" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
+            <TextBlock Text="Readiness &amp; QA Evidence" Style="{StaticResource HmiSectionHeaderText}"/>
+          </DockPanel>
+        </Border>
+        <TabControl Grid.Row="1" Background="{DynamicResource HmiSurfaceBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}">
+          <TabItem Header="Pilot Issues">
+            <Grid Margin="8">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*" MinHeight="110"/>
+              </Grid.RowDefinitions>
+              <WrapPanel Margin="0,0,0,8">
+                <TextBlock Text="Category" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <ComboBox x:Name="PilotIssueCategoryFilterCombo" Width="145" SelectedIndex="0" Margin="0,0,8,0" SelectionChanged="OnPilotIssueFilterChanged"/>
+                <TextBlock Text="Status" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <ComboBox x:Name="PilotIssueStatusFilterCombo" Width="125" SelectedIndex="0" Margin="0,0,8,0" SelectionChanged="OnPilotIssueFilterChanged"/>
+                <TextBlock Text="Severity" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <ComboBox x:Name="PilotIssueSeverityFilterCombo" Width="115" SelectedIndex="0" Margin="0,0,12,0" SelectionChanged="OnPilotIssueFilterChanged">
+                  <ComboBoxItem Content="All" Tag="All"/>
+                  <ComboBoxItem Content="Critical" Tag="Critical"/>
+                  <ComboBoxItem Content="High" Tag="High"/>
+                  <ComboBoxItem Content="Medium" Tag="Medium"/>
+                  <ComboBoxItem Content="Low" Tag="Low"/>
+                </ComboBox>
+                <Button Style="{StaticResource ActionBtnGreen}" Content="Good Board Marked Defect" Margin="0,0,6,0" Click="OnCreateFalseCallIssueClick" ToolTip="False Call: the system marked a good board as a defect."/>
+                <Button Style="{StaticResource ActionBtnAmber}" Content="Possible Missed Defect" Margin="0,0,6,0" Click="OnCreatePossibleEscapeIssueClick" ToolTip="Possible Escape: the system may have missed a real defect."/>
+                <Button Style="{StaticResource ActionBtnBlue}" Content="Refresh Issues" Margin="0,0,6,0" Click="OnRefreshPilotIssuesClick"/>
+                <Button Style="{StaticResource ActionBtn}" Content="Close Selected" Margin="0,0,6,0" Click="OnClosePilotIssueClick"/>
+                <Button Style="{StaticResource ActionBtn}" Content="Export Issue Report" Click="OnExportPilotIssueReportClick"/>
+                <TextBlock x:Name="PilotIssueSummaryText" Text="Pilot issues not loaded." Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+              </WrapPanel>
+              <DataGrid x:Name="PilotIssuesGrid" Grid.Row="1" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" MinWidth="1900" ToolTip="Use this list to close manual test findings before a client demo. False Call means a good board was marked defect. Possible Escape means a real defect may have been missed.">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="ID" Binding="{Binding IssueId}" Width="140" MinWidth="140"/>
+                  <DataGridTextColumn Header="Created" Binding="{Binding CreatedLocal}" SortMemberPath="CreatedAtUtc" Width="130" MinWidth="130"/>
+                  <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="125" MinWidth="125"/>
+                  <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Page" Binding="{Binding PageName}" Width="140" MinWidth="140"/>
+                  <DataGridTextColumn Header="Steps" Binding="{Binding ReproductionSteps}" Width="210" MinWidth="210"/>
+                  <DataGridTextColumn Header="Expected" Binding="{Binding ExpectedBehavior}" Width="190" MinWidth="190"/>
+                  <DataGridTextColumn Header="Actual" Binding="{Binding ActualBehavior}" Width="190" MinWidth="190"/>
+                  <DataGridTextColumn Header="Evidence" Binding="{Binding ScreenshotPath}" Width="200" MinWidth="200"/>
+                  <DataGridTextColumn Header="Board" Binding="{Binding BoardModel}" Width="115" MinWidth="115"/>
+                  <DataGridTextColumn Header="Lot" Binding="{Binding LotId}" Width="100" MinWidth="100"/>
+                  <DataGridTextColumn Header="Inspection" Binding="{Binding RelatedInspectionId}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Owner" Binding="{Binding Owner}" Width="120" MinWidth="120"/>
+                  <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="220" MinWidth="220"/>
+                </DataGrid.Columns>
+              </DataGrid>
+              <TextBlock Grid.Row="2"
+                         Text="Filtered inspection rows (select one, then capture Good Board Marked Defect or Possible Missed Defect)"
+                         Foreground="{DynamicResource HmiTextLabelBrush}"
+                         FontSize="{StaticResource HmiFontSizeBody}"
+                         TextWrapping="Wrap"
+                         Margin="0,8,0,4"/>
+              <DataGrid x:Name="PilotSourceInspectionGrid" Grid.Row="3" CanUserSortColumns="True" SelectionMode="Single" Style="{StaticResource HmiDenseTable}" MinWidth="1000" ToolTip="Filtered SQLite inspection history rows. Select a row here to capture a false-call or possible-escape pilot issue.">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Time" Binding="{Binding TimestampLocal}" SortMemberPath="CreatedAtUtc" Width="130" MinWidth="130"/>
+                  <DataGridTextColumn Header="Board" Binding="{Binding BoardProgram}" Width="120" MinWidth="120"/>
+                  <DataGridTextColumn Header="Operator" Binding="{Binding OperatorId}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Result" Binding="{Binding Verdict}" Width="90" MinWidth="90"/>
+                  <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" SortMemberPath="DifferenceScore" Width="84" MinWidth="84"/>
+                  <DataGridTextColumn Header="Defect" Binding="{Binding SuggestedDefect}" Width="160" MinWidth="160"/>
+                  <DataGridTextColumn Header="Image" Binding="{Binding ImageName}" Width="280" MinWidth="280"/>
+                </DataGrid.Columns>
+              </DataGrid>
+            </Grid>
+          </TabItem>
+          <TabItem Header="UI Stability Test" ToolTip="Cycles through major screens to catch slow navigation, memory growth, and recoverable crashes.">
+            <Grid Margin="8">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <WrapPanel Margin="0,0,0,8">
+                <TextBlock Text="Profile" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <ComboBox x:Name="UiStabilityProfileCombo" Width="235" SelectedIndex="1" Margin="0,0,8,0">
+                  <ComboBoxItem Content="5-minute smoke" Tag="{x:Static services:UiNavigationSoakProfile.FiveMinuteSmoke}"/>
+                  <ComboBoxItem Content="30-minute local stability" Tag="{x:Static services:UiNavigationSoakProfile.ThirtyMinuteLocalStability}"/>
+                  <ComboBoxItem Content="4-hour client demo readiness" Tag="{x:Static services:UiNavigationSoakProfile.FourHourClientDemoReadiness}"/>
+                  <ComboBoxItem Content="8-hour factory PoC" Tag="{x:Static services:UiNavigationSoakProfile.EightHourFactoryPoC}"/>
+                </ComboBox>
+                <CheckBox x:Name="UiStabilityHeavyLoadsCheck" Content="Exercise heavy page loads" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <Button Style="{StaticResource ActionBtnAmber}" Content="Run UI Stability Test" Margin="0,0,6,0" Click="OnRunUiStabilityTestClick"/>
+              </WrapPanel>
+              <TextBlock Grid.Row="1" x:Name="UiStabilityStatsText"
+                         Text="UI stability not run. Use 30-minute or better PASS evidence before client demo export."
+                         Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+              <DataGrid Grid.Row="2" x:Name="UiStabilityEventsGrid" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="980">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="UTC" Binding="{Binding TimestampUtc}" Width="150" MinWidth="150"/>
+                  <DataGridTextColumn Header="Cycle" Binding="{Binding Cycle}" Width="80" MinWidth="80"/>
+                  <DataGridTextColumn Header="Page" Binding="{Binding PageName}" Width="180" MinWidth="180"/>
+                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="96" MinWidth="96"/>
+                  <DataGridTextColumn Header="Load ms" Binding="{Binding PageLoadMilliseconds}" Width="100" MinWidth="100"/>
+                  <DataGridTextColumn Header="Heartbeat" Binding="{Binding HeartbeatMilliseconds}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Memory MB" Binding="{Binding WorkingSetMegabytes}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="240" MinWidth="240"/>
+                </DataGrid.Columns>
+              </DataGrid>
+            </Grid>
+          </TabItem>
+          <TabItem Header="Management Dashboard" ToolTip="Engineer/Admin view for trend review. Operators use Main Inspection for normal work.">
+            <Grid Margin="8">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <DockPanel LastChildFill="True">
+                <WrapPanel DockPanel.Dock="Right" Style="{StaticResource HmiInlineActionBand}" VerticalAlignment="Bottom" Margin="0,0,0,8">
+                  <Button Style="{StaticResource ActionBtnGreen}" Content="Refresh Dashboard" Margin="{StaticResource HmiButtonGap}" Click="OnRefreshManagementDashboardClick"/>
+                  <Button Style="{StaticResource ActionBtnAmber}" Content="Export Dashboard HTML/CSV/PDF" Click="OnExportManagementDashboardClick"/>
+                </WrapPanel>
+                <WrapPanel>
+                  <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                    <TextBlock Text="Lot" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ManagementLotFilterText"/>
+                  </StackPanel>
+                  <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                    <TextBlock Text="Model Version" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="ManagementModelFilterText"/>
+                  </StackPanel>
+                  <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                    <TextBlock Text="Deployment Profile" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="ManagementDeploymentProfileCombo" SelectedIndex="0" Style="{StaticResource FilterCombo}"/>
+                  </StackPanel>
+                </WrapPanel>
+              </DockPanel>
+              <TextBlock Grid.Row="1" x:Name="ManagementDashboardSummaryText" Text="Dashboard not loaded." Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="0,8,0,8"/>
+              <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="8"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="*"/>
+                  <RowDefinition Height="8"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DataGrid x:Name="ManagementDefectGrid" Grid.Row="0" Grid.Column="0" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="560" ToolTip="False calls are OK boards flagged for review or NG. Escapes are known NG boards that may be missed.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Defect Class" Binding="{Binding Name}" Width="170" MinWidth="170"/>
+                    <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="86" MinWidth="86"/>
+                    <DataGridTextColumn Header="False Calls" Binding="{Binding FalseCalls}" Width="112" MinWidth="112"/>
+                    <DataGridTextColumn Header="Escapes" Binding="{Binding PossibleEscapes}" Width="96" MinWidth="96"/>
+                    <DataGridTextColumn Header="Reviews" Binding="{Binding Reviews}" Width="96" MinWidth="96"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid x:Name="ManagementRoiGrid" Grid.Row="0" Grid.Column="2" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="560" ToolTip="ROI means region of interest: the board image area checked for a defect.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="ROI / RefDes" Binding="{Binding Name}" Width="170" MinWidth="170"/>
+                    <DataGridTextColumn Header="Count" Binding="{Binding Count}" Width="86" MinWidth="86"/>
+                    <DataGridTextColumn Header="False Calls" Binding="{Binding FalseCalls}" Width="112" MinWidth="112"/>
+                    <DataGridTextColumn Header="Escapes" Binding="{Binding PossibleEscapes}" Width="96" MinWidth="96"/>
+                    <DataGridTextColumn Header="Reviews" Binding="{Binding Reviews}" Width="96" MinWidth="96"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid x:Name="ManagementModelTrendGrid" Grid.Row="2" Grid.Column="0" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="590">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Model" Binding="{Binding ModelVersion}" Width="170" MinWidth="170"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding Total}" Width="80" MinWidth="80"/>
+                    <DataGridTextColumn Header="OK" Binding="{Binding Ok}" Width="72" MinWidth="72"/>
+                    <DataGridTextColumn Header="NG" Binding="{Binding Ng}" Width="72" MinWidth="72"/>
+                    <DataGridTextColumn Header="Review" Binding="{Binding Review}" Width="90" MinWidth="90"/>
+                    <DataGridTextColumn Header="Avg ms" Binding="{Binding AverageInspectionTimeMs}" Width="90" MinWidth="90"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid x:Name="ManagementLotModelGrid" Grid.Row="2" Grid.Column="2" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="780" ToolTip="False-call rate and possible escapes are review signals, not automatic production release decisions.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Lot" Binding="{Binding LotId}" Width="100" MinWidth="100"/>
+                    <DataGridTextColumn Header="Board" Binding="{Binding BoardModel}" Width="115" MinWidth="115"/>
+                    <DataGridTextColumn Header="Model" Binding="{Binding ModelVersion}" Width="160" MinWidth="160"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding Total}" Width="80" MinWidth="80"/>
+                    <DataGridTextColumn Header="False Calls" Binding="{Binding FalseCalls}" Width="112" MinWidth="112"/>
+                    <DataGridTextColumn Header="Escapes" Binding="{Binding PossibleEscapes}" Width="96" MinWidth="96"/>
+                    <DataGridTextColumn Header="False-call Rate" Binding="{Binding FalseCallRate}" Width="120" MinWidth="120"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+              </Grid>
+            </Grid>
+          </TabItem>
+          <TabItem Header="Factory Readiness" ToolTip="Shows what evidence is present, what is missing, and why it matters. Acceptance rows are evidence checks, not final certification.">
+            <DataGrid x:Name="FactoryReadinessGrid" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="900">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Category" Binding="{Binding Name}" Width="190" MinWidth="190"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110" MinWidth="110"/>
+                <DataGridTextColumn Header="Evidence" Binding="{Binding Evidence}" Width="330" MinWidth="330"/>
+                <DataGridTextColumn Header="Next Action" Binding="{Binding NextAction}" Width="270" MinWidth="270"/>
+              </DataGrid.Columns>
+            </DataGrid>
+          </TabItem>
+          <TabItem Header="Stage 1 Readiness" ToolTip="Independent Stage 1 customer-validation readiness. This does not require or claim real hardware readiness.">
+            <Grid Margin="8">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <DockPanel Margin="0,0,0,8">
+                <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
+                  <Button Style="{StaticResource ActionBtnBlue}" Content="Refresh Stage 1 Readiness" Margin="0,0,6,6" Click="OnRefreshStage1ReadinessClick"/>
+                  <Button Style="{StaticResource ActionBtnAmber}" Content="Export Stage 1 Readiness Report" Margin="0,0,6,6" Click="OnExportStage1ReadinessReportClick"/>
+                  <Button Style="{StaticResource ActionBtn}" Content="Open Sample Dataset Guide" Margin="0,0,6,6" Click="OnOpenSampleDatasetGuideClick"/>
+                  <Button Style="{StaticResource ActionBtn}" Content="Open Latest Validation Package" Margin="0,0,6,6" Click="OnOpenLatestValidationPackageClick"/>
+                  <Button Style="{StaticResource ActionBtn}" Content="Open Latest Benchmark Report" Margin="0,0,0,6" Click="OnOpenLatestBenchmarkReportClick"/>
+                </WrapPanel>
+                <StackPanel Margin="0,0,12,0">
+                  <TextBlock Text="Stage 1 Readiness" Style="{StaticResource HmiSectionHeaderText}"/>
+                  <TextBlock x:Name="Stage1ReadinessSummaryText"
+                             Text="Stage 1 readiness not evaluated."
+                             Foreground="{DynamicResource HmiTextBodyBrush}"
+                             FontSize="{StaticResource HmiFontSizeBody}"
+                             TextWrapping="Wrap"/>
+                  <TextBlock Text="Stage 1 PASS is scoped to local image-validation evidence. Real camera, lighting, robot, PLC safety, production MES, ERP, and full factory automation remain not validated unless their own evidence exists."
+                             Style="{StaticResource HmiTechnicalHintText}"
+                             TextWrapping="Wrap"/>
+                </StackPanel>
+              </DockPanel>
+              <UniformGrid Grid.Row="1" Columns="5" Margin="0,0,0,8">
+                <Border x:Name="Stage1ReadinessStatusCard" Style="{StaticResource FieldBox}" Margin="0,0,6,0">
+                  <StackPanel>
+                    <TextBlock Text="Status" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                    <TextBlock x:Name="Stage1ReadinessStatusText" Text="NOT RUN" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeSection}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+                <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
+                  <StackPanel>
+                    <TextBlock Text="Preflight" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                    <TextBlock x:Name="Stage1PreflightText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+                <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
+                  <StackPanel>
+                    <TextBlock Text="Batch Run" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                    <TextBlock x:Name="Stage1BatchText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+                <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
+                  <StackPanel>
+                    <TextBlock Text="Benchmark" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                    <TextBlock x:Name="Stage1BenchmarkText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+                  </StackPanel>
+                </Border>
+                <Border Style="{StaticResource FieldBox}">
+                  <StackPanel>
+                    <TextBlock Text="Validation Package" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                    <TextBlock x:Name="Stage1PackageText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+                  </StackPanel>
+                </Border>
+              </UniformGrid>
+              <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2*"/>
+                  <ColumnDefinition Width="8"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid x:Name="Stage1ReadinessGrid" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="900" ToolTip="Stage 1 readiness checks are independent from full factory/hardware readiness.">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Check" Binding="{Binding Name}" Width="220" MinWidth="220"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
+                    <DataGridTextColumn Header="Evidence" Binding="{Binding Evidence}" Width="360" MinWidth="360"/>
+                    <DataGridTextColumn Header="Next Action" Binding="{Binding NextAction}" Width="300" MinWidth="300"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <Border Grid.Column="2" Style="{StaticResource FieldBox}">
+                  <Grid>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Missing Evidence" Style="{StaticResource HmiSectionHeaderText}" Margin="0,0,0,6"/>
+                    <ListBox x:Name="Stage1MissingEvidenceList"
+                             Grid.Row="1"
+                             MinHeight="120"
+                             Background="{DynamicResource HmiSurfaceBrush}"
+                             BorderBrush="{DynamicResource HmiPanelBorderBrush}"
+                             Foreground="{DynamicResource HmiWarnSoftBrush}"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <TextBlock Grid.Row="2" Text="Next Recommended Action" Style="{StaticResource HmiSectionHeaderText}" Margin="0,10,0,6"/>
+                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                      <TextBlock x:Name="Stage1NextActionText" Text="Run the Stage 1 validation workflow." Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+                    </ScrollViewer>
+                  </Grid>
+                </Border>
+              </Grid>
+            </Grid>
+          </TabItem>
+          <TabItem Header="Standards &amp; Quality Checklist" ToolTip="Maps project HMI/software-quality expectations to concrete evidence. This is standards-aligned evidence, not certification.">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <DockPanel Margin="8">
+                <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
+                  <Button Style="{StaticResource ActionBtnBlue}" Content="Refresh Checklist" Margin="0,0,6,0" Click="OnRefreshStandardsTraceabilityClick"/>
+                  <Button Style="{StaticResource ActionBtnAmber}" Content="Export HTML/PDF/JSON" Click="OnExportStandardsTraceabilityClick"/>
+                </WrapPanel>
+                <TextBlock x:Name="StandardsTraceabilitySummaryText"
+                           Text="Standards traceability not loaded."
+                           Foreground="{DynamicResource HmiTextBodyBrush}"
+                           FontSize="{StaticResource HmiFontSizeBody}"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center"
+                           Margin="0,0,12,0"/>
+              </DockPanel>
+              <DataGrid x:Name="StandardsTraceabilityGrid" Grid.Row="1" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="1500" ToolTip="Long evidence paths and notes are available through hover when truncated.">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Source" Binding="{Binding StandardOrSource}" Width="180" MinWidth="180"/>
+                  <DataGridTextColumn Header="Requirement" Binding="{Binding PrincipleOrRequirement}" Width="300" MinWidth="300"/>
+                  <DataGridTextColumn Header="ID" Binding="{Binding ProjectRequirementId}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Evidence Type" Binding="{Binding EvidenceType}" Width="170" MinWidth="170"/>
+                  <DataGridTextColumn Header="Evidence Path" Binding="{Binding EvidencePath}" Width="280" MinWidth="280"/>
+                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
+                  <DataGridTextColumn Header="Blocking" Binding="{Binding BlockingLevel}" Width="130" MinWidth="130"/>
+                  <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="310" MinWidth="310"/>
+                </DataGrid.Columns>
+              </DataGrid>
+            </Grid>
+          </TabItem>
+          <TabItem Header="Evidence Completion" ToolTip="Shows missing evidence by stage. Completion is not the same as production release approval.">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <StackPanel Orientation="Horizontal" Margin="8">
+                <Button Style="{StaticResource ActionBtnBlue}" Content="Refresh Evidence List" Click="OnRefreshCompletionMatrixClick"/>
+                <TextBlock x:Name="CompletionMatrixSummaryText" Text="Evidence list not loaded." Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="12,0,0,0"/>
+              </StackPanel>
+              <DataGrid x:Name="CompletionMatrixGrid" Grid.Row="1" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="1360">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Stage" Binding="{Binding Stage}" Width="220" MinWidth="220"/>
+                  <DataGridTextColumn Header="Complete" Binding="{Binding PercentDisplay}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Evidence Score" Binding="{Binding EvidenceSummary}" Width="310" MinWidth="310"/>
+                  <DataGridTextColumn Header="Missing" Binding="{Binding MissingEvidenceDisplay}" Width="360" MinWidth="360"/>
+                  <DataGridTextColumn Header="Next Action" Binding="{Binding NextActionsDisplay}" Width="360" MinWidth="360"/>
+                </DataGrid.Columns>
+              </DataGrid>
+            </Grid>
+          </TabItem>
+          <TabItem Header="Factory Acceptance" ToolTip="Factory acceptance checklist for evidence collection and signoff. Do not overclaim production readiness from a single checklist row.">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+              </Grid.RowDefinitions>
+              <StackPanel Orientation="Horizontal" Margin="8">
+                <TextBlock Text="Deployment Profile" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox x:Name="FactoryAcceptanceProfileCombo" Width="230" SelectedIndex="0" Style="{StaticResource FilterCombo}"/>
+                <Button Style="{StaticResource ActionBtnBlue}" Content="Generate Checklist" Margin="8,0,0,0" Click="OnGenerateFactoryAcceptanceChecklistClick"/>
+                <Button Style="{StaticResource ActionBtnAmber}" Content="Export FAT Package" Margin="8,0,0,0" Click="OnExportFactoryAcceptanceChecklistClick"/>
+              </StackPanel>
+              <DataGrid x:Name="FactoryAcceptanceGrid" Grid.Row="1" CanUserSortColumns="True" Style="{StaticResource HmiDenseTable}" MinWidth="1480" ToolTip="Evidence paths and notes may be long; hover cells to inspect full values.">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="ID" Binding="{Binding RequirementId}" Width="110" MinWidth="110"/>
+                  <DataGridTextColumn Header="Requirement" Binding="{Binding RequirementText}" Width="260" MinWidth="260"/>
+                  <DataGridTextColumn Header="Required Evidence" Binding="{Binding RequiredEvidence}" Width="270" MinWidth="270"/>
+                  <DataGridTextColumn Header="Evidence Path" Binding="{Binding CurrentEvidencePath}" Width="260" MinWidth="260"/>
+                  <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
+                  <DataGridTextColumn Header="Signoff Role" Binding="{Binding SignoffRole}" Width="130" MinWidth="130"/>
+                  <DataGridTextColumn Header="Signed By" Binding="{Binding SignedBy}" Width="120" MinWidth="120"/>
+                  <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="310" MinWidth="310"/>
+                </DataGrid.Columns>
+              </DataGrid>
+            </Grid>
+          </TabItem>
+        </TabControl>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="4" Style="{StaticResource Panel}">
+      <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" MinWidth="420"/>
+          <ColumnDefinition Width="8"/>
+          <ColumnDefinition Width="1.4*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+          <TextBlock Text="Auto-Archive Policy" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+          <TextBlock x:Name="ArchivePolicyText"
+                     Text="Archive-then-purge: logs older than the configured retention window are copied to the recoverable LogArchive and removed from the live tables at startup."
+                     TextWrapping="Wrap" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiTextBodyBrush}"/>
+          <TextBlock x:Name="StatusText" Text="Ready." Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,6,0,0"/>
+          <TextBlock x:Name="PackagePathText" Text="Latest customer package: --" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,3,0,0" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+          <TextBlock x:Name="SoakReportPathText" Text="Latest soak-test report: --" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,3,0,0" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+          <TextBlock x:Name="BuildEvidenceSummaryText" Text="Build/test evidence: --" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,3,0,0" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+          <TextBlock x:Name="ClientDemoGateText" Text="Client demo readiness: not evaluated" Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+            <ProgressBar x:Name="WorkProgressBar" Width="190" Height="12" Minimum="0" Maximum="100" Value="0" Margin="0,0,8,0" VerticalAlignment="Center"/>
+            <Button x:Name="CancelWorkButton" Style="{StaticResource MiniBtn}" Content="Cancel" IsEnabled="False" Click="OnCancelWorkClick"/>
+          </StackPanel>
+        </StackPanel>
+        <WrapPanel Grid.Column="2" Orientation="Horizontal">
+          <Border Style="{StaticResource FieldBox}" Margin="0,0,8,8" MaxWidth="640" VerticalAlignment="Top">
+            <StackPanel>
+              <TextBlock Text="Readiness and Quality Gates" Style="{StaticResource HmiSectionHeaderText}" Margin="0,0,0,6"/>
+              <WrapPanel>
+                <Button Style="{StaticResource ActionBtnAmber}" Content="Create Stage 1 Customer Package" Margin="0,0,6,6" Click="OnExportCustomerPackageClick"/>
+                <Button Style="{StaticResource ActionBtnAmber}" Content="Export Readiness Evidence" Margin="0,0,6,6" Click="OnExportFactoryReadinessPackageClick" ToolTip="Exports the readiness evidence package. This is not final production certification."/>
+                <Button Style="{StaticResource ActionBtnBlue}" Content="Client Demo Readiness" Margin="0,0,6,6" Click="OnClientDemoReadinessClick"/>
+                <Button Style="{StaticResource ActionBtn}" Content="Export Demo Gate" Margin="0,0,6,6" Click="OnExportClientDemoReadinessClick"/>
+                <Button Style="{StaticResource ActionBtnBlue}" Content="Import Build/Test Evidence" Margin="0,0,6,6" Click="OnImportBuildTestEvidenceClick"/>
+                <Button Style="{StaticResource ActionBtn}" Content="Open Build Evidence Folder" Margin="0,0,6,6" Click="OnOpenBuildEvidenceFolderClick"/>
+                <Button Style="{StaticResource ActionBtnAmber}" Content="Soak Test" Margin="0,0,6,6" Click="OnRunSoakTestClick"/>
+                <Button Style="{StaticResource ActionBtnBlue}" Content="Performance Benchmark" Margin="0,0,6,6" Click="OnRunPerformanceBenchmarkClick"/>
+                <Button Style="{StaticResource ActionBtn}" Content="Export Latest Soak Evidence" Margin="0,0,6,6" Click="OnExportLatestSoakEvidenceClick"/>
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+        </WrapPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

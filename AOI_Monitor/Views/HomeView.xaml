@@ -161,7 +161,9 @@
         <ItemsControl x:Name="HomeAnalyzeItems" Grid.Row="3" ItemsSource="{Binding AnalyzePages}" ItemTemplate="{StaticResource HomeModuleTileTemplate}">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-              <UniformGrid Columns="4" Rows="1"/>
+              <!-- Five analyze tiles since the Export & Trace / Readiness & QA split;
+                   a fixed 4x1 UniformGrid would silently hide the fifth tile. -->
+              <UniformGrid Columns="5" Rows="1"/>
             </ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
         </ItemsControl>

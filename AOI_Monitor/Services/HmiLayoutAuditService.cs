@@ -244,6 +244,7 @@ public static class HmiLayoutAuditService
             new("shell-ai-models", "Shell - AI / Models", () => CreateShellRoute("modeltest"), false, ShellRequiredControls),
             new("shell-yield-analytics", "Shell - Yield Analytics", () => CreateShellRoute("spc"), false, ShellRequiredControls),
             new("shell-export-trace", "Shell - Export & Trace", () => CreateShellRoute("reports"), false, ShellRequiredControls),
+            new("shell-readiness-qa", "Shell - Readiness & QA", () => CreateShellRoute("readiness"), false, ShellRequiredControls),
             new("shell-calibration", "Shell - Calibration", () => CreateShellRoute("calibration"), false, ShellRequiredControls),
             new("shell-3d-profile", "Shell - 3D Profile", () => CreateShellRoute("profile"), false, ShellRequiredControls),
             new("shell-hardware-readiness", "Shell - Hardware Readiness", () => CreateShellRoute("pilot"), false, ShellRequiredControls),
@@ -257,12 +258,13 @@ public static class HmiLayoutAuditService
             new("recipe-editor", "Recipe Editor", () => new RecipeView(), false, new[] { "RecipeNameText", "RoiGrid", "ViewportCanvas", "RecipeEmptyStateCard" }),
             new("ai-model-test", "AI Model Test", () => new AIModelTestView(), true, new[] { "CancelWorkButton", "ResultsGrid", "FolderPathText", "GroundTruthPathText" }),
             new("yield-analytics", "Yield Analytics", () => new SpcView(), false, new[] { "VerdictBreakdownText", "YieldText", "DbHealthGrid" }),
-            new("export-trace", "Export & Trace", () => SelectReportsTab(new ReportsView(), "Export History"), true, new[] { "ExportGrid", "CancelWorkButton" }),
-            new("reports-inspection-history", "Reports - Inspection History", () => SelectReportsTab(new ReportsView(), "Inspection History"), true, new[] { "InspectionGrid" }),
-            new("reports-review-events", "Reports - Review Events", () => SelectReportsTab(new ReportsView(), "Review / Disposition Events"), true, new[] { "ReviewGrid" }),
-            new("reports-audit-trail", "Reports - Audit Trail", () => SelectReportsTab(new ReportsView(), "Audit Trail"), true, new[] { "AuditGrid" }),
-            new("reports-ui-stability", "Reports - UI Stability Test", () => SelectReportsTab(new ReportsView(), "UI Stability Test"), true, new[] { "UiStabilityEventsGrid" }),
-            new("reports-pilot-issues", "Reports - Pilot Issues", () => SelectReportsTab(new ReportsView(), "Pilot Issues"), true, new[] { "PilotIssuesGrid" }),
+            new("export-trace", "Export & Trace", () => SelectViewTab(new ReportsView(), "Export History"), true, new[] { "ExportGrid", "CancelWorkButton" }),
+            new("readiness-qa", "Readiness & QA", () => SelectViewTab(new ReadinessQaView(), "Stage 1 Readiness"), true, new[] { "ReadinessSummaryText", "ClientDemoGateText", "CancelWorkButton" }),
+            new("reports-inspection-history", "Reports - Inspection History", () => SelectViewTab(new ReportsView(), "Inspection History"), true, new[] { "InspectionGrid" }),
+            new("reports-review-events", "Reports - Review Events", () => SelectViewTab(new ReportsView(), "Review / Disposition Events"), true, new[] { "ReviewGrid" }),
+            new("reports-audit-trail", "Reports - Audit Trail", () => SelectViewTab(new ReportsView(), "Audit Trail"), true, new[] { "AuditGrid" }),
+            new("readiness-ui-stability", "Readiness & QA - UI Stability Test", () => SelectViewTab(new ReadinessQaView(), "UI Stability Test"), true, new[] { "UiStabilityEventsGrid" }),
+            new("readiness-pilot-issues", "Readiness & QA - Pilot Issues", () => SelectViewTab(new ReadinessQaView(), "Pilot Issues"), true, new[] { "PilotIssuesGrid", "PilotSourceInspectionGrid" }),
             new("settings-basics", "Settings - Basics", () => SelectSettingsTab(new SettingsView(new MainViewModel()), "Basics"), true, new[] { "ApplyBtn", "CancelBtn", "ResolutionCombo", "ThemeCombo", "LangCombo", "StorageRootText" }),
             new("settings-qol", "Settings - QOL", () => SelectSettingsTab(new SettingsView(new MainViewModel()), "QOL"), true, new[] { "ApplyBtn", "CancelBtn", "ReviewDefaultText", "DetectionPriorityCombo" }),
             new("settings-ai", "Settings - AI", () => SelectSettingsTab(new SettingsView(new MainViewModel()), "AI"), true, new[] { "InspectionEngineCombo", "ModelRegistryGrid", "ThresholdProfilesGrid", "TestModelBtn" }),
@@ -272,15 +274,15 @@ public static class HmiLayoutAuditService
             new("calibration", "Calibration", () => new CalibrationView(), false, new[] { "PointsGrid", "ProfileCombo", "SampleImagePathText" }),
             new("profile-3d", "3D Profile Viewer", () => new ProfileView(), false, new[] { "RunAcceptanceButton", "CancelAcceptanceButton", "ProfileSourceCombo", "ProfileSourceBadgeText", "ProfileConnectionBadgeText" }),
             new("hardware-readiness", "Hardware Readiness", () => new PilotWizardView(), false, new[] { "ProfileCombo", "StepsGrid", "StatusText", "CurrentStepText", "BlockersText", "NextActionText" }),
-            new("factory-readiness", "Factory Readiness", () => SelectReportsTab(new ReportsView(), "Factory Readiness"), true, new[] { "FactoryReadinessGrid" }),
-            new("stage1-readiness", "Stage 1 Readiness", () => SelectReportsTab(new ReportsView(), "Stage 1 Readiness"), true, new[] { "Stage1ReadinessGrid", "Stage1ReadinessStatusText", "Stage1MissingEvidenceList", "Stage1NextActionText" }),
-            new("standards-quality-checklist", "Standards & Quality Checklist", () => SelectReportsTab(new ReportsView(), "Standards & Quality Checklist"), true, new[] { "StandardsTraceabilityGrid", "StandardsTraceabilitySummaryText" }),
-            new("management-dashboard", "Management Dashboard", () => SelectReportsTab(new ReportsView(), "Management Dashboard"), true, new[] { "ManagementDefectGrid", "ManagementRoiGrid", "ManagementModelTrendGrid" }),
+            new("factory-readiness", "Factory Readiness", () => SelectViewTab(new ReadinessQaView(), "Factory Readiness"), true, new[] { "FactoryReadinessGrid" }),
+            new("stage1-readiness", "Stage 1 Readiness", () => SelectViewTab(new ReadinessQaView(), "Stage 1 Readiness"), true, new[] { "Stage1ReadinessGrid", "Stage1ReadinessStatusText", "Stage1MissingEvidenceList", "Stage1NextActionText" }),
+            new("standards-quality-checklist", "Standards & Quality Checklist", () => SelectViewTab(new ReadinessQaView(), "Standards & Quality Checklist"), true, new[] { "StandardsTraceabilityGrid", "StandardsTraceabilitySummaryText" }),
+            new("management-dashboard", "Management Dashboard", () => SelectViewTab(new ReadinessQaView(), "Management Dashboard"), true, new[] { "ManagementDefectGrid", "ManagementRoiGrid", "ManagementModelTrendGrid" }),
             new("model-registry-acceptance", "Model Registry / Model Acceptance", () => SelectSettingsTab(new SettingsView(new MainViewModel()), "AI"), true, new[] { "ModelRegistryGrid", "ModelAcceptanceRunsGrid" }),
-            new("mes-queue", "MES Queue", () => SelectReportsTab(new ReportsView(), "MES Upload Queue"), true, new[] { "MesSpoolGrid", "MesQueueStatusFilter" }),
-            new("central-sync", "Central Sync", () => SelectReportsTab(new ReportsView(), "Central Evidence Sync"), true, new[] { "CentralSyncGrid" }),
-            new("factory-acceptance", "Factory Acceptance Checklist", () => SelectReportsTab(new ReportsView(), "Factory Acceptance"), true, new[] { "FactoryAcceptanceGrid", "FactoryAcceptanceProfileCombo" }),
-            new("completion-matrix", "Completion Matrix", () => SelectReportsTab(new ReportsView(), "Evidence Completion"), true, new[] { "CompletionMatrixGrid", "CompletionMatrixSummaryText" }),
+            new("mes-queue", "MES Queue", () => SelectViewTab(new ReportsView(), "MES Upload Queue"), true, new[] { "MesSpoolGrid", "MesQueueStatusFilter" }),
+            new("central-sync", "Central Sync", () => SelectViewTab(new ReportsView(), "Central Evidence Sync"), true, new[] { "CentralSyncGrid" }),
+            new("factory-acceptance", "Factory Acceptance Checklist", () => SelectViewTab(new ReadinessQaView(), "Factory Acceptance"), true, new[] { "FactoryAcceptanceGrid", "FactoryAcceptanceProfileCombo" }),
+            new("completion-matrix", "Completion Matrix", () => SelectViewTab(new ReadinessQaView(), "Evidence Completion"), true, new[] { "CompletionMatrixGrid", "CompletionMatrixSummaryText" }),
             new("installation-notes", "Installation Notes", () => new InstallView(), true, new[] { "RuntimeGrid", "BoundaryGrid" }),
             new("guide", "Guide", () => new GuideView(), true, new[] { "StepsGrid" }),
         };
@@ -425,7 +427,7 @@ public static class HmiLayoutAuditService
         return view;
     }
 
-    private static FrameworkElement SelectReportsTab(ReportsView view, string header)
+    private static FrameworkElement SelectViewTab(FrameworkElement view, string header)
     {
         view.Measure(new Size(1920, 1080));
         view.Arrange(new Rect(0, 0, 1920, 1080));

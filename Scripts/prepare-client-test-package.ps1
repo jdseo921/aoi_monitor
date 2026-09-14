@@ -99,8 +99,8 @@ This folder is ready for client software evaluation.
 8. Click `Run Batch Inspection`.
 9. Export CSV and annotated images if requested.
 10. Click `Export Stage 1 Validation Package`.
-11. Open `Export & Trace > Performance Benchmark` and run against `SampleData\DemoSet_Quick\images`.
-12. Open `Export & Trace > Stage 1 Readiness`, click `Refresh`, then `Export Report`.
+11. Open `Readiness & QA > Performance Benchmark` and run against `SampleData\DemoSet_Quick\images`.
+12. Open `Readiness & QA > Stage 1 Readiness`, click `Refresh`, then `Export Report`.
 13. Review `stage1_readiness_report.html`, `stage1_readiness_report.pdf`, `stage1_readiness_report.json`, `validation_summary.html`, `customer_validation_report.html`, `benchmark_report.html`, `benchmark_results.csv`, and `limitations.txt`.
 
 ## Suggested First Tests

@@ -47,7 +47,7 @@ Simulation, folder-source, null-adapter, fake-adapter, sample CSV, mock REST, an
 
 ### Stage 1 — implemented
 
-- Thirteen focused workflow windows — Home + 12 destinations (window list and per-window procedures: `Docs/USER_MANUAL.md`) — with local Operator/Engineer/Admin roles, route authorization, and audited access-denied events.
+- Fourteen focused workflow windows — Home + 13 destinations (window list and per-window procedures: `Docs/USER_MANUAL.md`) — with local Operator/Engineer/Admin roles, route authorization, and audited access-denied events.
 - Image/batch import into a managed vault (SQLite records, SHA-256 hashes); golden comparison with defect overlays; disposition logging with false-call / possible-escape support and candidate export review; recipe ROI editing, thresholds, revisions, recipe lock, centroid CSV auto-ROI import.
 - Pixel Difference Prototype Engine default; optional ONNX Runtime inference for a valid local model/tensor/threshold/label-map configuration (readiness-tested, safe REVIEW fallback); results, defects, reviews, recipes, audits, exports, readiness, and acceptance evidence persisted in SQLite with versioned migrations.
 - Batch validation with manifests, confusion metrics, per-image timing (1 second target warnings), customer validation reports.

@@ -42,6 +42,11 @@ public sealed class RoleAuthorizationTests
         Assert.True(RoleAuthorization.CanAccessPage(UserRole.Engineer, "reports"));
         Assert.True(RoleAuthorization.CanAccessPage(UserRole.Admin, "reports"));
 
+        // Readiness & QA mirrors Export & Trace access (same read-only view, Admin-gated exports).
+        Assert.True(RoleAuthorization.CanAccessPage(UserRole.Operator, "readiness"));
+        Assert.True(RoleAuthorization.CanAccessPage(UserRole.Engineer, "readiness"));
+        Assert.True(RoleAuthorization.CanAccessPage(UserRole.Admin, "readiness"));
+
         // Exporting logs remains restricted to Admin.
         Assert.False(RoleAuthorization.CanExportLogs(UserRole.Operator));
         Assert.False(RoleAuthorization.CanExportLogs(UserRole.Engineer));
@@ -69,6 +74,7 @@ public sealed class RoleAuthorizationTests
     [InlineData("modeltest")]
     [InlineData("spc")]
     [InlineData("reports")]
+    [InlineData("readiness")]
     [InlineData("calibration")]
     [InlineData("profile")]
     [InlineData("pilot")]

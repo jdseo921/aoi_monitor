@@ -386,7 +386,7 @@ public static class Stage1ReadinessGateService
     {
         if (benchmark is null)
         {
-            report.Checks.Add(Check("Inspection performance benchmark", Fail, "No benchmark result is available.", "Run Export & Trace > Performance Benchmark against the Stage 1 image folder."));
+            report.Checks.Add(Check("Inspection performance benchmark", Fail, "No benchmark result is available.", "Run Readiness & QA > Performance Benchmark against the Stage 1 image folder."));
             return;
         }
 

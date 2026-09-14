@@ -14,7 +14,7 @@ Simulated, mock, demo, and non-production evidence is always labeled: purple chi
 
 ## Workflow Windows
 
-Home opens the module map for the 12 destination windows and the station status chips: Board & Images, Run Inspection, Golden Compare, Defect Review, Recipe Rules, AI / Models, Yield Analytics, Export & Trace, Calibration, 3D Profile, Hardware Readiness, and System Settings. Older documents and exports may use earlier module names (Main Inspection, Image Library, Disposition, Recipe Editor, AI Model Test, Log & Export, 3D Profile Viewer, Settings / Guide).
+Home opens the module map for the 13 destination windows and the station status chips: Board & Images, Run Inspection, Golden Compare, Defect Review, Recipe Rules, AI / Models, Yield Analytics, Export & Trace, Readiness & QA, Calibration, 3D Profile, Hardware Readiness, and System Settings. Older documents and exports may use earlier module names (Main Inspection, Image Library, Disposition, Recipe Editor, AI Model Test, Log & Export, 3D Profile Viewer, Settings / Guide).
 
 ## Roles and Sign-In
 
@@ -154,19 +154,23 @@ Capture requirements and limits: fixtured, same-camera, same-framing imagery onl
 
 ## Export & Trace
 
-Audit review and evidence generation. Operator/Engineer open it read-only (Inspection History, Review/Disposition Events, Export History, Audit Trail); export, delete, Mock MES upload, and Soak Test are Admin-only.
+Audit review and operational evidence generation. Operator/Engineer open it read-only (Inspection History, Review/Disposition Events, Export History, Audit Trail, MES Upload Queue, Central Evidence Sync); export, delete, and Mock MES upload are Admin-only.
 
-Common actions: filter by date, board/model, operator, or result; review the four grids; export `Inspection History CSV`, `Review Log CSV`, audit trail CSV, and `Annotated Overlays` (each shows a confirmation dialog and appears in Export History); run DB Integrity and rebuild the image index (maintenance detail: `Docs/RUNBOOK.md`); upload the selected/latest result to Mock MES; run a local Soak Test; create the Stage 1 Customer Package. The Audit Trail tab filters by date, user, role, and action type; the audit CSV includes UTC/local timestamps, user ID, role, station ID, action category/detail, and related record/image/path fields.
+Common actions: filter by date, board/model, operator, or result; review the six grids; export `Inspection History CSV`, `Review Log CSV`, audit trail CSV, and `Annotated Overlays` (each shows a confirmation dialog and appears in Export History); run DB Integrity and rebuild the image index (maintenance detail: `Docs/RUNBOOK.md`); upload the selected/latest result to Mock MES; retry or abandon MES/central-sync queue items. The Audit Trail tab filters by date, user, role, and action type; the audit CSV includes UTC/local timestamps, user ID, role, station ID, action category/detail, and related record/image/path fields.
 
-The Stage 1 customer package is a timestamped folder: HTML customer validation report with print-to-PDF instructions, Markdown companion report, batch CSV, sample annotated validation images, annotated inspection overlays, inspection/review/audit CSVs, engine/model configuration summary, database health summary, recipe revision summary, calibration profile summary, README, and warnings; missing optional evidence produces a warning, not a failure.
-
-The Soak Test repeatedly inspects images from a selected folder through Folder Camera Simulation for the requested duration, supports cancellation, and exports an HTML report (cycle counts, success/failure counts, timing, memory estimates, start/end time, errors); use a short duration such as 2 minutes before an 8-hour evidence soak.
-
-Mock MES upload is not production MES/ERP integration: it builds a MES-style traceability payload (lot ID, board model, station, operator, result, timestamp, defect summary, image path); `Mock REST` mode POSTs to the configured mock endpoint, otherwise it writes local JSON; each attempt is recorded in SQLite. The `Performance Benchmark` and `Stage 1 Readiness` tabs used in the demo route also live here.
+Mock MES upload is not production MES/ERP integration: it builds a MES-style traceability payload (lot ID, board model, station, operator, result, timestamp, defect summary, image path); `Mock REST` mode POSTs to the configured mock endpoint, otherwise it writes local JSON; each attempt is recorded in SQLite.
 
 ### Data retention
 
 Live log rows are kept 30 days by default. At startup, older rows are copied into a recoverable local archive with their full payload, then purged from live tables; with the pre-purge warning enabled, Export & Trace shows an advisory a configurable number of days ahead (default 7). Configure in `System Settings > Data Retention` (Admin only): enable/disable purge, retention window in days, warning lead time. Disabling purge keeps all live rows; the archive is retained indefinitely so purged history can be reconstructed for audits.
+
+## Readiness & QA
+
+Stage gates, checklists, dashboards, and acceptance evidence, split out of Export & Trace so each window keeps a single tab row. Tabs: Pilot Issues (with a filtered inspection-row list for capturing false-call / possible-escape issues), UI Stability Test, Management Dashboard, Factory Readiness, Stage 1 Readiness, Standards & Quality Checklist, Evidence Completion, and Factory Acceptance. The footer keeps the readiness status block (auto-archive policy, latest customer package, latest soak report, build/test evidence, client demo readiness) and the Readiness and Quality Gates actions; exports, Soak Test, and issue actions are Admin-only, and the UI Stability Test and Soak Test require maintenance permission.
+
+The Stage 1 customer package is a timestamped folder: HTML customer validation report with print-to-PDF instructions, Markdown companion report, batch CSV, sample annotated validation images, annotated inspection overlays, inspection/review/audit CSVs, engine/model configuration summary, database health summary, recipe revision summary, calibration profile summary, README, and warnings; missing optional evidence produces a warning, not a failure.
+
+The Soak Test repeatedly inspects images from a selected folder through Folder Camera Simulation for the requested duration, supports cancellation, and exports an HTML report (cycle counts, success/failure counts, timing, memory estimates, start/end time, errors); use a short duration such as 2 minutes before an 8-hour evidence soak. The `Performance Benchmark` and `Stage 1 Readiness` tabs used in the demo route also live here.
 
 ## 3D Profile
 
@@ -224,8 +228,8 @@ Management/customer walkthrough with synthetic, non-confidential data:
 8. Review rows, OK/NG/REVIEW counts, false calls, possible escapes, timing, and selected-row preview.
 9. Export CSV and annotated images if needed.
 10. Click `Export Stage 1 Validation Package`.
-11. Open `Export & Trace > Performance Benchmark` and benchmark `SampleData/DemoSet_Quick/images`.
-12. Open `Export & Trace > Stage 1 Readiness`, click `Refresh`, then `Export Report`.
+11. Open `Readiness & QA > Performance Benchmark` and benchmark `SampleData/DemoSet_Quick/images`.
+12. Open `Readiness & QA > Stage 1 Readiness`, click `Refresh`, then `Export Report`.
 13. Review `stage1_readiness_report.html`, `stage1_readiness_report.pdf`, `stage1_readiness_report.json`, `validation_summary.html`, `customer_validation_report.html`, `benchmark_report.html`, `benchmark_results.csv`, and `limitations.txt`.
 14. Confirm every report keeps the claim scoped to Stage 1 uploaded-image validation and does not claim real camera, lighting, robot, MES, safety, or full factory automation readiness.
 
@@ -245,7 +249,8 @@ Demo framing defaults: board program `TBOX-MAIN`, station `AOI-LIB-01`, model ve
 - **Recipe Rules** — ROI editing, types/thresholds, tolerance rules, Test Run on unsaved edits, revisions with lock, centroid CSV import.
 - **AI / Models** — preflight, batch validation with confidence reporting, validation package, AI Training Setup with model versioning/activation.
 - **Yield Analytics** — prototype-labeled SPC trends, database health summaries.
-- **Export & Trace** — history/audit grids, confirmed exports, customer package, DB integrity, image index rebuild, Mock MES upload, soak test, benchmark, readiness report.
+- **Export & Trace** — history/audit grids, confirmed exports, DB integrity, image index rebuild, Mock MES upload, MES/central sync queues.
+- **Readiness & QA** — pilot issues, UI stability test, management dashboard, factory/Stage 1 readiness, standards checklist, evidence completion, factory acceptance, customer package, soak test, benchmark.
 - **Calibration** — 2D point-pair profiles, approximate transform, customer-package summary.
 - **3D Profile** — sample-CSV height surface, synchronized inset/slice/feature list, dispositions, acceptance test/report.
 - **Hardware Readiness** — camera/lighting/robot/3D gate wizard; simulation/boundary evidence only.

@@ -100,7 +100,7 @@ Exit codes: `0` prepared with no warnings, `1` prepared with warnings (read them
 AOI_Monitor.Tools stage1-readiness [--dataset <folder>] [--manifest <csv>] [--output <folder>] [--p95-target-ms <ms>]
 ```
 
-Evaluates the Stage 1 readiness gate — the same service behind `Export & Trace > Stage 1 Readiness` — against persisted evidence, prints every check with its evidence and next action, and writes `stage1_readiness_report.html`, `.pdf`, and `.json`. Omit `--dataset`/`--manifest` to fall back to the latest persisted batch run, then to the generated `SampleData/DemoSet_Quick` dataset.
+Evaluates the Stage 1 readiness gate — the same service behind `Readiness & QA > Stage 1 Readiness` — against persisted evidence, prints every check with its evidence and next action, and writes `stage1_readiness_report.html`, `.pdf`, and `.json`. Omit `--dataset`/`--manifest` to fall back to the latest persisted batch run, then to the generated `SampleData/DemoSet_Quick` dataset.
 
 Exit codes: `0` PASS, `1` CONDITIONAL, `2` FAIL, `3` usage error. CONDITIONAL has its own code so a pipeline can distinguish "evidence incomplete" from "evidence contradicts readiness".
 
