@@ -110,6 +110,8 @@
   <Thickness x:Key="HmiRowGap">0,0,0,8</Thickness>
   <Thickness x:Key="HmiFieldGap">0,0,8,8</Thickness>
   <Thickness x:Key="HmiButtonGap">0,0,8,0</Thickness>
+  <Thickness x:Key="HmiChipGap">0,0,6,6</Thickness>
+  <Thickness x:Key="HmiSectionGap">0,0,0,16</Thickness>
 
   <Style x:Key="FactoryPageContainer" TargetType="Grid">
     <Setter Property="Margin" Value="10"/>
@@ -125,6 +127,61 @@
     <Setter Property="Focusable" Value="False"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="Background" Value="{DynamicResource HmiBgBrush}"/>
+  </Style>
+
+  <!-- Viewport-filling page idiom: the page inset lives on the ScrollViewer as Padding
+       (ViewportHeight excludes Padding), and the child root Grid carries NO outer Margin —
+       a Margin outside a ViewportHeight-bound MinHeight adds itself to the scroll extent
+       and guarantees a permanent sliver of scroll even when everything fits. -->
+  <Style x:Key="FactoryViewportFillPage" TargetType="ScrollViewer" BasedOn="{StaticResource FactoryScrollablePage}">
+    <Setter Property="Padding" Value="8"/>
+  </Style>
+
+  <!-- One shared panel-header strip: replaces the per-view hand-rolled header Borders so
+       every panel titles at the same size, padding, and rule weight. -->
+  <Style x:Key="HmiPanelHeader" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource HmiSurfaceAltBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource HmiBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="Padding" Value="8,4"/>
+    <Setter Property="MinHeight" Value="36"/>
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+  </Style>
+
+  <!-- Empty-state overlay text for tables/canvases: one voice for "nothing here yet". -->
+  <Style x:Key="HmiEmptyStateText" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource HmiTextDimBrush}"/>
+    <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
+    <Setter Property="TextWrapping" Value="Wrap"/>
+    <Setter Property="TextAlignment" Value="Center"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="Margin" Value="16"/>
+    <Setter Property="IsHitTestVisible" Value="False"/>
+  </Style>
+
+  <!-- Verdict banner family: the one style for large OK / REVIEW / NG verdict surfaces.
+       Backgrounds/borders mirror the adaptive status chip states; code-behind swaps the
+       style per verdict instead of assigning raw hex brushes. -->
+  <sys:Double x:Key="HmiFontSizeVerdict" xmlns:sys="clr-namespace:System;assembly=mscorlib">24</sys:Double>
+  <Style x:Key="HmiVerdictBanner" TargetType="Border">
+    <Setter Property="BorderThickness" Value="2"/>
+    <Setter Property="Padding" Value="8,5"/>
+    <Setter Property="Background" Value="#20262B"/>
+    <Setter Property="BorderBrush" Value="#667078"/>
+    <Setter Property="SnapsToDevicePixels" Value="True"/>
+  </Style>
+  <Style x:Key="HmiVerdictBannerOk" TargetType="Border" BasedOn="{StaticResource HmiVerdictBanner}">
+    <Setter Property="Background" Value="#14311D"/>
+    <Setter Property="BorderBrush" Value="#3C8D50"/>
+  </Style>
+  <Style x:Key="HmiVerdictBannerNg" TargetType="Border" BasedOn="{StaticResource HmiVerdictBanner}">
+    <Setter Property="Background" Value="#35191B"/>
+    <Setter Property="BorderBrush" Value="#A13A3F"/>
+  </Style>
+  <Style x:Key="HmiVerdictBannerWarn" TargetType="Border" BasedOn="{StaticResource HmiVerdictBanner}">
+    <Setter Property="Background" Value="#372914"/>
+    <Setter Property="BorderBrush" Value="#987538"/>
   </Style>
 
   <Style x:Key="FactoryCard" TargetType="Border">

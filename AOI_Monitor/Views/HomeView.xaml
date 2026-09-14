@@ -13,32 +13,15 @@
       <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}"/>
       <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
     </Style>
-    <Style x:Key="HomeCompactStatusBorder" TargetType="Border" BasedOn="{StaticResource HmiAdaptiveStatusUnavailable}">
-      <Setter Property="MinHeight" Value="30"/>
-      <Setter Property="MinWidth" Value="136"/>
-      <Setter Property="MaxWidth" Value="286"/>
-      <Setter Property="Padding" Value="7,3"/>
-      <Setter Property="Margin" Value="0,0,6,6"/>
-    </Style>
-    <Style x:Key="HomeStatusLabel" TargetType="TextBlock" BasedOn="{StaticResource FactoryTrimmedTextWithTooltip}">
-      <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
-      <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-      <Setter Property="TextWrapping" Value="NoWrap"/>
-    </Style>
-    <Style x:Key="HomeStatusValue" TargetType="TextBlock" BasedOn="{StaticResource FactoryTrimmedTextWithTooltip}">
-      <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-      <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
-      <Setter Property="FontWeight" Value="ExtraBold"/>
-      <Setter Property="MaxWidth" Value="220"/>
-    </Style>
   </UserControl.Resources>
 
-  <ScrollViewer Style="{StaticResource FactoryScrollablePage}">
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}">
     <!-- Fill the viewport: the workflow tiles absorb the spare height (audit metric
          TrailingVoidPercent held 37.6% dead space at 1080p before this). Small screens keep
-         scrolling because MinHeight never shrinks content below its natural size. -->
-    <Grid Margin="8" MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+         scrolling because MinHeight never shrinks content below its natural size. The page
+         inset lives on the ScrollViewer Padding, never on this Grid: a Margin here adds to
+         the scroll extent and re-creates the permanent sliver of scroll. -->
+    <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="8"/>
@@ -57,58 +40,57 @@
                the single source now. -->
           <TextBlock Text="Home"
                      Style="{StaticResource HmiPageTitleText}"
-                     FontSize="{StaticResource HmiFontSizeSection}"
                      VerticalAlignment="Center"
                      TextWrapping="NoWrap"/>
         </DockPanel>
 
         <WrapPanel Grid.Row="2" Orientation="Horizontal">
-          <Border x:Name="HomeDatabaseStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeDatabaseStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="DB" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeDatabaseStatusText" Text="Not Connected" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="DB" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeDatabaseStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeImageVaultStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeImageVaultStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="Vault" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeImageVaultStatusText" Text="Not Available" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="Vault" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeImageVaultStatusText" Text="Not Available" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeEngineStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeEngineStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="Engine" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeEngineStatusText" Text="Pixel Difference Prototype Engine" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="Engine" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeEngineStatusText" Text="Pixel Difference Prototype Engine" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeCameraStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeCameraStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="Camera" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeCameraStatusText" Text="Not Connected" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="Camera" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeCameraStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeLightingStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeLightingStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="Light" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeLightingStatusText" Text="Not Connected" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="Light" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeLightingStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeRobotStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeRobotStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="Robot" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeRobotStatusText" Text="Not Connected" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="Robot" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeRobotStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeMesStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeMesStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="MES" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeMesStatusText" Text="Not Connected" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="MES" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeMesStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
-          <Border x:Name="HomeEStopStatusBorder" Style="{StaticResource HomeCompactStatusBorder}">
+          <Border x:Name="HomeEStopStatusBorder" Style="{StaticResource HmiAdaptiveStatusUnavailable}">
             <DockPanel LastChildFill="True">
-              <TextBlock Text="E-Stop" Style="{StaticResource HomeStatusLabel}" Margin="0,0,6,0"/>
-              <TextBlock x:Name="HomeEStopStatusText" Text="Not Connected" Style="{StaticResource HomeStatusValue}"/>
+              <TextBlock Text="E-Stop" Style="{StaticResource HmiAdaptiveStatusValueText}" Margin="0,0,6,0"/>
+              <TextBlock x:Name="HomeEStopStatusText" Text="Not Connected" Style="{StaticResource HmiAdaptiveStatusText}"/>
             </DockPanel>
           </Border>
         </WrapPanel>
@@ -123,7 +105,7 @@
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="AOI Workflow Menus" Style="{StaticResource HmiSectionHeaderText}" FontSize="{StaticResource HmiFontSizeSection}"/>
+        <TextBlock Text="AOI Workflow Menus" Style="{StaticResource HmiSectionHeaderText}"/>
 
         <ItemsControl x:Name="HomeModuleItems" Grid.Row="2" ItemsSource="{Binding NavPages}">
           <ItemsControl.ItemsPanel>
@@ -189,7 +171,7 @@
               <RowDefinition Height="5"/>
               <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Current State" Style="{StaticResource HmiSectionHeaderText}" FontSize="{StaticResource HmiFontSizeSection}"/>
+            <TextBlock Text="Current State" Style="{StaticResource HmiSectionHeaderText}"/>
             <Border Grid.Row="2" Style="{StaticResource FactoryCard}" Padding="10">
               <Grid>
                 <Grid.RowDefinitions>
@@ -204,21 +186,21 @@
                   <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="82"/>
+                  <ColumnDefinition Width="Auto" MinWidth="96"/>
                   <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Sample" Style="{StaticResource HomeStatusLabel}"/>
+                <TextBlock Text="Sample" Style="{StaticResource FactoryFormFieldLabel}"/>
                 <TextBlock x:Name="HomeSampleText" Grid.Column="1" Text="none" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <TextBlock Grid.Row="2" Text="Golden" Style="{StaticResource HomeStatusLabel}"/>
+                <TextBlock Grid.Row="2" Text="Golden" Style="{StaticResource FactoryFormFieldLabel}"/>
                 <TextBlock x:Name="HomeGoldenText" Grid.Row="2" Grid.Column="1" Text="none" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <TextBlock Grid.Row="4" Text="Score" Style="{StaticResource HomeStatusLabel}"/>
+                <TextBlock Grid.Row="4" Text="Score" Style="{StaticResource FactoryFormFieldLabel}"/>
                 <TextBlock x:Name="HomeScoreText" Grid.Row="4" Grid.Column="1" Text="--" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <TextBlock Grid.Row="6" Text="Recipe" Style="{StaticResource HomeStatusLabel}"/>
+                <TextBlock Grid.Row="6" Text="Recipe" Style="{StaticResource FactoryFormFieldLabel}"/>
                 <TextBlock x:Name="HomeRecipeText" Grid.Row="6" Grid.Column="1" Text="PIXEL_DIFF_0.2" Style="{StaticResource HmiAdaptiveFieldWrappedValueText}" FontWeight="Bold"/>
-                <Border x:Name="HomeVerdictBorder" Grid.Row="8" Grid.ColumnSpan="2" Background="#372914" BorderBrush="#987538" BorderThickness="2" Padding="8,5" Margin="0,8,0,0">
+                <Border x:Name="HomeVerdictBorder" Grid.Row="8" Grid.ColumnSpan="2" Style="{StaticResource HmiVerdictBannerWarn}" Margin="0,8,0,0">
                   <DockPanel LastChildFill="True">
                     <TextBlock Text="Verdict" Foreground="{DynamicResource MutedBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="HomeVerdictText" Text="REVIEW" Foreground="#FFE0A7" FontSize="24" FontWeight="ExtraBold" HorizontalAlignment="Right" TextAlignment="Right"/>
+                    <TextBlock x:Name="HomeVerdictText" Text="REVIEW" Foreground="{DynamicResource HmiWarnSoftBrush}" FontSize="{StaticResource HmiFontSizeVerdict}" FontWeight="ExtraBold" HorizontalAlignment="Right" TextAlignment="Right"/>
                   </DockPanel>
                 </Border>
               </Grid>
@@ -231,7 +213,7 @@
               <RowDefinition Height="5"/>
               <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Evidence Boundary" Style="{StaticResource HmiSectionHeaderText}" FontSize="{StaticResource HmiFontSizeSection}"/>
+            <TextBlock Text="Evidence Boundary" Style="{StaticResource HmiSectionHeaderText}"/>
             <Border Grid.Row="2" Style="{StaticResource HmiPlainLanguageNote}" Padding="10" VerticalAlignment="Stretch">
               <TextBlock Text="Stage 1 image-validation evidence is for review. Camera, lighting, robot, safety, and MES readiness still require Hardware Readiness evidence before any real factory-integration claim."
                          Style="{StaticResource HmiPageSubtitleText}" LineHeight="25" VerticalAlignment="Center"/>

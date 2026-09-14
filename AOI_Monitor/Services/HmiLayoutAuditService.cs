@@ -316,8 +316,7 @@ public static class HmiLayoutAuditService
         "ActiveAlarmHeaderText",
         "PageContent",
         "FooterRecordCountText",
-        "FooterImageLinkText",
-        "FooterDbRevText",
+                "FooterDbRevText",
         "FooterStationText",
     };
 
@@ -341,7 +340,7 @@ public static class HmiLayoutAuditService
             SetText(window, "ActiveAlarmHeaderText", "none");
             SetText(window, "ActiveAlarmSummaryText", "No active alarms.");
             SetText(window, "FooterRecordCountText", "123456");
-            SetText(window, "FooterImageLinkText", "123456/123456");
+            SetText(window, "FooterIndexText", "Images OK 123,456/123,456");
             SetText(window, "FooterDbRevText", "SQLite local revision");
             SetText(window, "FooterStationText", "AOI-LIB-LINE-02-STATION-WEST");
             SetText(window, "FooterIndexText", "Images OK / Long Index Status");

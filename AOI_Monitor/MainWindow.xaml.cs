@@ -1522,8 +1522,9 @@ public partial class MainWindow : Window, IDisposable
             }, cancellationToken);
 
             FooterRecordCountText.Text = status.InspectionCount.ToString("N0", CultureInfo.InvariantCulture);
-            FooterImageLinkText.Text = $"{status.LinkedImageCount:N0}/{status.ImageCount:N0}";
-            FooterIndexText.Text = status.BrokenImageCount == 0 ? "Images OK" : $"{status.BrokenImageCount:N0} Missing";
+            FooterIndexText.Text = status.BrokenImageCount == 0
+                ? $"Images OK {status.LinkedImageCount:N0}/{status.ImageCount:N0}"
+                : $"{status.BrokenImageCount:N0} Missing {status.LinkedImageCount:N0}/{status.ImageCount:N0}";
             FooterIndexText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(status.BrokenImageCount == 0 ? "#50F56E" : "#F27777"));
 
             if (status.DatabaseExists && status.DatabaseWriteTime is { } dbWriteTime)
@@ -1544,7 +1545,6 @@ public partial class MainWindow : Window, IDisposable
         {
             Trace.WriteLine($"Footer status update failed: {ex.Message}");
             FooterRecordCountText.Text = "--";
-            FooterImageLinkText.Text = "--";
             FooterIndexText.Text = "Unavailable";
             FooterIndexText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F27777"));
             FooterDbUpdatedText.Text = "--";

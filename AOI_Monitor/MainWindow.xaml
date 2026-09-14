@@ -52,47 +52,57 @@
                   ToolTip="Return to the Home module map."/>
         </Grid>
 
-        <Grid Grid.Column="1" Margin="8,3" MinWidth="0">
-          <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <Image x:Name="BrandLogoImage"
-                   Width="20"
-                   Height="20"
-                   Stretch="Uniform"
-                   Visibility="Collapsed"
-                   VerticalAlignment="Center"
-                   Margin="0,0,6,0"/>
-            <Ellipse x:Name="BrandAccentDot" Width="12" Height="12" VerticalAlignment="Center" Fill="#1EA7A1"/>
-            <TextBlock x:Name="BrandTitleText"
-                       Text="AOI MONITOR"
-                       Foreground="{DynamicResource HmiTextBrush}"
-                       FontSize="{StaticResource HmiFontSizeSection}"
-                       FontWeight="ExtraBold"
-                       VerticalAlignment="Center"
-                       Margin="7,0,8,0"
-                       MaxWidth="235"
-                       TextWrapping="NoWrap"
-                       TextTrimming="CharacterEllipsis"
-                       ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-            <Border Background="{DynamicResource HmiRaisedBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Padding="7,3" Margin="0,0,4,0" MaxWidth="205" MinHeight="34" VerticalAlignment="Center">
-              <DockPanel LastChildFill="True">
-                <TextBlock Text="Station " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
-                <TextBlock x:Name="StationNameText" Text="AOI-LIB" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="130" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-                <TextBlock x:Name="StationSubtitleText" Text="local review console / prototype" Visibility="Collapsed" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-              </DockPanel>
-            </Border>
-            <Border x:Name="OperatingModeBanner" Style="{StaticResource HmiPersistentBanner}" Background="#2A1740" BorderBrush="#8F5FD1" VerticalAlignment="Center">
-              <TextBlock x:Name="OperatingModeBannerText" Text="Demo Mode" Foreground="#F1D8FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-            </Border>
-            <Border x:Name="DeploymentProfileBanner" Style="{StaticResource HmiPersistentBanner}" Background="#172A39" BorderBrush="#5CA0D3" VerticalAlignment="Center">
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Profile " Foreground="#CFEAFF" FontSize="{StaticResource HmiFontSizeBody}"/>
-                <TextBlock x:Name="DeploymentProfileBannerText" Text="Stage 1 Image" Foreground="#E7F5FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="220" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-              </StackPanel>
-            </Border>
-            <Border x:Name="SimulationWarningBanner" Style="{StaticResource HmiPersistentBanner}" Background="#372914" BorderBrush="#E1A334" VerticalAlignment="Center">
-              <TextBlock x:Name="SimulationWarningBannerText" Text="SIM / MOCK ACTIVE" Foreground="#FFE0A7" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-            </Border>
-          </WrapPanel>
+        <!-- One-row header band: the brand title owns the star column and flexes into free
+             space (trimming only under real pressure); the station chip and the truthfulness
+             banners are Auto columns that never trim or wrap out of view. -->
+        <Grid Grid.Column="1" Margin="8,3" MinWidth="0" VerticalAlignment="Center">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="0"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+          <Image x:Name="BrandLogoImage"
+                 Width="20"
+                 Height="20"
+                 Stretch="Uniform"
+                 Visibility="Collapsed"
+                 VerticalAlignment="Center"
+                 Margin="0,0,6,0"/>
+          <Ellipse Grid.Column="1" x:Name="BrandAccentDot" Width="12" Height="12" VerticalAlignment="Center" Fill="#1EA7A1"/>
+          <TextBlock Grid.Column="2"
+                     x:Name="BrandTitleText"
+                     Text="AOI MONITOR"
+                     Foreground="{DynamicResource HmiTextBrush}"
+                     FontSize="{StaticResource HmiFontSizeSection}"
+                     FontWeight="ExtraBold"
+                     VerticalAlignment="Center"
+                     Margin="7,0,8,0"
+                     TextWrapping="NoWrap"
+                     TextTrimming="CharacterEllipsis"
+                     ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+          <Border Grid.Column="3" Background="{DynamicResource HmiRaisedBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Padding="7,3" Margin="0,0,4,0" MaxWidth="205" MinHeight="34" VerticalAlignment="Center">
+            <DockPanel LastChildFill="True">
+              <TextBlock Text="Station " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
+              <TextBlock x:Name="StationNameText" Text="AOI-LIB" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="130" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+              <TextBlock x:Name="StationSubtitleText" Text="local review console / prototype" Visibility="Collapsed" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+            </DockPanel>
+          </Border>
+          <Border Grid.Column="4" x:Name="OperatingModeBanner" Style="{StaticResource HmiPersistentBanner}" Background="#2A1740" BorderBrush="#8F5FD1" VerticalAlignment="Center">
+            <TextBlock x:Name="OperatingModeBannerText" Text="Demo Mode" Foreground="#F1D8FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+          </Border>
+          <Border Grid.Column="5" x:Name="DeploymentProfileBanner" Style="{StaticResource HmiPersistentBanner}" Background="#172A39" BorderBrush="#5CA0D3" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="Profile " Foreground="#CFEAFF" FontSize="{StaticResource HmiFontSizeBody}"/>
+              <TextBlock x:Name="DeploymentProfileBannerText" Text="Stage 1 Image" Foreground="#E7F5FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="220" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+            </StackPanel>
+          </Border>
+          <Border Grid.Column="6" x:Name="SimulationWarningBanner" Style="{StaticResource HmiPersistentBanner}" Background="#372914" BorderBrush="#E1A334" VerticalAlignment="Center">
+            <TextBlock x:Name="SimulationWarningBannerText" Text="SIM / MOCK ACTIVE" Foreground="#FFE0A7" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+          </Border>
         </Grid>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,3,12,3">
@@ -361,15 +371,13 @@
               <TextBlock Text="Station " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
               <TextBlock x:Name="FooterStationText" Text="AOI-LIB-01" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,14,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="150" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
               <TextBlock Text="Link " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="FooterIndexText" Text="SQLite" FontWeight="Bold" Foreground="{DynamicResource HmiOkBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,14,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="110" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+              <TextBlock x:Name="FooterIndexText" Text="SQLite" FontWeight="Bold" Foreground="{DynamicResource HmiOkBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,14,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="200" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
               <TextBlock Text="DB Updated " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
               <TextBlock x:Name="FooterDbUpdatedText" Text="--" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="120" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" MaxWidth="560">
               <TextBlock Text="REC " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
               <TextBlock x:Name="FooterRecordCountText" Text="0" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,14,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="70" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-              <TextBlock Text="IMG LINK " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="FooterImageLinkText" Text="0/0" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,14,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="90" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
               <TextBlock Text="DB REV " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
               <TextBlock x:Name="FooterDbRevText" Text="local" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="110" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
             </StackPanel>

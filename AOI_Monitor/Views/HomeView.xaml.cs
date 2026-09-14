@@ -121,7 +121,7 @@ public partial class HomeView : UserControl
         {
             HomeScoreText.Text = "--";
             HomeVerdictText.Text = "REVIEW";
-            SetVerdict(StatusKind.Warning, "#FFE0A7");
+            SetVerdict(StatusKind.Warning);
         }
         else
         {
@@ -129,11 +129,11 @@ public partial class HomeView : UserControl
             HomeScoreText.ToolTip = $"Difference score: {state.LastAnalysis.DifferenceScore:F1}%.";
             HomeVerdictText.Text = state.LastAnalysis.Verdict;
             if (state.LastAnalysis.Verdict.Equals("OK", StringComparison.OrdinalIgnoreCase))
-                SetVerdict(StatusKind.Ok, "#C6FFD0");
+                SetVerdict(StatusKind.Ok);
             else if (state.LastAnalysis.Verdict.Equals("NG", StringComparison.OrdinalIgnoreCase))
-                SetVerdict(StatusKind.Ng, "#FFBFC1");
+                SetVerdict(StatusKind.Ng);
             else
-                SetVerdict(StatusKind.Warning, "#FFE0A7");
+                SetVerdict(StatusKind.Warning);
         }
 
     }
@@ -144,40 +144,43 @@ public partial class HomeView : UserControl
         textBlock.ToolTip = $"{endpoint.Name}: {endpoint.StatusMessage}";
     }
 
-    private void SetVerdict(StatusKind kind, string textColor)
+    private void SetVerdict(StatusKind kind)
     {
-        ApplyStatusBrushes(HomeVerdictBorder, kind);
-        HomeVerdictText.Foreground = Brush(textColor);
+        // Swap the shared verdict-banner style; the shared soft brushes color the text.
+        // Raw hex assignments here would escape the tokenized palette the WCAG contract
+        // test covers.
+        HomeVerdictBorder.Style = (Style)FindResource(kind switch
+        {
+            StatusKind.Ok => "HmiVerdictBannerOk",
+            StatusKind.Ng => "HmiVerdictBannerNg",
+            _ => "HmiVerdictBannerWarn",
+        });
+        HomeVerdictText.Foreground = (System.Windows.Media.Brush)FindResource(SoftBrushKey(kind));
     }
 
     private static void SetStatus(Border border, TextBlock textBlock, string text, StatusKind kind)
     {
         textBlock.Text = text;
         textBlock.ToolTip = text;
-        textBlock.Foreground = Brush(kind switch
+        textBlock.Foreground = (System.Windows.Media.Brush)border.FindResource(SoftBrushKey(kind));
+        border.Style = (Style)border.FindResource(kind switch
         {
-            StatusKind.Ok => "#C6FFD0",
-            StatusKind.Ng => "#FFBFC1",
-            StatusKind.Warning => "#FFE0A7",
-            StatusKind.Simulated => "#F1D8FF",
-            _ => "#CFEAFF",
+            StatusKind.Ok => "HmiAdaptiveStatusOk",
+            StatusKind.Ng => "HmiAdaptiveStatusNg",
+            StatusKind.Warning => "HmiAdaptiveStatusWarning",
+            StatusKind.Simulated => "HmiAdaptiveStatusSimulated",
+            _ => "HmiAdaptiveStatusUnavailable",
         });
-        ApplyStatusBrushes(border, kind);
     }
 
-    private static void ApplyStatusBrushes(Border border, StatusKind kind)
+    private static string SoftBrushKey(StatusKind kind) => kind switch
     {
-        var (background, borderBrush) = kind switch
-        {
-            StatusKind.Ok => ("#14311D", "#3C8D50"),
-            StatusKind.Ng => ("#35191B", "#A13A3F"),
-            StatusKind.Warning => ("#372914", "#987538"),
-            StatusKind.Simulated => ("#2A1740", "#8F5FD1"),
-            _ => ("#20262B", "#667078"),
-        };
-        border.Background = Brush(background);
-        border.BorderBrush = Brush(borderBrush);
-    }
+        StatusKind.Ok => "HmiOkSoftBrush",
+        StatusKind.Ng => "HmiNgSoftBrush",
+        StatusKind.Warning => "HmiWarnSoftBrush",
+        StatusKind.Simulated => "HmiSimulatedSoftBrush",
+        _ => "HmiInfoSoftBrush",
+    };
 
     private static IntegrationConnectionStatus CombineStatuses(
         IntegrationConnectionStatus first,
@@ -208,8 +211,6 @@ public partial class HomeView : UserControl
         _ => StatusKind.Unavailable,
     };
 
-    private static SolidColorBrush Brush(string color)
-        => new((Color)ColorConverter.ConvertFromString(color));
 
     private enum StatusKind
     {
