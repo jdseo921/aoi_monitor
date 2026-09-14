@@ -588,6 +588,15 @@ public record ValidationPackageRecord(
     string OperatorId,
     long? AuditEventId);
 
+/// <summary>
+/// Reserved scope tokens for threshold-profile rules. FULL_FRAME marks a rule that governs
+/// only the engine's full-frame (no-ROI) decision path; no recipe ROI may use it as a RoiType.
+/// </summary>
+public static class ThresholdScopes
+{
+    public const string FullFrame = "FULL_FRAME";
+}
+
 public sealed class ValidationAcceptanceCriteria
 {
     public double MinimumAccuracy { get; set; } = 0.97;

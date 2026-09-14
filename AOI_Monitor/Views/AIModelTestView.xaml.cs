@@ -568,15 +568,7 @@ public partial class AIModelTestView : UserControl, IAsyncNavigationPage, IDispo
         }
 
         var configuration = InspectionModelConfigurationService.Load();
-        var criteria = new FalseCallReductionCriteria
-        {
-            Mode = GetSelectedFalseCallMode(),
-            MaximumFalseCallRate = 0.10,
-            MaximumPossibleEscapeRate = GetSelectedFalseCallMode() == FalseCallReductionMode.MaximizeDefectRecall ? 0.0 : 0.05,
-            MinimumKnownOk = 1,
-            MinimumKnownNg = 1,
-            ManualReviewMinutesPerImage = 2.0,
-        };
+        var criteria = FalseCallReductionService.CreateSweepCriteria(GetSelectedFalseCallMode());
 
         _currentFalseCallRun = FalseCallReductionService.AnalyzeAndPersist(
             _rows.ToArray(),

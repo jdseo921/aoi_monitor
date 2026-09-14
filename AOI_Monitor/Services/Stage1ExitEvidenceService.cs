@@ -383,10 +383,19 @@ public static class Stage1ExitEvidenceService
             engine.Version,
             InspectionModelConfigurationService.Load().ActiveModelId,
             InspectionModelConfigurationService.Load().ActiveModelSha256,
-            runId);
+            runId,
+            FalseCallReductionService.CreateSweepCriteria(ToFalseCallMode(priority)));
 
         return new Stage1ExitBatchEvidence(engine, manifest, rows, metrics, performance, runId, falseCallRun, warnings);
     }
+
+    private static FalseCallReductionMode ToFalseCallMode(DetectionPriority priority)
+        => priority switch
+        {
+            DetectionPriority.MinimizeFalsePositives => FalseCallReductionMode.MinimizeFalsePositives,
+            DetectionPriority.MaximizeDefectRecall => FalseCallReductionMode.MaximizeDefectRecall,
+            _ => FalseCallReductionMode.Balanced,
+        };
 
     private static ModelRegistryEntry? GetActiveReadyOnnxModel()
     {

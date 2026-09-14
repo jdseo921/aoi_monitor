@@ -51,6 +51,28 @@ public static class FalseCallReductionService
         return run;
     }
 
+    /// <summary>
+    /// Sweep criteria for interactive/CLI threshold calibration. The 0.01 floor and 0.005
+    /// step let the sweep see the sub-5% boundaries golden-compare imagery produces (a grid
+    /// that cannot see the OK/NG boundary can never emit a VALID recommendation), and the
+    /// review band equals the step so a fine grid does not silently sweep the whole
+    /// population into predicted REVIEW. Class defaults stay unchanged for other consumers.
+    /// </summary>
+    public static FalseCallReductionCriteria CreateSweepCriteria(FalseCallReductionMode mode)
+        => new()
+        {
+            MinimumThreshold = 0.01,
+            MaximumThreshold = 0.95,
+            ThresholdStep = 0.005,
+            ReviewBand = 0.005,
+            MaximumFalseCallRate = 0.10,
+            MaximumPossibleEscapeRate = mode == FalseCallReductionMode.MaximizeDefectRecall ? 0.0 : 0.05,
+            MinimumKnownOk = 1,
+            MinimumKnownNg = 1,
+            ManualReviewMinutesPerImage = 2.0,
+            Mode = mode,
+        };
+
     public static void ApplyRecommendedThreshold(FalseCallReductionRun run, string operatorId)
         => ApplyRecommendedThreshold(run, UserRole.Admin, operatorId);
 
@@ -242,8 +264,14 @@ public static class FalseCallReductionService
         return criteria;
     }
 
+    /// <summary>
+    /// Rows arrive with DifferenceScore on the 0-100 percent scale from every engine
+    /// (pixel-diff worst-region percent, ONNX confidence x 100), so the sweep always
+    /// divides by 100. The previous "already normalized" guess for values &lt;= 1.0
+    /// mis-scaled genuine sub-1% difference scores by 100x.
+    /// </summary>
     private static double NormalizeScore(double score)
-        => Math.Clamp(score > 1.0 ? score / 100.0 : score, 0.0, 1.0);
+        => Math.Clamp(score / 100.0, 0.0, 1.0);
 
     private static double Divide(int numerator, int denominator)
         => denominator <= 0 ? 0 : numerator / (double)denominator;

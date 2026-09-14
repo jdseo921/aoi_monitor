@@ -40,6 +40,9 @@ public static class Program
         if (args.Length > 0 && string.Equals(args[0], "record-build-evidence", StringComparison.OrdinalIgnoreCase))
             return RecordBuildEvidenceCommand.Execute(args, Console.Out, Console.Error);
 
+        if (args.Length > 0 && string.Equals(args[0], "threshold-profile", StringComparison.OrdinalIgnoreCase))
+            return ThresholdProfileCommand.Execute(args, Console.Out, Console.Error);
+
         return Stage1ExitCommand.Execute(args, Console.Out, Console.Error);
     }
 }

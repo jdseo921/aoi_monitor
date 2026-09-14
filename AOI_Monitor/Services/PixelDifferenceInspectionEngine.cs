@@ -119,7 +119,9 @@ public sealed class PixelDifferenceInspectionEngine : IInspectionEngine
         result.FrameMeanDifferenceScore = frameMeanDiff;
         result.Hotspot = hotspot;
 
-        var (ngThreshold, reviewThreshold) = GetThresholds(priority);
+        var frameThreshold = ResolveFrameThreshold(result, recipeLoad, priority);
+        var ngThreshold = frameThreshold.NgThreshold;
+        var reviewThreshold = frameThreshold.ReviewThreshold;
         result.NgThreshold = ngThreshold;
         result.ReviewThreshold = reviewThreshold;
 
@@ -146,7 +148,12 @@ public sealed class PixelDifferenceInspectionEngine : IInspectionEngine
         }
 
         result.Confidence = ComputeConfidence(result.Verdict, diff, reviewThreshold, ngThreshold);
+        if (!string.IsNullOrEmpty(frameThreshold.ProfileId))
+            result.DecisionReason += $" (deployed threshold profile {frameThreshold.ProfileId}/{frameThreshold.Revision})";
         result.Evidence = BuildEvidence(result, priority);
+        result.Evidence.Add(string.IsNullOrEmpty(frameThreshold.ProfileId)
+            ? $"Threshold profile fallback (full frame): no active deployed profile rule matched board={result.BoardId}, program={result.BoardProgram}, recipe={recipeLoad.Recipe?.RecipeName ?? "ANY"}, view={result.ViewType}, roiType={ThresholdScopes.FullFrame}."
+            : $"Threshold profile (full frame): {frameThreshold.ProfileId}/{frameThreshold.Revision} (Review >= {frameThreshold.ReviewThreshold:F1}%, NG >= {frameThreshold.NgThreshold:F1}%).");
         AppendRecipeWarnings(result, recipeLoad);
         result.Defects.Add(CreateDefectResult(result, result.SuggestedDefect, "ROI-HOTSPOT-001", 1, sampleNorm.PixelWidth, sampleNorm.PixelHeight));
         overlayWatch.Stop();
@@ -407,6 +414,38 @@ public sealed class PixelDifferenceInspectionEngine : IInspectionEngine
             DetectionPriority.Balanced => (18, 8),
             DetectionPriority.MaximizeDefectRecall => (14, 5),
             _ => (18, 8),
+        };
+    }
+
+    private static EffectiveThresholdRule ResolveFrameThreshold(
+        AnalysisResult result,
+        RecipeLoadResult recipeLoad,
+        DetectionPriority priority)
+    {
+        // The real recipe name is load-bearing: the frame path also runs when a loaded
+        // recipe has no enabled ROIs, and drafts created from the AI / Models screen are
+        // scoped to that recipe's name — an empty name would orphan those deployments.
+        var profileRule = ThresholdProfileService.GetEffectiveThreshold(
+            result.BoardId,
+            result.BoardProgram,
+            recipeLoad.Recipe?.RecipeName ?? string.Empty,
+            result.ViewType,
+            ThresholdScopes.FullFrame,
+            ThresholdScopes.FullFrame);
+        if (profileRule is not null)
+        {
+            ApplyThresholdProfile(result, profileRule);
+            return profileRule;
+        }
+
+        var (ngThreshold, reviewThreshold) = GetThresholds(priority);
+        result.ThresholdSource = "Built-in policy default";
+        return new EffectiveThresholdRule
+        {
+            Source = "Built-in policy default",
+            ReviewThreshold = reviewThreshold,
+            NgThreshold = ngThreshold,
+            ConfidenceThreshold = Math.Clamp(reviewThreshold / 100.0, 0.0, 1.0),
         };
     }
 

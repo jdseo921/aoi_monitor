@@ -2538,6 +2538,150 @@ public sealed class AoiDatabaseTests : IDisposable
     }
 
     [Fact]
+    public void PixelDifferenceFullFrameHonorsDeployedThresholdProfile()
+    {
+        AoiDatabase.Initialize();
+        var golden = WriteBmp("frame-profile-golden.bmp", 40, 40, (_, _) => White());
+        // A 5x5 patch 8 gray levels darker: worst 8x8-grid cell ~3% difference — below
+        // every built-in review band, above the calibrated profile's NG band.
+        var sample = WriteBmp("frame-profile-sample.bmp", 40, 40,
+            (x, y) => x < 5 && y < 5 ? ((byte)247, (byte)247, (byte)247) : White());
+        var engine = new PixelDifferenceInspectionEngine();
+
+        var before = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+        Assert.Equal("OK", before.Verdict);
+        Assert.Equal("Built-in policy default", before.ThresholdSource);
+        Assert.Contains(before.Evidence, line => line.Contains("Threshold profile fallback (full frame)", StringComparison.OrdinalIgnoreCase));
+
+        var profile = new ThresholdProfile
+        {
+            ProfileId = "TP-FRAME",
+            Revision = "R0001",
+            BoardModel = "ANY",
+            BoardProgram = "ANY",
+            RecipeName = "ANY",
+            RecipeRevision = "ANY",
+            Status = "Approved",
+            CreatedBy = "Engineer01",
+            CreatedAtUtc = DateTime.UtcNow,
+            Rules = [new ThresholdProfileRule { ViewType = "Any", RoiType = "Any", DefectClass = "Any", ReviewThreshold = 0.5, NgThreshold = 1.0, ConfidenceThreshold = 0.7 }],
+        };
+        AoiDatabase.SaveThresholdProfile(profile);
+        ThresholdProfileService.DeployProfile(profile.ProfileId, profile.Revision, UserRole.Engineer, "Engineer01 [Engineer]");
+
+        var after = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+
+        Assert.Equal("NG", after.Verdict);
+        Assert.Equal("TP-FRAME", after.ThresholdProfileId);
+        Assert.Equal("R0001", after.ThresholdProfileRevision);
+        Assert.Equal(1.0, after.NgThreshold);
+        Assert.Contains("deployed threshold profile TP-FRAME/R0001", after.DecisionReason, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(after.Evidence, line => line.Contains("Threshold profile (full frame): TP-FRAME/R0001", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void PixelDifferenceFullFrameScopeRulesResolveBySpecificity()
+    {
+        AoiDatabase.Initialize();
+        var golden = WriteBmp("frame-scope-golden.bmp", 40, 40, (_, _) => White());
+        var sample = WriteBmp("frame-scope-sample.bmp", 40, 40,
+            (x, y) => x < 5 && y < 5 ? ((byte)247, (byte)247, (byte)247) : White());
+        var engine = new PixelDifferenceInspectionEngine();
+
+        // A FULL_FRAME-scoped rule outranks the wildcard rule on the frame path.
+        var scoped = new ThresholdProfile
+        {
+            ProfileId = "TP-FRAME-SCOPED",
+            Revision = "R0001",
+            BoardModel = "ANY",
+            BoardProgram = "ANY",
+            RecipeName = "ANY",
+            RecipeRevision = "ANY",
+            Status = "Approved",
+            CreatedBy = "Engineer01",
+            CreatedAtUtc = DateTime.UtcNow,
+            Rules =
+            [
+                new ThresholdProfileRule { ViewType = "Any", RoiType = "Any", DefectClass = "Any", ReviewThreshold = 4, NgThreshold = 9, ConfidenceThreshold = 0.6 },
+                new ThresholdProfileRule { ViewType = "Any", RoiType = ThresholdScopes.FullFrame, DefectClass = "Any", ReviewThreshold = 0.5, NgThreshold = 1.0, ConfidenceThreshold = 0.7 },
+            ],
+        };
+        AoiDatabase.SaveThresholdProfile(scoped);
+        ThresholdProfileService.DeployProfile(scoped.ProfileId, scoped.Revision, UserRole.Engineer, "Engineer01 [Engineer]");
+
+        var viaScoped = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+        Assert.Equal(1.0, viaScoped.NgThreshold);
+        Assert.Equal("NG", viaScoped.Verdict);
+
+        // A profile holding only a concrete component-ROI rule never governs frame verdicts.
+        var concreteOnly = new ThresholdProfile
+        {
+            ProfileId = "TP-FRAME-CONCRETE",
+            Revision = "R0001",
+            BoardModel = "ANY",
+            BoardProgram = "ANY",
+            RecipeName = "ANY",
+            RecipeRevision = "ANY",
+            Status = "Approved",
+            CreatedBy = "Engineer01",
+            CreatedAtUtc = DateTime.UtcNow,
+            Rules = [new ThresholdProfileRule { ViewType = "Any", RoiType = "Solder Bridge", DefectClass = "Any", ReviewThreshold = 0.5, NgThreshold = 1.0, ConfidenceThreshold = 0.7 }],
+        };
+        AoiDatabase.SaveThresholdProfile(concreteOnly);
+        ThresholdProfileService.DeployProfile(concreteOnly.ProfileId, concreteOnly.Revision, UserRole.Engineer, "Engineer01 [Engineer]");
+
+        var viaConcrete = engine.Analyze(sample, golden, DetectionPriority.Balanced);
+        Assert.Equal("Built-in policy default", viaConcrete.ThresholdSource);
+        Assert.Equal("OK", viaConcrete.Verdict);
+        Assert.Contains(viaConcrete.Evidence, line => line.Contains("Threshold profile fallback (full frame)", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void FalseCallSweepSeesSubFivePercentBoundary()
+    {
+        // Percent-scale scores 0.8 / 3.5 / 5.0 (normalized 0.008 / 0.035 / 0.05): the old
+        // mixed-scale NormalizeScore treated 0.8% as 0.8 and the old 5% sweep floor could
+        // not see this boundary at all; the calibration grid must find a VALID point.
+        var rows = new[]
+        {
+            ScoredRow("OK", 0.008),
+            ScoredRow("OK", 0.006),
+            ScoredRow("NG", 0.035),
+            ScoredRow("NG", 0.05),
+        };
+
+        var run = FalseCallReductionService.Analyze(
+            rows,
+            "Unit Test Engine",
+            "TEST-1",
+            "MODEL-1",
+            "HASH",
+            null,
+            FalseCallReductionService.CreateSweepCriteria(FalseCallReductionMode.MaximizeDefectRecall));
+
+        Assert.Equal("VALID", run.Recommendation.Status);
+        Assert.NotNull(run.Recommendation.Point);
+        Assert.InRange(run.Recommendation.Point!.DifferenceThreshold, 0.01, 0.035);
+        Assert.Equal(0, run.Recommendation.Point.FalseNegative);
+        Assert.Equal(0, run.Recommendation.Point.FalsePositive);
+    }
+
+    [Fact]
+    public void CreateSweepCriteriaPinsCalibrationGrid()
+    {
+        var recall = FalseCallReductionService.CreateSweepCriteria(FalseCallReductionMode.MaximizeDefectRecall);
+        Assert.Equal(0.01, recall.MinimumThreshold);
+        Assert.Equal(0.005, recall.ThresholdStep);
+        // Review band tied to the step: a fine grid must not predict the whole
+        // below-threshold population into REVIEW.
+        Assert.Equal(recall.ThresholdStep, recall.ReviewBand);
+        Assert.Equal(0.0, recall.MaximumPossibleEscapeRate);
+
+        var balanced = FalseCallReductionService.CreateSweepCriteria(FalseCallReductionMode.Balanced);
+        Assert.Equal(0.05, balanced.MaximumPossibleEscapeRate);
+    }
+
+    [Fact]
     public void MinimizeFalsePositivesPrefersLowerFpEvenIfRecallDecreases()
     {
         var rows = new[]
@@ -3484,7 +3628,11 @@ public sealed class AoiDatabaseTests : IDisposable
         string side = "top",
         string roiId = "ROI-TEST")
     {
+        // Callers express the score on the sweep's normalized 0-1 scale; the persisted
+        // row carries the production 0-100 percent DifferenceScore scale, which
+        // FalseCallReductionService.NormalizeScore divides by 100.
         var engineResult = score >= 0.5 ? "NG" : "OK";
+        score *= 100.0;
         var normalizedExpectedClass = BatchValidationService.NormalizeDefectClass(expectedClass);
         var normalizedPredictedClass = BatchValidationService.NormalizeDefectClass(predictedClass);
         var normalizedSide = BatchValidationService.NormalizeSide(side);
