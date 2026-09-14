@@ -125,25 +125,11 @@
     </Grid.RowDefinitions>
 
     <Border Grid.Row="0" Style="{StaticResource SettingsPanel}">
-      <Grid>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="420"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel>
-          <TextBlock Text="Settings Control Center" Style="{StaticResource HmiPageTitleText}"/>
-          <TextBlock Text="Settings are staged by category. Apply writes changes through the existing services; Cancel reloads the last saved values."
-                     Style="{StaticResource HmiPageSubtitleText}" Margin="0,6,0,0"/>
-        </StackPanel>
-        <Border Grid.Column="1" Style="{StaticResource HmiStatusInfo}" Padding="12" Margin="16,0,0,0">
-          <StackPanel>
-            <TextBlock Text="Staged changes" FontWeight="ExtraBold"/>
-            <TextBlock x:Name="SettingsStagedStatusText"
-                       Text="Apply writes settings and refreshes the shell. Cancel restores the last saved values."
-                       Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,0"/>
-          </StackPanel>
-        </Border>
-      </Grid>
+      <StackPanel>
+        <TextBlock Text="Settings Control Center" Style="{StaticResource HmiPageTitleText}"/>
+        <TextBlock Text="Settings are staged by category. Apply writes changes through the existing services; Cancel reloads the last saved values."
+                   Style="{StaticResource HmiPageSubtitleText}" Margin="0,6,0,0"/>
+      </StackPanel>
     </Border>
 
     <TabControl x:Name="SettingsCategoryTabs" Grid.Row="2" Background="{DynamicResource Bg}" BorderBrush="{DynamicResource LineBrush}">
@@ -1006,13 +992,6 @@
                 </StackPanel>
               </Border>
 
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <TextBlock Text="Localization" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock x:Name="LocalizationScopeText" TextWrapping="Wrap" LineHeight="25" FontSize="{StaticResource HmiFontSizeBody}"
-                             Text="Language/font changes are applied after pressing Apply. Supported shell, page, table, and Settings labels update immediately; technical codes and evidence IDs remain English for traceability."/>
-                </StackPanel>
-              </Border>
             </StackPanel>
 
             <StackPanel Grid.Column="2">
@@ -1039,13 +1018,6 @@
                 </StackPanel>
               </Border>
 
-              <Border Style="{StaticResource SettingsPanel}">
-                <StackPanel>
-                  <TextBlock Text="Configuration Policy" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock TextWrapping="Wrap" LineHeight="25" FontSize="{StaticResource HmiFontSizeBody}"
-                             Text="Training set export prepares local candidate files only. No model training, fine-tuning, or deployment is run from this prototype."/>
-                </StackPanel>
-              </Border>
             </StackPanel>
           </Grid>
         </ScrollViewer>
@@ -1054,11 +1026,6 @@
 
     <Border Grid.Row="4" Style="{StaticResource SettingsPanel}" Margin="0">
       <DockPanel LastChildFill="False">
-        <TextBlock DockPanel.Dock="Left"
-                   Text="Apply/Cancel controls remain available regardless of category."
-                   Style="{StaticResource HmiTechnicalHintText}"
-                   VerticalAlignment="Center"
-                   Margin="0,0,18,0"/>
         <WrapPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
           <Button x:Name="ApplyBtn" Style="{StaticResource ActionBtnGreen}" Content="Apply" Click="OnApply" Margin="{StaticResource HmiButtonGap}"/>
           <Button x:Name="CancelBtn" Style="{StaticResource ActionBtn}" Content="Cancel" Click="OnCancel" Margin="{StaticResource HmiButtonGap}"/>

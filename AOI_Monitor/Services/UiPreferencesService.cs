@@ -283,7 +283,6 @@ public static class UiPreferencesService
         ["Mark Possible Escape (3)"] = "유출 가능 표시 (3)",
         ["Hold for 2nd Review (4)"] = "2차 검토 보류 (4)",
         ["Queue Candidate"] = "학습 후보 등록",
-        ["Keyboard: 1 Confirm NG · 2 False Call · 3 Possible Escape · 4 Hold"] = "키보드: 1 NG 확정 · 2 허위 검출 · 3 유출 가능 · 4 보류",
         // Recipe editor centroid import.
         ["Import Centroid CSV"] = "센트로이드 CSV 가져오기",
         ["Board / Status"] = "보드 / 상태",
@@ -334,7 +333,6 @@ public static class UiPreferencesService
         ["1920 x 1080 minimum HMI"] = "1920 x 1080 최소 HMI",
         ["2560 x 1440 engineering monitor"] = "2560 x 1440 엔지니어링 모니터",
         ["3840 x 2160 wall display"] = "3840 x 2160 벽면 디스플레이",
-        ["Staged changes"] = "대기 중인 변경",
         ["Apply writes settings and refreshes the shell. Cancel restores the last saved values."] = "적용은 설정을 저장하고 셸을 새로 고칩니다. 취소는 마지막 저장 값을 복원합니다.",
         ["Processing & Tolerance Rules"] = "처리 및 공차 규칙",
         ["X/Y tolerance mm"] = "X/Y 공차 mm",
@@ -382,6 +380,8 @@ public static class UiPreferencesService
         ["No Camera Connected"] = "카메라 연결 안 됨",
         ["No frame"] = "프레임 없음",
         ["Lighting: Not Connected"] = "조명: 연결 안 됨",
+        ["Disabled / Not Connected"] = "비활성 / 연결 안 됨",
+        ["Alignment steps - planned, not yet interactive"] = "정렬 단계 - 계획된 기능, 아직 동작하지 않음",
         ["Board X"] = "보드 X",
         ["Board Y"] = "보드 Y",
         ["Simulated handler load step only."] = "시뮬레이션 핸들러 로드 단계 전용입니다.",
@@ -412,7 +412,6 @@ public static class UiPreferencesService
         ["Inspection Result"] = "검사 결과",
         ["Ground Truth"] = "실측 판정",
         ["Possible Escape"] = "유출 가능",
-        ["AI means inspection result. GT means ground truth. RefDes means reference designator."] = "AI는 검사 결과, GT는 실측 판정, RefDes는 부품 참조 기호를 의미합니다.",
         // --- Recipe Editor (RecipeView) ---
         // NOTE: RoiTypeCombo / IpcClassCombo / LightingProfileCombo / FalseCallPolicyCombo item
         // contents are intentionally NOT translated: RecipeView code-behind round-trips those

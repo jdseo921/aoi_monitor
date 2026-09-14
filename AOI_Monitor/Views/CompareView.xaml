@@ -63,7 +63,7 @@
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" MinHeight="42"/>
           <RowDefinition Height="*"/>
-          <RowDefinition Height="142"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="7,5">
           <DockPanel>
@@ -210,13 +210,14 @@
                 </UniformGrid>
               </StackPanel>
             </Border>
-            <!-- Sync controls -->
-            <UniformGrid Grid.Row="3" Columns="2" Rows="2">
-              <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="01" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}"/><TextBlock Text="Lock board orientation" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/></StackPanel></Border>
-              <Border Style="{StaticResource FieldBox}" Margin="0,0,0,5"><StackPanel><TextBlock Text="02" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}"/><TextBlock Text="Equalize brightness" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/></StackPanel></Border>
-              <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="03" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}"/><TextBlock Text="Normalize ROI scale" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/></StackPanel></Border>
-              <Border Style="{StaticResource FieldBox}"><StackPanel><TextBlock Text="04" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}"/><TextBlock Text="Highlight unmatched solder area" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/></StackPanel></Border>
-            </UniformGrid>
+            <!-- Alignment steps are a planned feature, shown as one amber planned-feature note. -->
+            <Border Grid.Row="3" Style="{StaticResource HmiEvidenceBoundaryOnly}" MaxWidth="520">
+              <TextBlock Text="Alignment steps - planned, not yet interactive"
+                         Foreground="{DynamicResource HmiWarnSoftBrush}"
+                         FontSize="{StaticResource HmiFontSizeBody}"
+                         FontWeight="ExtraBold"
+                         TextWrapping="Wrap"/>
+            </Border>
           </Grid>
         </Grid>
       </Border>
@@ -264,7 +265,7 @@
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" MinHeight="42"/>
           <RowDefinition Height="*"/>
-          <RowDefinition Height="142"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="7,5">
           <DockPanel>
@@ -329,11 +330,11 @@
           </Grid>
         </Border>
         <!-- Footer fields -->
-        <UniformGrid Grid.Row="2" Columns="3" Margin="8" Rows="2">
+        <!-- RefDes/FOV are shown once, in the defect-side footer; the golden footer keeps
+             only golden-specific fields. -->
+        <UniformGrid Grid.Row="2" Columns="2" Margin="8" Rows="2">
           <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="Sample" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="IMG_GOLD_0241" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="RefDes" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="U107" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,0,5"><StackPanel><TextBlock Text="FOV" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="TOP-03" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="Status" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Demo OK" Style="{StaticResource CompareFooterValueText}" Foreground="{DynamicResource HmiSimulatedBrush}"/></StackPanel></Border>
+          <Border Style="{StaticResource FieldBox}" Margin="0,0,0,5"><StackPanel><TextBlock Text="Status" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Demo OK" Style="{StaticResource CompareFooterValueText}" Foreground="{DynamicResource HmiSimulatedBrush}"/></StackPanel></Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="Program" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="TBOX_TOP_V1.2" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
           <Border Style="{StaticResource FieldBox}" Margin="0"><StackPanel><TextBlock Text="Captured" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Baseline" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
         </UniformGrid>

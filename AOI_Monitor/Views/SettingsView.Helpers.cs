@@ -256,7 +256,6 @@ public partial class SettingsView
             "Language/font changes are applied after pressing Apply. Supported shell, page, table, and Settings labels update immediately; technical codes and evidence IDs remain English for traceability.",
             "\uC5B8\uC5B4/\uAE00\uAF34 \uC124\uC815\uC740 \uC801\uC6A9\uC744 \uB204\uB978 \uB4A4 \uBC18\uC601\uB429\uB2C8\uB2E4. \uC9C0\uC6D0\uB418\uB294 \uC178, \uD398\uC774\uC9C0, \uD45C, \uC124\uC815 \uB77C\uBCA8\uC740 \uC989\uC2DC \uBC14\uB00C\uBA70, \uAE30\uC220 \uCF54\uB4DC\uC640 \uC99D\uBE59 ID\uB294 \uCD94\uC801\uC131\uC744 \uC704\uD574 \uC601\uC5B4\uB85C \uC720\uC9C0\uB429\uB2C8\uB2E4.");
         LocalizationStatusText.Text = localizationScope;
-        LocalizationScopeText.Text = localizationScope;
 
         SetComboItemText(LangCombo, 0, "English");
         SetComboItemText(LangCombo, 1, TextFor("Korean", "\uD55C\uAD6D\uC5B4"));

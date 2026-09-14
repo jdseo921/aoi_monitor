@@ -17,10 +17,10 @@
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <StackPanel>
+        <!-- Mode/evidence state is carried by the Sample CSV / Not Connected badges to the
+             right and the bottom status banner; the header keeps only the title. -->
+        <StackPanel VerticalAlignment="Center">
           <TextBlock Text="3D Profile Viewer" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
-          <TextBlock Text="Sample Data Mode. CSV height-map review only. 3D Camera Not Connected."
-                     Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="0,3,0,0"/>
         </StackPanel>
         <StackPanel Grid.Column="1" HorizontalAlignment="Right">
           <WrapPanel HorizontalAlignment="Right">
@@ -215,7 +215,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
               </Grid.RowDefinitions>
               <TextBlock Text="CSV" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center"/>
               <TextBlock Grid.Column="1" x:Name="CsvNameText" Text="--" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" VerticalAlignment="Center" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
@@ -231,8 +230,6 @@
               <TextBlock Grid.Row="5" Grid.Column="1" x:Name="DefectYText" Text="--" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
               <TextBlock Grid.Row="6" Text="Height Min / Max" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center"/>
               <TextBlock Grid.Row="6" Grid.Column="1" x:Name="HeightRangeText" Text="--" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
-              <TextBlock Grid.Row="7" Text="Status" Foreground="{DynamicResource HmiTextLabelBrush}" VerticalAlignment="Center"/>
-              <TextBlock Grid.Row="7" Grid.Column="1" Text="Sample Data Mode only" Foreground="{DynamicResource HmiWarnBrush}" FontWeight="Bold" VerticalAlignment="Center"/>
             </Grid>
           </Grid>
         </Border>

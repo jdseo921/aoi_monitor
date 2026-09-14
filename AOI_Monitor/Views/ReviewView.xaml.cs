@@ -16,13 +16,16 @@ public partial class ReviewView : UserControl
     private bool _overlayVisible = true;
     private bool _zoomed;
 
-    private static readonly object[] QueueItems =
+    public sealed record ReviewQueueItem(
+        string Priority, string Sample, string AiResult, string GroundTruth, string Defect, string RefDes, string Risk);
+
+    private static readonly ReviewQueueItem[] QueueItems =
     {
-        new { Priority = "1", Sample = "IMG_0241", AiResult = "OK", GroundTruth = "NG", Defect = "Solder Bridge",  RefDes = "U107", Risk = "Escape" },
-        new { Priority = "2", Sample = "IMG_0177", AiResult = "OK", GroundTruth = "NG", Defect = "Polarity Error", RefDes = "D12",  Risk = "Escape" },
-        new { Priority = "3", Sample = "IMG_0188", AiResult = "NG", GroundTruth = "NG", Defect = "Insuff Solder",  RefDes = "C684", Risk = "Verified NG" },
-        new { Priority = "4", Sample = "IMG_0164", AiResult = "NG", GroundTruth = "NG", Defect = "Tombstone",      RefDes = "R88",  Risk = "Verified NG" },
-        new { Priority = "5", Sample = "IMG_0182", AiResult = "NG", GroundTruth = "OK", Defect = "Pin Height Err", RefDes = "CN8",  Risk = "False Call" },
+        new("1", "IMG_0241", "OK", "NG", "Solder Bridge",  "U107", "Escape"),
+        new("2", "IMG_0177", "OK", "NG", "Polarity Error", "D12",  "Escape"),
+        new("3", "IMG_0188", "NG", "NG", "Insuff Solder",  "C684", "Verified NG"),
+        new("4", "IMG_0164", "NG", "NG", "Tombstone",      "R88",  "Verified NG"),
+        new("5", "IMG_0182", "NG", "OK", "Pin Height Err", "CN8",  "False Call"),
     };
 
     public ReviewView()
@@ -40,6 +43,33 @@ public partial class ReviewView : UserControl
     }
 
     private void OnStateChanged() => UiDispatcher.InvokeIfAvailable(Dispatcher, RefreshFromState);
+
+    // Risk chips in the queue reuse the shared adaptive-status chip styles instead of
+    // page-local color styles. Pure presentation mapping: risk state -> shared style key
+    // and shared soft foreground brush, swapped via FindResource (never raw hexes).
+    private void OnRiskChipLoaded(object sender, RoutedEventArgs e)
+        => ApplyRiskChipStyle(sender as Border);
+
+    private void OnRiskChipDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        => ApplyRiskChipStyle(sender as Border);
+
+    private void ApplyRiskChipStyle(Border? chip)
+    {
+        if (chip is null) return;
+
+        var risk = (chip.DataContext as ReviewQueueItem)?.Risk;
+        var (chipStyleKey, textBrushKey) = risk switch
+        {
+            "Escape" => ("HmiAdaptiveStatusNg", "HmiNgSoftBrush"),
+            "False Call" => ("HmiAdaptiveStatusWarning", "HmiWarnSoftBrush"),
+            "Verified NG" => ("HmiAdaptiveStatusInfo", "HmiInfoSoftBrush"),
+            _ => ("HmiAdaptiveStatusUnavailable", "HmiTextBodyBrush"),
+        };
+
+        chip.Style = (Style)FindResource(chipStyleKey);
+        if (chip.Child is TextBlock text)
+            text.SetResourceReference(TextBlock.ForegroundProperty, textBrushKey);
+    }
 
     private void OnOverlayClick(object sender, RoutedEventArgs e)
     {

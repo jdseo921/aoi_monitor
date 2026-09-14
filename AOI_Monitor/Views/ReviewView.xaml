@@ -3,48 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource HmiBgBrush}"
              PreviewKeyDown="OnReviewPreviewKeyDown">
-  <UserControl.Resources>
-    <Style x:Key="RiskChipBorder" TargetType="Border" BasedOn="{StaticResource Chip}">
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding Risk}" Value="Escape">
-          <Setter Property="Background" Value="#35191B"/>
-          <Setter Property="BorderBrush" Value="#9A393E"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Risk}" Value="False Call">
-          <Setter Property="Background" Value="#372914"/>
-          <Setter Property="BorderBrush" Value="#8C6C35"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Risk}" Value="Verified NG">
-          <Setter Property="Background" Value="#172A39"/>
-          <Setter Property="BorderBrush" Value="#477CA5"/>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
-    <Style x:Key="RiskChipText" TargetType="TextBlock">
-      <Setter Property="Foreground" Value="{DynamicResource HmiTextBodyBrush}"/>
-      <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
-      <Setter Property="FontWeight" Value="Bold"/>
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding Risk}" Value="Escape">
-          <Setter Property="Foreground" Value="{DynamicResource HmiNgSoftBrush}"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Risk}" Value="False Call">
-          <Setter Property="Foreground" Value="{DynamicResource HmiWarnSoftBrush}"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Risk}" Value="Verified NG">
-          <Setter Property="Foreground" Value="{DynamicResource HmiInfoSoftBrush}"/>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
-  </UserControl.Resources>
-  <ScrollViewer Style="{StaticResource FactoryScrollablePage}">
-  <Grid Margin="8" MinHeight="665">
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}">
+  <!-- Viewport-fill idiom: the page inset lives on the ScrollViewer Padding, never on this
+       Grid — a Margin here adds to the scroll extent and re-creates a permanent sliver of
+       scroll. MinHeight never shrinks content below its natural size, so small screens
+       still scroll while the disposition column stays on-screen at 150% DPI. -->
+  <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="372"/>
       <ColumnDefinition Width="8"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="8"/>
-      <ColumnDefinition Width="340"/>
+      <ColumnDefinition Width="*" MinWidth="340"/>
     </Grid.ColumnDefinitions>
 
     <!-- Left: Queue + Similar -->
@@ -70,11 +40,8 @@
           <DataGrid Grid.Row="1"
                     x:Name="QueueGrid"
                     BorderThickness="0"
-                    Margin="0"
                     MinWidth="0"
-                    MaxHeight="480"
-                    Style="{StaticResource HmiDenseTable}"
-                    ToolTip="AI means inspection result. GT means ground truth. RefDes means reference designator.">
+                    Style="{StaticResource HmiDenseTable}">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="#"      Binding="{Binding Priority}"    Width="38" MinWidth="38"/>
                 <DataGridTextColumn Header="Sample" Binding="{Binding Sample}"      Width="104" MinWidth="104"/>
@@ -83,8 +50,12 @@
                 <DataGridTemplateColumn Header="Risk" Width="*" MinWidth="118">
                   <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                      <Border Style="{StaticResource RiskChipBorder}" HorizontalAlignment="Left" Margin="0,1,0,1">
-                        <TextBlock Text="{Binding Risk}" Style="{StaticResource RiskChipText}"/>
+                      <!-- Shared adaptive-status chip styles are applied per risk state in
+                           code-behind (FindResource swap); no local color styles here. -->
+                      <Border HorizontalAlignment="Left" Margin="0,1,0,1"
+                              Loaded="OnRiskChipLoaded"
+                              DataContextChanged="OnRiskChipDataContextChanged">
+                        <TextBlock Text="{Binding Risk}" Style="{StaticResource HmiAdaptiveStatusText}"/>
                       </Border>
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
@@ -157,7 +128,6 @@
           <RowDefinition Height="Auto" MinHeight="32"/>
           <RowDefinition Height="Auto" MinHeight="46"/>
           <RowDefinition Height="*"/>
-          <RowDefinition Height="110"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
@@ -180,8 +150,8 @@
           </StackPanel>
         </Border>
 
-        <!-- PCB Canvas -->
-        <Border Grid.Row="2" Margin="8" MaxHeight="560" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Background="{DynamicResource HmiSurfaceBrush}" ClipToBounds="True">
+        <!-- PCB Canvas: the star row and the uniform Viewbox bound it; no height cap. -->
+        <Border Grid.Row="2" Margin="8" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Background="{DynamicResource HmiSurfaceBrush}" ClipToBounds="True">
           <Viewbox x:Name="ReviewCanvasViewbox" Stretch="Uniform">
           <Viewbox.LayoutTransform>
             <ScaleTransform x:Name="ReviewZoomTransform" ScaleX="1" ScaleY="1"/>
@@ -251,38 +221,11 @@
           </Canvas>
           </Viewbox>
         </Border>
-
-        <!-- Image footer: metadata fields -->
-        <UniformGrid Grid.Row="3" Columns="4" Margin="8" Rows="1">
-          <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiButtonGap}">
-            <StackPanel>
-              <TextBlock Text="Sample ID"   Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
-              <TextBlock Text="IMG_0241"    FontWeight="Bold" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-            </StackPanel>
-          </Border>
-          <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiButtonGap}">
-            <StackPanel>
-              <TextBlock Text="Board"       Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
-              <TextBlock Text="TBOX-MAIN"   FontWeight="Bold" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-            </StackPanel>
-          </Border>
-          <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiButtonGap}">
-            <StackPanel>
-              <TextBlock Text="RefDes"      Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
-              <TextBlock Text="U107"        FontWeight="Bold" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-            </StackPanel>
-          </Border>
-          <Border Style="{StaticResource FieldBox}">
-            <StackPanel>
-              <TextBlock Text="FOV"         Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
-              <TextBlock Text="TOP-03"      FontWeight="Bold" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-            </StackPanel>
-          </Border>
-        </UniformGrid>
       </Grid>
     </Border>
 
-    <!-- Right: Metadata + Decision -->
+    <!-- Right: Metadata + Decision. The star-sized metadata panel absorbs vertical shrink
+         (its body scrolls) so the disposition controls stay on-screen at 150% DPI. -->
     <Grid Grid.Column="4">
       <Grid.RowDefinitions>
         <RowDefinition Height="*"/>
@@ -303,40 +246,51 @@
             </DockPanel>
           </Border>
           <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <UniformGrid Columns="2" Margin="8" Rows="4">
-            <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiFieldGap}">
+          <Grid Margin="8" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiFieldGap}">
               <StackPanel><TextBlock Text="Sample ID" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="IMG_0241" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="0,0,0,8">
+            <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiRowGap}">
               <StackPanel><TextBlock Text="Board" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="TBOX-MAIN" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiFieldGap}">
+            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiFieldGap}">
               <StackPanel><TextBlock Text="RefDes" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="U107" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="0,0,0,8">
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiRowGap}">
               <StackPanel><TextBlock Text="FOV" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="TOP-03" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiFieldGap}">
+            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiFieldGap}">
               <StackPanel><TextBlock Text="Inspection Result" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="OK" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="0,0,0,8">
+            <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiRowGap}">
               <StackPanel><TextBlock Text="Ground Truth" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="NG" FontWeight="Bold" Foreground="{DynamicResource HmiNgStrongBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="0,0,8,0">
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource FieldBox}" Margin="{StaticResource HmiRowGap}">
               <StackPanel><TextBlock Text="Risk" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
-              <TextBlock Text="Possible Escape" FontWeight="Bold" Foreground="{DynamicResource HmiNgStrongBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
+              <TextBlock Text="Possible Escape" FontWeight="Bold" Foreground="{DynamicResource HmiNgStrongBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/></StackPanel>
             </Border>
-            <Border Style="{StaticResource FieldBox}" Margin="0">
+            <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource FieldBox}">
               <StackPanel><TextBlock Text="Engine" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
-              <TextBlock Text="Pixel Difference Prototype Engine 0.1" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/></StackPanel>
+              <TextBlock Text="Pixel Difference Prototype Engine 0.1" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Style="{StaticResource FactoryTrimmedTextWithTooltip}" TextWrapping="Wrap"/></StackPanel>
             </Border>
-          </UniformGrid>
+          </Grid>
           </ScrollViewer>
         </Grid>
       </Border>
@@ -349,7 +303,6 @@
             <TextBlock Text="Disposition Controls" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
           </Border>
           <StackPanel Grid.Row="1" Margin="8">
-            <TextBlock Text="Keyboard: 1 Confirm NG · 2 False Call · 3 Possible Escape · 4 Hold" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="{StaticResource HmiRowGap}"/>
             <Button Style="{StaticResource ActionBtnRed}" Content="Confirm NG (1)" Margin="{StaticResource HmiRowGap}" Click="OnConfirmNgClick"/>
             <Button Style="{StaticResource ActionBtnAmber}" Content="Mark False Call (2)" Margin="{StaticResource HmiRowGap}" Click="OnFalseCallClick"/>
             <Button Style="{StaticResource ActionBtnRed}" Content="Mark Possible Escape (3)" Margin="{StaticResource HmiRowGap}" Click="OnPossibleEscapeClick"/>
@@ -363,4 +316,3 @@
   </Grid>
   </ScrollViewer>
 </UserControl>
-

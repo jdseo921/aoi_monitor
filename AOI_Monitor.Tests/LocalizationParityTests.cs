@@ -129,10 +129,6 @@ public class LocalizationParityTests
             "Hold for 2nd Review (4)",
             "Queue Candidate",
             "Disposition Controls",
-            // ReviewView keyboard hint line. The separator is U+00B7 (middle dot), built
-            // from an escape so an editor/encoding change cannot silently diverge from
-            // the XAML literal.
-            "Keyboard: 1 Confirm NG \u00B7 2 False Call \u00B7 3 Possible Escape \u00B7 4 Hold",
             // RecipeView centroid import.
             "Import Centroid CSV",
         };

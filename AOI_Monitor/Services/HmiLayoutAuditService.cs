@@ -256,7 +256,7 @@ public static class HmiLayoutAuditService
             new("defect-review", "Defect Review", () => new ReviewView(), false, new[] { "QueueGrid", "ReviewCanvasViewbox" }),
             new("recipe-editor", "Recipe Editor", () => new RecipeView(), false, new[] { "RecipeNameText", "RoiGrid", "ViewportCanvas", "RecipeEmptyStateCard" }),
             new("ai-model-test", "AI Model Test", () => new AIModelTestView(), true, new[] { "CancelWorkButton", "ResultsGrid", "FolderPathText", "GroundTruthPathText" }),
-            new("yield-analytics", "Yield Analytics", () => new SpcView(), false, new[] { "InspectionCountText", "VerdictBreakdownText", "YieldText", "DbHealthGrid" }),
+            new("yield-analytics", "Yield Analytics", () => new SpcView(), false, new[] { "VerdictBreakdownText", "YieldText", "DbHealthGrid" }),
             new("export-trace", "Export & Trace", () => SelectReportsTab(new ReportsView(), "Export History"), true, new[] { "ExportGrid", "CancelWorkButton" }),
             new("reports-inspection-history", "Reports - Inspection History", () => SelectReportsTab(new ReportsView(), "Inspection History"), true, new[] { "InspectionGrid" }),
             new("reports-review-events", "Reports - Review Events", () => SelectReportsTab(new ReportsView(), "Review / Disposition Events"), true, new[] { "ReviewGrid" }),
@@ -307,7 +307,6 @@ public static class HmiLayoutAuditService
         "StationNameText",
         "HeaderUserText",
         "HeaderRoleText",
-        "HeaderEngineText",
         "HomeNavBtn",
         "OperatingModeBannerText",
         "DeploymentProfileBannerText",
@@ -336,7 +335,6 @@ public static class HmiLayoutAuditService
             SetText(window, "StationSubtitleText", "local review console / prototype / customer validation workstation / long subtitle");
             SetText(window, "HeaderUserText", "Engineer01.CustomerValidationShiftLeadWithLongName");
             SetText(window, "HeaderRoleText", "Admin / Shift Lead");
-            SetText(window, "HeaderEngineText", "Pixel Difference Prototype Engine With ONNX Candidate Adapter Boundary");
             SetText(window, "ActiveAlarmHeaderText", "none");
             SetText(window, "ActiveAlarmSummaryText", "No active alarms.");
             SetText(window, "FooterRecordCountText", "123456");

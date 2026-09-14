@@ -44,7 +44,7 @@
       <Border Grid.Column="0" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" MinHeight="32"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="8"/>
             <RowDefinition Height="*"/>
@@ -123,15 +123,15 @@
       <Border Grid.Column="2" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" MinHeight="32"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="8"/>
-            <RowDefinition Height="160"/>
+            <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
           <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
             <TextBlock Text="Calibration Points" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
           </Border>
-          <DataGrid Grid.Row="1" x:Name="PointsGrid" AutoGenerateColumns="False" Margin="0,0,0,0" Style="{StaticResource HmiTable}" MinWidth="560">
+          <DataGrid Grid.Row="1" x:Name="PointsGrid" AutoGenerateColumns="False" Style="{StaticResource HmiTable}">
             <DataGrid.Columns>
               <DataGridTextColumn Header="#" Binding="{Binding No}" Width="56" MinWidth="56"/>
               <DataGridTextColumn Header="Image X" Binding="{Binding ImageXDisplay}" Width="120" MinWidth="120"/>

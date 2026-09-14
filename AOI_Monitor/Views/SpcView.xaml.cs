@@ -23,7 +23,6 @@ public partial class SpcView : UserControl, IAsyncNavigationPage
             cancellationToken.ThrowIfCancellationRequested();
             var healthRows = AoiDatabase.GetDatabaseHealthRows();
             var inspections = AoiDatabase.GetInspectionHistory(new LogFilter());
-            var reviews = AoiDatabase.GetReviewEvents(new LogFilter());
             var images = AoiDatabase.GetImportedImages();
             var ok = inspections.Count(row => string.Equals(row.Verdict, "OK", StringComparison.OrdinalIgnoreCase));
             var ng = inspections.Count(row => string.Equals(row.Verdict, "NG", StringComparison.OrdinalIgnoreCase));
@@ -32,16 +31,13 @@ public partial class SpcView : UserControl, IAsyncNavigationPage
             var yield = inspections.Count == 0
                 ? "--"
                 : (ok / (double)inspections.Count).ToString("P1", System.Globalization.CultureInfo.InvariantCulture);
-            return new SpcSnapshot(healthRows, inspections.Count, reviews.Count, images.Count, ok, ng, review, brokenLinks, yield);
+            return new SpcSnapshot(healthRows, inspections.Count, ok, ng, review, brokenLinks, yield);
         }, cancellationToken);
 
         DbHealthGrid.ItemsSource = snapshot.HealthRows;
 
-        InspectionCountText.Text = snapshot.InspectionCount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
         VerdictBreakdownText.Text = $"{snapshot.Ok:N0} / {snapshot.Ng:N0} / {snapshot.Review:N0}";
         YieldText.Text = snapshot.Yield;
-        ReviewEventCountText.Text = snapshot.ReviewCount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
-        ImportedImageCountText.Text = snapshot.ImageCount.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
         BrokenImageLinksText.Text = snapshot.BrokenLinks.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
         BrokenImageLinksText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(snapshot.BrokenLinks > 0 ? "#F13B3F" : "#DCE5EB"));
 
@@ -73,8 +69,6 @@ public partial class SpcView : UserControl, IAsyncNavigationPage
     private sealed record SpcSnapshot(
         IReadOnlyList<DbHealthRow> HealthRows,
         int InspectionCount,
-        int ReviewCount,
-        int ImageCount,
         int Ok,
         int Ng,
         int Review,

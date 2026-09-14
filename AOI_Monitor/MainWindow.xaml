@@ -84,10 +84,10 @@
                      TextWrapping="NoWrap"
                      TextTrimming="CharacterEllipsis"
                      ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-          <Border Grid.Column="3" Background="{DynamicResource HmiRaisedBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Padding="7,3" Margin="0,0,4,0" MaxWidth="205" MinHeight="34" VerticalAlignment="Center">
+          <Border Grid.Column="3" Background="{DynamicResource HmiRaisedBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Padding="7,3" Margin="0,0,4,0" MaxWidth="175" MinHeight="34" VerticalAlignment="Center">
             <DockPanel LastChildFill="True">
               <TextBlock Text="Station " Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
-              <TextBlock x:Name="StationNameText" Text="AOI-LIB" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="130" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+              <TextBlock x:Name="StationNameText" Text="AOI-LIB" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="110" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
               <TextBlock x:Name="StationSubtitleText" Text="local review console / prototype" Visibility="Collapsed" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
             </DockPanel>
           </Border>
@@ -109,27 +109,21 @@
           <Border Style="{StaticResource HmiPersistentBanner}" Background="{DynamicResource HmiRaisedBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" Margin="{StaticResource HmiButtonGap}">
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="User " Foreground="{DynamicResource HmiMutedTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="HeaderUserText" Text="Engineer01" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="112" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+              <TextBlock x:Name="HeaderUserText" Text="Engineer01" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="100" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
               <TextBlock Text=" / " Foreground="{DynamicResource HmiMutedTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
               <TextBlock x:Name="HeaderRoleText" Text="Admin" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="74" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-            </StackPanel>
-          </Border>
-          <Border Style="{StaticResource HmiPersistentBanner}" Background="{DynamicResource HmiRaisedBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" Margin="{StaticResource HmiButtonGap}">
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="Engine " Foreground="{DynamicResource HmiMutedTextBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="HeaderEngineText" Text="Pixel Diff Prototype" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="230" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
             </StackPanel>
           </Border>
           <Button x:Name="ActiveAlarmsButton"
                   AutomationProperties.Name="Active alarms"
                   Style="{StaticResource MiniBtn}"
-                  MinWidth="238"
+                  MinWidth="190"
                   MinHeight="34"
                   Padding="8,3"
                   Margin="{StaticResource HmiButtonGap}"
                   Click="OnActiveAlarmsButtonClick"
                   ToolTip="Open active alarm list.">
-            <Grid MinWidth="210">
+            <Grid MinWidth="160">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -144,7 +138,7 @@
                          HorizontalAlignment="Right"
                          TextWrapping="NoWrap"
                          TextTrimming="CharacterEllipsis"
-                         MaxWidth="210"
+                         MaxWidth="170"
                          ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
             </Grid>
           </Button>

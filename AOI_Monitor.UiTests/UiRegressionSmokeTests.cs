@@ -364,7 +364,7 @@ public sealed class UiRegressionSmokeTests : IDisposable
             new UiPageDefinition("review", "Defect Review", () => new ReviewView(), false, new[] { "QueueGrid", "ReviewCanvasViewbox" }),
             new UiPageDefinition("recipe", "Recipe Rules", () => new RecipeView(), false, new[] { "RecipeNameText", "RoiGrid", "ViewportCanvas" }),
             new UiPageDefinition("modeltest", "AI / Models", () => new AIModelTestView(), true, new[] { "CancelWorkButton", "ResultsGrid" }),
-            new UiPageDefinition("spc", "Yield Analytics", () => new SpcView(), false, new[] { "InspectionCountText", "VerdictBreakdownText", "DbHealthGrid" }),
+            new UiPageDefinition("spc", "Yield Analytics", () => new SpcView(), false, new[] { "VerdictBreakdownText", "YieldText", "DbHealthGrid" }),
             new UiPageDefinition("reports", "Export & Trace", () => new ReportsView(), true, new[] { "CancelWorkButton", "InspectionGrid", "FactoryReadinessGrid", "ManagementDefectGrid", "MesSpoolGrid", "CentralSyncGrid" }),
             new UiPageDefinition("settings", "System Settings", () => new SettingsView(viewModel), true, new[] { "ApplyBtn", "CancelBtn", "ResetBtn", "ModelRegistryGrid", "MesModeCombo", "CentralSyncModeCombo", "OpenInstallNotesBtn", "OpenGuideBtn" }),
             new UiPageDefinition("calibration", "Calibration", () => new CalibrationView(), false, new[] { "PointsGrid", "ProfileCombo" }),

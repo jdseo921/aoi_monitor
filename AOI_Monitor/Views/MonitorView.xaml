@@ -4,26 +4,32 @@
              Background="{DynamicResource HmiBgBrush}"
              PreviewKeyDown="OnMonitorPreviewKeyDown">
   <UserControl.Resources>
+    <!-- Labels and values share the same top alignment and vertical margin so every
+         Board/Status row reads from a common baseline even when the value wraps. -->
     <Style x:Key="MonitorStatusLabel" TargetType="TextBlock">
       <Setter Property="Foreground" Value="{DynamicResource HmiTextLabelBrush}"/>
       <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
       <Setter Property="Margin" Value="0,4,10,4"/>
     </Style>
     <Style x:Key="MonitorStatusValue" TargetType="TextBlock" BasedOn="{StaticResource FactoryTrimmedTextWithTooltip}">
       <Setter Property="Foreground" Value="{DynamicResource HmiTextBodyBrush}"/>
       <Setter Property="FontWeight" Value="Bold"/>
-      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="Margin" Value="0,4,0,4"/>
     </Style>
     <Style x:Key="MonitorStatusWrappedValue" TargetType="TextBlock" BasedOn="{StaticResource HmiAdaptiveFieldWrappedValueText}">
       <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="VerticalAlignment" Value="Top"/>
       <Setter Property="Margin" Value="0,4,0,4"/>
     </Style>
   </UserControl.Resources>
-  <ScrollViewer Style="{StaticResource FactoryScrollablePage}">
-  <Grid Margin="8">
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}">
+  <!-- Viewport-fill idiom: the page inset lives on the ScrollViewer Padding; the root Grid
+       carries NO outer Margin so the star rows genuinely bound the image viewport, defect
+       list, and alarm log instead of relying on hard MaxHeight caps. -->
+  <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="8"/>
@@ -46,32 +52,32 @@
                      Foreground="{DynamicResource HmiTextLabelBrush}"
                      FontSize="{StaticResource HmiFontSizeBody}"
                      Margin="0,8,0,3"/>
-          <UniformGrid Columns="5" Rows="1">
-            <Border Style="{StaticResource HmiStatusInfo}" Margin="0,0,6,0"
+          <WrapPanel>
+            <Border Style="{StaticResource HmiStatusInfo}" Margin="{StaticResource HmiChipGap}"
                     ToolTip="Status indicator, not a button. Fiducial alignment runs automatically inside golden compare; blue = informational stage.">
-              <TextBlock Text="Fiducial alignment" Foreground="#D7F0FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
+              <TextBlock Text="Fiducial alignment" Foreground="{DynamicResource HmiInfoSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
             </Border>
-            <Border Style="{StaticResource HmiStatusInfo}" Margin="0,0,6,0"
+            <Border Style="{StaticResource HmiStatusInfo}" Margin="{StaticResource HmiChipGap}"
                     ToolTip="Status indicator, not a button. The golden reference image is selected in Board &amp; Images or Golden Compare; blue = informational stage.">
-              <TextBlock Text="Golden template" Foreground="#D7F0FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
+              <TextBlock Text="Golden template" Foreground="{DynamicResource HmiInfoSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
             </Border>
-            <Border Style="{StaticResource HmiStatusInfo}" Margin="0,0,6,0"
+            <Border Style="{StaticResource HmiStatusInfo}" Margin="{StaticResource HmiChipGap}"
                     ToolTip="Status indicator, not a button. ROI masks come from the saved recipe (Recipe Rules); blue = informational stage.">
-              <TextBlock Text="ROI masks" Foreground="#D7F0FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
+              <TextBlock Text="ROI masks" Foreground="{DynamicResource HmiInfoSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
             </Border>
-            <Border Style="{StaticResource HmiStatusWarning}" Margin="0,0,6,0"
+            <Border Style="{StaticResource HmiStatusWarning}" Margin="{StaticResource HmiChipGap}"
                     ToolTip="Status indicator, not a button. Tolerance rules are configured in Recipe Rules; amber = review the configuration before trusting verdicts.">
-              <TextBlock Text="Tolerance rules" Foreground="#FFE0A7" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
+              <TextBlock Text="Tolerance rules" Foreground="{DynamicResource HmiWarnSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
             </Border>
-            <Border Style="{StaticResource HmiStatusWarning}"
+            <Border Style="{StaticResource HmiStatusWarning}" Margin="{StaticResource HmiChipGap}"
                     ToolTip="Status indicator, not a button. Lighting control is a Stage 2 hardware boundary; amber = not validated in Stage 1.">
-              <TextBlock Text="Lighting boundary" Foreground="#FFE0A7" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
+              <TextBlock Text="Lighting boundary" Foreground="{DynamicResource HmiWarnSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" TextWrapping="Wrap"/>
             </Border>
-          </UniformGrid>
+          </WrapPanel>
         </StackPanel>
         <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-          <Button Style="{StaticResource ActionBtnGreen}" Content="Disposition" Margin="0,0,6,0" Click="OnOpenDispositionClick"/>
-          <Button Style="{StaticResource ActionBtnBlue}" Content="Golden Compare" Margin="0,0,6,0" Click="OnOpenCompareClick"/>
+          <Button Style="{StaticResource ActionBtnGreen}" Content="Disposition" Margin="{StaticResource HmiButtonGap}" Click="OnOpenDispositionClick"/>
+          <Button Style="{StaticResource ActionBtnBlue}" Content="Golden Compare" Margin="{StaticResource HmiButtonGap}" Click="OnOpenCompareClick"/>
           <Button Style="{StaticResource ActionBtn}" Content="Image Library" Click="OnOpenLibraryClick"/>
         </WrapPanel>
       </Grid>
@@ -93,7 +99,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
             <DockPanel>
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock x:Name="ImageStatusText" Text="No image loaded" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -109,7 +115,7 @@
 
           <WrapPanel Grid.Row="1" Margin="8">
             <StackPanel Orientation="Horizontal" Margin="{StaticResource HmiButtonGap}">
-              <TextBlock Text="View" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+              <TextBlock Text="View" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center" Margin="{StaticResource HmiButtonGap}"/>
               <ComboBox x:Name="ViewSelector" Width="110" SelectedIndex="0" AutomationProperties.Name="Inspection view" SelectionChanged="OnViewSelectionChanged">
                 <ComboBoxItem Content="Top" Tag="Top"/>
                 <ComboBoxItem Content="Side" Tag="Side"/>
@@ -122,7 +128,7 @@
             <Button Style="{StaticResource MiniBtn}" Content="Top Folder" Margin="{StaticResource HmiButtonGap}" Click="OnSelectTopFolderClick"/>
             <Button Style="{StaticResource MiniBtn}" Content="Side Folder" Margin="{StaticResource HmiButtonGap}" Click="OnSelectSideFolderClick"/>
             <Button Style="{StaticResource MiniBtn}" Content="Bottom Folder" Margin="{StaticResource HmiButtonGap}" Click="OnSelectBottomFolderClick"/>
-            <CheckBox x:Name="AutoSaveCheck" Content="Auto-save" Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center" Margin="0,0,0,6"/>
+            <CheckBox x:Name="AutoSaveCheck" Content="Auto-save" Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center" Margin="{StaticResource HmiButtonGap}"/>
           </WrapPanel>
 
           <UniformGrid Grid.Row="2" Columns="4" Margin="8,0,8,8">
@@ -139,7 +145,7 @@
                 <RowDefinition Height="Auto"/>
               </Grid.RowDefinitions>
               <StackPanel Grid.Row="0">
-                <TextBlock Text="Simulated Robot / Handler" Foreground="#F1D8FF" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+                <TextBlock Text="Simulated Robot / Handler" Foreground="{DynamicResource HmiSimulatedSoftBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
                 <TextBlock Text="Simulation only. No real robot, handler, PLC, or safety hardware is connected."
                            Foreground="#E5CAFF" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="0,2,0,0"/>
                 <WrapPanel Margin="0,5,0,0">
@@ -165,11 +171,12 @@
             </Grid>
           </Border>
 
-          <Border x:Name="InspectionImageViewport" Grid.Row="4" Margin="8,0,8,8" MinHeight="320" MaxHeight="620" Background="#050607" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
+          <!-- The star row plus the Uniform-stretch Viewbox bound this viewport, so no
+               MaxHeight cap is needed; MinHeight keeps it usable on small windows. -->
+          <Border x:Name="InspectionImageViewport" Grid.Row="4" Margin="8,0,8,8" MinHeight="320" Background="#050607" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
             <Grid ClipToBounds="True">
               <TextBlock x:Name="EmptyImageText" Text="Select a folder or load an image from Image Library, then press Start / Next Board."
-                         Foreground="#7F8C95" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" TextAlignment="Center"
-                         HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24"/>
+                         Style="{StaticResource HmiEmptyStateText}"/>
               <Viewbox Stretch="Uniform">
                 <Grid x:Name="ImageOverlayRoot" Width="1000" Height="700">
                   <Image x:Name="InspectionImage" Stretch="Uniform"/>
@@ -194,12 +201,14 @@
               <RowDefinition Height="Auto" MinHeight="32"/>
               <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+            <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
               <TextBlock Text="Board / Status" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
             </Border>
             <Grid Grid.Row="1" Margin="8">
               <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="110"/>
+                <!-- Auto + MinWidth lets long labels ('Board / Model', 'Learned Evidence',
+                     '2D Cal Profile') sit on one line instead of wrapping at a fixed 110. -->
+                <ColumnDefinition Width="Auto" MinWidth="150"/>
                 <ColumnDefinition Width="*"/>
               </Grid.ColumnDefinitions>
               <Grid.RowDefinitions>
@@ -243,16 +252,17 @@
                 </ComboBox.ItemTemplate>
               </ComboBox>
               <TextBlock Grid.Row="8" Text="Camera" Style="{StaticResource MonitorStatusLabel}"/>
-              <TextBlock Grid.Row="8" Grid.Column="1" x:Name="CameraSourceText" Text="No Camera Connected" Style="{StaticResource MonitorStatusWrappedValue}"/>
+              <TextBlock Grid.Row="8" Grid.Column="1" x:Name="CameraSourceText" Text="Not Connected" Style="{StaticResource MonitorStatusWrappedValue}"/>
               <TextBlock Grid.Row="9" Text="Frame" Style="{StaticResource MonitorStatusLabel}"/>
               <TextBlock Grid.Row="9" Grid.Column="1" x:Name="CameraFrameMetadataText" Text="No frame" Style="{StaticResource MonitorStatusWrappedValue}" Foreground="{DynamicResource HmiTextLabelBrush}" FontWeight="Normal"/>
               <TextBlock Grid.Row="10" Text="Lighting" Style="{StaticResource MonitorStatusLabel}"/>
-              <TextBlock Grid.Row="10" Grid.Column="1" x:Name="LightingSyncText" Text="Lighting: Not Connected" Style="{StaticResource MonitorStatusWrappedValue}" Foreground="{DynamicResource HmiTextLabelBrush}" FontWeight="Normal"/>
+              <TextBlock Grid.Row="10" Grid.Column="1" x:Name="LightingSyncText" Text="Not Connected" Style="{StaticResource MonitorStatusWrappedValue}" Foreground="{DynamicResource HmiTextLabelBrush}" FontWeight="Normal"/>
               <TextBlock Grid.Row="11" Text="Timing" Style="{StaticResource MonitorStatusLabel}"/>
               <TextBlock Grid.Row="11" Grid.Column="1" x:Name="TimingText" Text="--" Style="{StaticResource MonitorStatusValue}"/>
               <TextBlock Grid.Row="12" Text="Result" Style="{StaticResource MonitorStatusLabel}"/>
-              <Border Grid.Row="12" Grid.Column="1" x:Name="ResultStatusBorder" Background="#372914" BorderBrush="#8C6C35" BorderThickness="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="10,6">
-                <TextBlock x:Name="ResultStatusText" Text="REVIEW" FontWeight="ExtraBold" FontSize="28" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <!-- Verdict surface: code-behind swaps HmiVerdictBannerOk/Ng/Warn via FindResource. -->
+              <Border Grid.Row="12" Grid.Column="1" x:Name="ResultStatusBorder" Style="{StaticResource HmiVerdictBannerWarn}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <TextBlock x:Name="ResultStatusText" Text="REVIEW" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeVerdict}" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
               </Border>
             </Grid>
           </Grid>
@@ -264,9 +274,12 @@
               <RowDefinition Height="Auto" MinHeight="32"/>
               <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+            <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
               <TextBlock Text="Defect List" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
             </Border>
+            <!-- Star row bounds the grid (viewport-fill root), so no MaxHeight cap. Review-
+                 critical columns lead; text columns use star widths + MinWidth with the
+                 shared trim-with-tooltip cell style so headers and cells stop clipping. -->
             <DataGrid Grid.Row="1"
                       x:Name="DefectGrid"
                       AutomationProperties.Name="Defect list"
@@ -274,17 +287,16 @@
                       AutoGenerateColumns="False"
                       Style="{StaticResource HmiDenseTable}"
                       MinWidth="0"
-                      MaxHeight="560"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ToolTip="ROI means region of interest: the image area checked for a defect.">
               <DataGrid.Columns>
                 <DataGridTextColumn Header="No" Binding="{Binding No}" Width="58" MinWidth="58"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="132" MinWidth="132"/>
-                <DataGridTextColumn Header="ROI" Binding="{Binding RoiId}" Width="96" MinWidth="96"/>
-                <DataGridTextColumn Header="ROI Type" Binding="{Binding RoiType}" Width="112" MinWidth="112"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="1.4*" MinWidth="132" ElementStyle="{StaticResource HmiDataGridCellText}"/>
+                <DataGridTextColumn Header="ROI" Binding="{Binding RoiId}" Width="*" MinWidth="96" ElementStyle="{StaticResource HmiDataGridCellText}"/>
                 <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" Width="90" MinWidth="90"/>
-                <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="112" MinWidth="112"/>
-                <DataGridTextColumn Header="Side" Binding="{Binding Side}" Width="84" MinWidth="84"/>
+                <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="*" MinWidth="128" ElementStyle="{StaticResource HmiDataGridCellText}"/>
+                <DataGridTextColumn Header="ROI Type" Binding="{Binding RoiType}" Width="*" MinWidth="120" ElementStyle="{StaticResource HmiDataGridCellText}"/>
+                <DataGridTextColumn Header="Side" Binding="{Binding Side}" Width="84" MinWidth="84" ElementStyle="{StaticResource HmiDataGridCellText}"/>
                 <DataGridTextColumn Header="X" Binding="{Binding XDisplay}" Width="72" MinWidth="72"/>
                 <DataGridTextColumn Header="Y" Binding="{Binding YDisplay}" Width="72" MinWidth="72"/>
                 <DataGridTextColumn Header="Board X" Binding="{Binding BoardXDisplay}" Width="120" MinWidth="120"/>
@@ -302,13 +314,14 @@
           <RowDefinition Height="Auto" MinHeight="32"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
           <DockPanel>
             <TextBlock x:Name="ModeText" DockPanel.Dock="Right" Text="STOPPED" Foreground="{DynamicResource HmiWarnBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
             <TextBlock Text="Alarm / Event Log" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
           </DockPanel>
         </Border>
-        <DataGrid Grid.Row="1" x:Name="AlarmGrid" AutomationProperties.Name="Alarm and event log" AutoGenerateColumns="False" Style="{StaticResource HmiTable}" MaxHeight="300">
+        <!-- Star row (viewport-fill root) bounds the log height; no MaxHeight cap needed. -->
+        <DataGrid Grid.Row="1" x:Name="AlarmGrid" AutomationProperties.Name="Alarm and event log" AutoGenerateColumns="False" Style="{StaticResource HmiTable}">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="96" MinWidth="96"/>
             <DataGridTextColumn Header="Event" Binding="{Binding Event}" Width="150" MinWidth="150"/>

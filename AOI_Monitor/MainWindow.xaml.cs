@@ -1587,8 +1587,6 @@ public partial class MainWindow : Window, IDisposable
         var status = InspectionModelConfigurationService.GetStatus();
         var statusText = InspectionModelConfigurationService.GetStatusText();
         InspectionEngineStatusText.Text = statusText;
-        HeaderEngineText.Text = InspectionModelConfigurationService.ShortStatusLabel(statusText);
-        HeaderEngineText.ToolTip = statusText;
         InspectionEngineStatusText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(status switch
         {
             Models.InspectionEngineStatus.MlModelReady => "#50F56E",

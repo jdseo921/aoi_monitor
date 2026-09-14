@@ -40,7 +40,8 @@ public partial class MonitorView : UserControl, IReleasablePageResources, IAsync
     private string _currentSourceFrameId = string.Empty;
     private string _currentSourceKind = "File";
     private string _currentFrameMetadata = "No frame";
-    private string _lastLightingResult = "Lighting: Disabled / Not Connected";
+    // The Board/Status row label already reads "Lighting"; keep the value prefix-free.
+    private string _lastLightingResult = "Disabled / Not Connected";
     private bool _currentIsSimulatedSource;
     private BitmapSource? _currentBitmap;
     private AnalysisResult? _currentAnalysis;
@@ -890,10 +891,14 @@ public partial class MonitorView : UserControl, IReleasablePageResources, IAsync
         BoardModelText.Text = string.IsNullOrWhiteSpace(_currentBoardModel) ? state.BoardProgram : _currentBoardModel;
         LotText.Text = string.IsNullOrWhiteSpace(_currentLotId) ? "POC-LOT" : _currentLotId;
         OperatorText.Text = state.OperatorWithRole;
-        EngineText.Text = $"{engine.Name} | Camera: {CameraStatusText()}";
+        // The Engine row shows only the engine; camera connectivity is the Camera row's fact.
+        EngineText.Text = engine.Name;
         ModelVersionText.Text = engine.Version;
         LearnedModelEvidenceText.Text = BuildLearnedModelEvidenceText(_currentAnalysis);
-        CameraSourceText.Text = $"{_cameraSource.Name}: {CameraStatusText()}";
+        // With the null source, "No Camera Connected: Not Connected" said the same thing twice.
+        CameraSourceText.Text = _cameraSource is NullCameraSource
+            ? CameraStatusText()
+            : $"{_cameraSource.Name}: {CameraStatusText()}";
         CameraFrameMetadataText.Text = _currentFrameMetadata;
         LightingSyncText.Text = _lastLightingResult;
         if (_currentAnalysis is null)
@@ -1097,25 +1102,27 @@ public partial class MonitorView : UserControl, IReleasablePageResources, IAsync
 
     private void SetResultStatus(string verdict)
     {
+        // Swap the shared verdict banner style instead of assigning raw hex brushes so the
+        // Result surface stays on the HmiVerdictBanner Ok/Ng/Warn token family.
         var normalized = verdict.ToUpperInvariant();
+        string bannerStyleKey;
         if (normalized == "OK")
         {
             ResultStatusText.Text = "OK";
-            ResultStatusBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#14311D"));
-            ResultStatusBorder.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#50F56E"));
+            bannerStyleKey = "HmiVerdictBannerOk";
         }
         else if (normalized == "NG")
         {
             ResultStatusText.Text = "NG";
-            ResultStatusBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#35191B"));
-            ResultStatusBorder.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F13B3F"));
+            bannerStyleKey = "HmiVerdictBannerNg";
         }
         else
         {
             ResultStatusText.Text = normalized == "WARNING" ? "WARNING" : "REVIEW";
-            ResultStatusBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#372914"));
-            ResultStatusBorder.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E1A334"));
+            bannerStyleKey = "HmiVerdictBannerWarn";
         }
+
+        ResultStatusBorder.Style = (Style)FindResource(bannerStyleKey);
     }
 
     private void LogEvent(string eventName, string message)

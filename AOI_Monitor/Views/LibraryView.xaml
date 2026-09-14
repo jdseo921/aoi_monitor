@@ -118,12 +118,13 @@
             <TextBlock Text="Inspection Records" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
           </DockPanel>
         </Border>
+        <!-- Abbreviations are explained by the per-header tooltips (HmiHeaderRefDesTemplate /
+             HmiHeaderInspectionResultTemplate / HmiHeaderGroundTruthTemplate). -->
         <DataGrid Grid.Row="1"
                   x:Name="RecordsGrid"
                   SelectionChanged="OnRecordsSelectionChanged"
                   MinWidth="1130"
-                  Style="{StaticResource HmiDenseTable}"
-                  ToolTip="AI means inspection result. GT means ground truth. RefDes means reference designator.">
+                  Style="{StaticResource HmiDenseTable}">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Sample"   Binding="{Binding Sample}"      Width="128" MinWidth="128"/>
             <DataGridTextColumn Header="Board"    Binding="{Binding Board}"       Width="118" MinWidth="118"/>
@@ -160,7 +161,7 @@
             <TextBlock Text="Database Transparency" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
           </DockPanel>
         </Border>
-        <DataGrid Grid.Row="1" x:Name="SchemaGrid" MaxHeight="170" Style="{StaticResource HmiDenseTable}" MinWidth="720">
+        <DataGrid Grid.Row="1" x:Name="SchemaGrid" Style="{StaticResource HmiDenseTable}" MinWidth="720">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Table"   Binding="{Binding Table}"   Width="150" MinWidth="150"/>
             <DataGridTextColumn Header="Columns" Binding="{Binding Columns}" Width="470" MinWidth="470" ElementStyle="{StaticResource HmiDataGridCellText}"/>
