@@ -23,12 +23,12 @@
           <TextBlock Text="Deployment Profile" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
           <ComboBox x:Name="ProfileCombo" MinHeight="34"/>
         </StackPanel>
-        <TextBlock Grid.Column="2" x:Name="SessionSummaryText" Text="No pilot session loaded."
+        <TextBlock Grid.Column="2" x:Name="SessionSummaryText"
                    Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" VerticalAlignment="Center"/>
         <WrapPanel Grid.Column="3" VerticalAlignment="Center">
-          <Button Style="{StaticResource ActionBtnGreen}" Content="Start New Pilot" Margin="0,0,6,0" MinWidth="132" Click="OnStartNewClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="Resume Latest" Margin="0,0,6,0" MinWidth="116" Click="OnResumeClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="Export Bundle" MinWidth="118" Click="OnExportBundleClick"/>
+          <Button Style="{StaticResource ActionBtnGreen}" Content="Start New Pilot" Margin="{StaticResource HmiButtonGap}" Click="OnStartNewClick"/>
+          <Button Style="{StaticResource ActionBtn}" Content="Resume Latest" Margin="{StaticResource HmiButtonGap}" Click="OnResumeClick"/>
+          <Button Style="{StaticResource ActionBtn}" Content="Export Bundle" Click="OnExportBundleClick"/>
         </WrapPanel>
       </Grid>
     </Border>
@@ -36,81 +36,90 @@
     <Border Grid.Row="2" Style="{StaticResource Panel}">
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" MinHeight="32"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,5">
-          <TextBlock Text="Customer Pilot Evidence Steps" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Customer Pilot Evidence Steps" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
+            <Button Grid.Column="1" Style="{StaticResource ActionBtnAmber}" Content="Waive Selected" Click="OnWaiveSelectedClick"
+                    ToolTip="Records an audited engineer waiver for the step selected in the table below."/>
+          </Grid>
         </Border>
-        <WrapPanel Grid.Row="1" Margin="8">
-          <Button Style="{StaticResource ActionBtnGreen}" Content="1 Confirm Profile" Margin="0,0,6,6" MinWidth="142" Click="OnConfirmProfileClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="2 Diagnostics" Margin="0,0,6,6" MinWidth="120" Click="OnDiagnosticsClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="3 Select Dataset" Margin="0,0,6,6" MinWidth="130" Click="OnSelectDatasetClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="4 Preflight" Margin="0,0,6,6" MinWidth="112" Click="OnPreflightClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="5 Batch" Margin="0,0,6,6" MinWidth="96" Click="OnBatchClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="6 False Calls" Margin="0,0,6,6" MinWidth="118" Click="OnFalseCallClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="7 Model" Margin="0,0,6,6" MinWidth="96" Click="OnModelClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="8 Customer Package" Margin="0,0,6,6" MinWidth="150" Click="OnCustomerPackageClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="9 Stage 2 Accept" Margin="0,0,6,6" MinWidth="136" Click="OnStage2Click"/>
-          <Button Style="{StaticResource ActionBtnGreen}" Content="10 Readiness Export" Margin="0,0,6,6" MinWidth="154" Click="OnReadinessClick"/>
-          <Button Style="{StaticResource ActionBtnAmber}" Content="Waive Selected" Margin="0,0,6,6" MinWidth="126" Click="OnWaiveSelectedClick"/>
-        </WrapPanel>
-        <UniformGrid Grid.Row="2" Columns="5" Margin="8,0,8,8">
+        <!-- Session roll-up: collapsed until a pilot session exists. The steps table below is
+             the single source of step identity, status, and action. -->
+        <UniformGrid Grid.Row="1" x:Name="SummaryTilesPanel" Columns="5" Margin="8" Visibility="Collapsed">
           <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
             <StackPanel>
               <TextBlock Text="Current Step" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="CurrentStepText" Text="No session" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+              <TextBlock x:Name="CurrentStepText" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
             </StackPanel>
           </Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
             <StackPanel>
               <TextBlock Text="Blockers" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="BlockersText" Text="Start or resume a pilot" Foreground="{DynamicResource HmiNgSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+              <TextBlock x:Name="BlockersText" Foreground="{DynamicResource HmiNgSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
             </StackPanel>
           </Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
             <StackPanel>
               <TextBlock Text="Evidence Required" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="EvidenceRequiredText" Text="Profile, diagnostics, dataset, preflight, batch evidence" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+              <TextBlock x:Name="EvidenceRequiredText" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
             </StackPanel>
           </Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
             <StackPanel>
               <TextBlock Text="Next Action" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="NextActionText" Text="Start New Pilot or Resume Latest" Foreground="{DynamicResource HmiWarnSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+              <TextBlock x:Name="NextActionText" Foreground="{DynamicResource HmiWarnSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
             </StackPanel>
           </Border>
           <Border Style="{StaticResource FieldBox}">
             <StackPanel>
               <TextBlock Text="Waived" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock x:Name="WaivedStatusText" Text="0 waived steps" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+              <TextBlock x:Name="WaivedStatusText" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
             </StackPanel>
           </Border>
         </UniformGrid>
-        <DataGrid Grid.Row="3" x:Name="StepsGrid" CanUserSortColumns="False" AutoGenerateColumns="False" Margin="8,0,8,8" Style="{StaticResource HmiDenseTable}" MinWidth="0"
-                  ToolTip="Each row is a readiness gate. Waived items require audited engineering justification and do not imply production readiness.">
-          <DataGrid.RowStyle>
-            <Style TargetType="DataGridRow">
-              <Setter Property="Background" Value="{Binding StatusBrush}"/>
-              <Setter Property="Foreground" Value="{DynamicResource HmiTextBrush}"/>
-            </Style>
-          </DataGrid.RowStyle>
-          <DataGrid.Columns>
-            <DataGridTextColumn Header="#" Binding="{Binding StepOrder}" Width="60" MinWidth="60"/>
-            <DataGridTextColumn Header="Step" Binding="{Binding StepName}" Width="240" MinWidth="240"/>
-            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
-            <DataGridTextColumn Header="Evidence" Binding="{Binding EvidencePath}" Width="300" MinWidth="300"/>
-            <DataGridTextColumn Header="Messages" Binding="{Binding MessagesDisplay}" Width="360" MinWidth="360"/>
-            <DataGridCheckBoxColumn Header="Waived" Binding="{Binding Waived}" Width="96" MinWidth="96"/>
-          </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Row="2" Margin="8,0,8,8">
+          <DataGrid x:Name="StepsGrid" CanUserSortColumns="False" AutoGenerateColumns="False" Style="{StaticResource HmiDenseTable}" MinWidth="0"
+                    ToolTip="Each row is a readiness gate. Waived items require audited engineering justification and do not imply production readiness.">
+            <DataGrid.RowStyle>
+              <Style TargetType="DataGridRow">
+                <Setter Property="Background" Value="{Binding StatusBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource HmiTextBrush}"/>
+              </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="#" Binding="{Binding StepOrder}" Width="60" MinWidth="60"/>
+              <DataGridTextColumn Header="Step" Binding="{Binding StepName}" Width="240" MinWidth="240"/>
+              <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="120" MinWidth="120"/>
+              <DataGridTextColumn Header="Evidence" Binding="{Binding EvidencePath}" Width="2*" MinWidth="120"
+                                  ElementStyle="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+              <DataGridTextColumn Header="Messages" Binding="{Binding MessagesDisplay}" Width="*" MinWidth="120"
+                                  ElementStyle="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+              <DataGridCheckBoxColumn Header="Waived" Binding="{Binding Waived}" Width="96" MinWidth="96"/>
+              <DataGridTemplateColumn Header="Run" Width="Auto" MinWidth="136">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Style="{StaticResource ActionBtn}" Content="Run" Margin="4,2" Click="OnRunStepClick"
+                            ToolTip="{Binding RunActionName}" AutomationProperties.Name="{Binding RunActionName}"/>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBlock x:Name="StepsEmptyStateText" Style="{StaticResource HmiEmptyStateText}"
+                     Text="No pilot session - press Start New Pilot to begin."/>
+        </Grid>
       </Grid>
     </Border>
 
-    <TextBlock Grid.Row="4" x:Name="StatusText" Text="Pilot wizard ready."
+    <TextBlock Grid.Row="4" x:Name="StatusText" MinHeight="{StaticResource HmiFontSizeBody}"
                Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
   </Grid>
 </UserControl>
-

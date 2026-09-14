@@ -101,6 +101,9 @@ public partial class ProfileView : UserControl, IReleasablePageResources, IDispo
         LegendMaxText.Text = _maxHeight.ToString("F3", CultureInfo.InvariantCulture);
         MapStatusText.Text = $"{_points.Count:N0} height samples";
         EmptyMapText.Visibility = Visibility.Collapsed;
+        TopDownMapInset.Visibility = Visibility.Visible;
+        HeightScaleLegend.Visibility = Visibility.Visible;
+        ViewHintChip.Visibility = Visibility.Visible;
         HeightMapImage.Source = BuildHeatMapBitmap();
         BuildSurfaceModel();
         BuildDefectRows();
@@ -127,6 +130,12 @@ public partial class ProfileView : UserControl, IReleasablePageResources, IDispo
         };
     }
 
+    /// <summary>
+    /// The source badge states the evidence CLASS of the selected source (the combo already
+    /// names the source itself): SAMPLE DATA for the CSV path, BOUNDARY ONLY for the pilot
+    /// adapter (no vendor SDK is configured, so it cannot validate real 3D hardware), and
+    /// NO SOURCE when nothing is selected.
+    /// </summary>
     private void UpdateSourceEvidenceBadges()
     {
         var mode = GetSelectedSourceMode();
@@ -134,19 +143,19 @@ public partial class ProfileView : UserControl, IReleasablePageResources, IDispo
         {
             case "Sample CSV":
                 ProfileSourceBadge.Style = (Style)FindResource("HmiEvidenceSampleData");
-                ProfileSourceBadgeText.Text = string.IsNullOrWhiteSpace(_currentCsvPath) ? "Sample CSV" : "Sample CSV Loaded";
+                ProfileSourceBadgeText.Text = "SAMPLE DATA";
                 ProfileConnectionBadge.Style = (Style)FindResource("HmiEvidenceNotConnected");
                 ProfileConnectionBadgeText.Text = "Not Connected";
                 break;
             case "Pilot Hardware Adapter":
-                ProfileSourceBadge.Style = (Style)FindResource("HmiEvidencePilot");
-                ProfileSourceBadgeText.Text = "Pilot Hardware";
+                ProfileSourceBadge.Style = (Style)FindResource("HmiEvidenceBoundaryOnly");
+                ProfileSourceBadgeText.Text = "BOUNDARY ONLY";
                 ProfileConnectionBadge.Style = (Style)FindResource("HmiEvidenceNotValidated");
                 ProfileConnectionBadgeText.Text = "Not Validated";
                 break;
             default:
                 ProfileSourceBadge.Style = (Style)FindResource("HmiEvidenceNotConnected");
-                ProfileSourceBadgeText.Text = "No Source";
+                ProfileSourceBadgeText.Text = "NO SOURCE";
                 ProfileConnectionBadge.Style = (Style)FindResource("HmiEvidenceNotConnected");
                 ProfileConnectionBadgeText.Text = "Not Connected";
                 break;
@@ -519,7 +528,13 @@ public partial class ProfileView : UserControl, IReleasablePageResources, IDispo
         SurfaceModel.Geometry = null;
         _defectRows.Clear();
         DefectCountText.Text = "0 features";
+        MapStatusText.Text = string.Empty;
+        SliceRowText.Text = "--";
         EmptyMapText.Visibility = Visibility.Visible;
+        SliceEmptyText.Visibility = Visibility.Visible;
+        TopDownMapInset.Visibility = Visibility.Collapsed;
+        HeightScaleLegend.Visibility = Visibility.Collapsed;
+        ViewHintChip.Visibility = Visibility.Collapsed;
     }
 
     private void OnHeightMapClick(object sender, MouseButtonEventArgs e)
@@ -584,8 +599,11 @@ public partial class ProfileView : UserControl, IReleasablePageResources, IDispo
         if (_selectedPoint is not { } point || _points.Count == 0)
         {
             SliceRowText.Text = "--";
+            SliceEmptyText.Visibility = Visibility.Visible;
             return;
         }
+
+        SliceEmptyText.Visibility = Visibility.Collapsed;
 
         var row = Enumerable.Range(_minX, _maxX - _minX + 1)
             .Select(x => (X: x, Height: _points.TryGetValue((x, point.Y), out var value) ? value : double.NaN))

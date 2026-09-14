@@ -165,9 +165,7 @@ public partial class SettingsView
             return;
 
         LangCombo.SelectedIndex = 0;
-        FontCombo.SelectedIndex = 1;
         ResolutionCombo.SelectedIndex = 0;
-        ThemeCombo.SelectedIndex = 0;
         ConsoleTitleText.Text = UiPreferenceDefaults.ConsoleTitle;
         StationNameText.Text = UiPreferenceDefaults.StationDisplayName;
         StationSubtitleText.Text = UiPreferenceDefaults.StationSubtitle;

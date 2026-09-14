@@ -16,12 +16,15 @@ public partial class CompareView : UserControl
     private bool _goldenOverlayVisible = true;
     private bool _zoomed;
 
-    private static readonly object[] Findings =
+    /// <summary>Typed presentation row for the comparison findings table.</summary>
+    private sealed record CompareFindingRow(string Region, string Defect, string Golden, string Judgement);
+
+    private static readonly CompareFindingRow[] Findings =
     {
-        new { Region = "U107 pin row B",    Defect = "Bridge-like solder mass",  Golden = "Separated joints",      Judgement = "NG" },
-        new { Region = "U107 lower-right",  Defect = "Excess highlight",          Golden = "Normal pad edge",        Judgement = "Review" },
-        new { Region = "Board fiducial",    Defect = "Aligned",                   Golden = "Aligned",                Judgement = "OK" },
-        new { Region = "Connector CN8",     Defect = "No difference",             Golden = "No difference",          Judgement = "OK" },
+        new("U107 pin row B",   "Bridge-like solder mass", "Separated joints", "NG"),
+        new("U107 lower-right", "Excess highlight",        "Normal pad edge",  "Review"),
+        new("Board fiducial",   "Aligned",                 "Aligned",          "OK"),
+        new("Connector CN8",    "No difference",           "No difference",    "OK"),
     };
 
     public CompareView()
@@ -51,33 +54,25 @@ public partial class CompareView : UserControl
             var judgement = ToChipVerdict(a.Verdict);
             var topEvidence = a.Evidence.Take(3).ToArray();
 
-            var rows = new List<object>();
-            rows.AddRange(a.Defects.Select(defect => new
-            {
-                Region = string.IsNullOrWhiteSpace(defect.RoiId) ? "Defect ROI" : defect.RoiId,
-                Defect = $"{defect.DefectType} {defect.Confidence:P0}",
-                Golden = string.IsNullOrWhiteSpace(defect.RoiType) ? $"Box {defect.BoundingBox.X:P0},{defect.BoundingBox.Y:P0}" : defect.RoiType,
-                Judgement = ToChipVerdict(defect.JudgmentStatus),
-            }));
-            rows.Add(new { Region = "Decision", Defect = a.DecisionReason, Golden = $"Policy: {a.PolicyName}", Judgement = judgement });
-            rows.Add(new { Region = "Score vs Threshold", Defect = $"{a.DifferenceScore:F1}%", Golden = $"R {a.ReviewThreshold:F1}% / NG {a.NgThreshold:F1}%", Judgement = judgement });
-            rows.Add(new { Region = "Hotspot ROI", Defect = $"x={a.Hotspot.X:P0}, y={a.Hotspot.Y:P0}", Golden = $"w={a.Hotspot.Width:P0}, h={a.Hotspot.Height:P0}", Judgement = judgement });
-            rows.Add(new { Region = "Evidence 1", Defect = topEvidence.Length > 0 ? topEvidence[0] : "-", Golden = "", Judgement = judgement });
-            rows.Add(new { Region = "Evidence 2", Defect = topEvidence.Length > 1 ? topEvidence[1] : "-", Golden = "", Judgement = judgement });
-            rows.Add(new { Region = "Evidence 3", Defect = topEvidence.Length > 2 ? topEvidence[2] : "-", Golden = "", Judgement = judgement });
+            var rows = new List<CompareFindingRow>();
+            rows.AddRange(a.Defects.Select(defect => new CompareFindingRow(
+                string.IsNullOrWhiteSpace(defect.RoiId) ? "Defect ROI" : defect.RoiId,
+                $"{defect.DefectType} {defect.Confidence:P0}",
+                string.IsNullOrWhiteSpace(defect.RoiType) ? $"Box {defect.BoundingBox.X:P0},{defect.BoundingBox.Y:P0}" : defect.RoiType,
+                ToChipVerdict(defect.JudgmentStatus))));
+            rows.Add(new CompareFindingRow("Decision", a.DecisionReason, $"Policy: {a.PolicyName}", judgement));
+            rows.Add(new CompareFindingRow("Score vs Threshold", $"{a.DifferenceScore:F1}%", $"R {a.ReviewThreshold:F1}% / NG {a.NgThreshold:F1}%", judgement));
+            rows.Add(new CompareFindingRow("Hotspot ROI", $"x={a.Hotspot.X:P0}, y={a.Hotspot.Y:P0}", $"w={a.Hotspot.Width:P0}, h={a.Hotspot.Height:P0}", judgement));
+            rows.Add(new CompareFindingRow("Evidence 1", topEvidence.Length > 0 ? topEvidence[0] : "-", "", judgement));
+            rows.Add(new CompareFindingRow("Evidence 2", topEvidence.Length > 1 ? topEvidence[1] : "-", "", judgement));
+            rows.Add(new CompareFindingRow("Evidence 3", topEvidence.Length > 2 ? topEvidence[2] : "-", "", judgement));
             FindingsGrid.ItemsSource = rows;
 
-            FindingsSourceText.Text = "Analysis Result";
-            FindingsSourceText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C6FFD0"));
-            FindingsSourceChip.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#14311D"));
-            FindingsSourceChip.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#377849"));
+            SetFindingsSource("Analysis Result", "HmiAdaptiveStatusOk", "HmiOkSoftBrush");
         }
         else
         {
-            FindingsSourceText.Text = "Demo Data";
-            FindingsSourceText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F1D8FF"));
-            FindingsSourceChip.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2A1740"));
-            FindingsSourceChip.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#8F5FD1"));
+            SetFindingsSource("Demo Data", "HmiAdaptiveStatusSimulated", "HmiSimulatedSoftBrush");
         }
 
         ApplyLearnedVisualComparison(state.LastAnalysis);
@@ -91,6 +86,41 @@ public partial class CompareView : UserControl
             "OK" => "OK",
             _ => "Review",
         };
+    }
+
+    // The findings source chip and the per-row result chips reuse the shared
+    // adaptive-status styles instead of page-local colors. Pure presentation mapping:
+    // state -> shared style key and shared soft foreground brush, swapped via
+    // FindResource (never raw hexes).
+    private void SetFindingsSource(string label, string chipStyleKey, string textBrushKey)
+    {
+        FindingsSourceText.Text = label;
+        FindingsSourceText.SetResourceReference(TextBlock.ForegroundProperty, textBrushKey);
+        FindingsSourceChip.Style = (Style)FindResource(chipStyleKey);
+    }
+
+    private void OnResultChipLoaded(object sender, RoutedEventArgs e)
+        => ApplyResultChipStyle(sender as Border);
+
+    private void OnResultChipDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        => ApplyResultChipStyle(sender as Border);
+
+    private void ApplyResultChipStyle(Border? chip)
+    {
+        if (chip is null) return;
+
+        var judgement = (chip.DataContext as CompareFindingRow)?.Judgement;
+        var (chipStyleKey, textBrushKey) = judgement switch
+        {
+            "NG" => ("HmiAdaptiveStatusNg", "HmiNgSoftBrush"),
+            "OK" => ("HmiAdaptiveStatusOk", "HmiOkSoftBrush"),
+            "Review" => ("HmiAdaptiveStatusWarning", "HmiWarnSoftBrush"),
+            _ => ("HmiAdaptiveStatusUnavailable", "HmiTextBodyBrush"),
+        };
+
+        chip.Style = (Style)FindResource(chipStyleKey);
+        if (chip.Child is TextBlock text)
+            text.SetResourceReference(TextBlock.ForegroundProperty, textBrushKey);
     }
 
     public void ExportPair()
@@ -258,10 +288,7 @@ public partial class CompareView : UserControl
                 ? string.Join(" ", analysis.Evidence.Take(4))
                 : string.Join(" ", LearnedVisualModelRegistryService.BuildEvidenceLines(active.Model));
 
-        FindingsSourceText.Text = "Learned Visual Model";
-        FindingsSourceText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F1D8FF"));
-        FindingsSourceChip.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3A2149"));
-        FindingsSourceChip.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#7C4FB6"));
+        SetFindingsSource("Learned Visual Model", "HmiAdaptiveStatusSimulated", "HmiSimulatedSoftBrush");
     }
 
     private void ShowDemoComparisonCanvases()

@@ -55,6 +55,8 @@
 
   <!-- Soft status text (pale tint used on themed surfaces; chip-internal text keeps its
        literal pair) and the table selection tint. -->
+  <Color x:Key="HmiInsetPanelColor">#13191D</Color>
+  <Color x:Key="HmiDeepInsetColor">#080A0C</Color>
   <Color x:Key="HmiWarnSoftColor">#FFE0A7</Color>
   <Color x:Key="HmiNgSoftColor">#FFCDD0</Color>
   <Color x:Key="HmiOkSoftColor">#C6FFD0</Color>
@@ -62,6 +64,8 @@
   <Color x:Key="HmiSimulatedSoftColor">#F1D8FF</Color>
   <Color x:Key="HmiSelectionColor">#273642</Color>
 
+  <SolidColorBrush x:Key="HmiInsetPanelBrush" Color="{StaticResource HmiInsetPanelColor}"/>
+  <SolidColorBrush x:Key="HmiDeepInsetBrush" Color="{StaticResource HmiDeepInsetColor}"/>
   <SolidColorBrush x:Key="HmiWarnSoftBrush" Color="{StaticResource HmiWarnSoftColor}"/>
   <SolidColorBrush x:Key="HmiNgSoftBrush" Color="{StaticResource HmiNgSoftColor}"/>
   <SolidColorBrush x:Key="HmiOkSoftBrush" Color="{StaticResource HmiOkSoftColor}"/>

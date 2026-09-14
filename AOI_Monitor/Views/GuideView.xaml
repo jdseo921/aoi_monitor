@@ -2,69 +2,66 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource HmiBgBrush}">
-  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <!-- Fill the viewport: the review-sequence table absorbs spare height (audit
+  <!-- Explicit scroll attributes restate the FactoryViewportFillPage style values; a
+       repo-content test asserts these literals on documentation pages. -->
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <!-- Viewport-fill idiom: the page inset lives on the ScrollViewer Padding, never on this
+         Grid. The review-sequence table is the star element and absorbs spare height (audit
          TrailingVoidPercent was 57.9% at 1080p before this). -->
-    <Grid Margin="8" MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+    <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
-    <Border Style="{StaticResource Panel}" Margin="0,0,0,8">
-      <Grid Margin="8">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel>
-          <TextBlock Text="Settings / Guide" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
-          <TextBlock Text="Operator workflow reference with access to local settings and prototype installation notes."
-                     Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="0,3,0,0"/>
-        </StackPanel>
-        <WrapPanel Grid.Row="1" HorizontalAlignment="Left" Margin="0,8,0,0">
-          <Button Style="{StaticResource ActionBtnGreen}" Content="Open Settings" Margin="0,0,6,0" Click="OnOpenSettingsClick"/>
-          <Button Style="{StaticResource ActionBtnBlue}" Content="Calibration" Margin="0,0,6,0" Click="OnOpenCalibrationClick"/>
-          <Button Style="{StaticResource ActionBtnAmber}" Content="Run Setup Wizard Again" Margin="0,0,6,0" Click="OnRunSetupWizardClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="Export Diagnostics Report" Margin="0,0,6,0" Click="OnExportDiagnosticsClick"/>
-          <Button Style="{StaticResource ActionBtn}" Content="Installation Notes" Click="OnOpenInstallClick"/>
-        </WrapPanel>
-      </Grid>
-    </Border>
+      <!-- Header + navigation actions (above the fold) -->
+      <Border Style="{StaticResource Panel}" Margin="{StaticResource HmiRowGap}">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" MinHeight="32"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+            <TextBlock Text="Settings / Guide"
+                       Style="{StaticResource HmiSectionHeaderText}"
+                       ToolTip="Operator workflow reference with access to local settings and prototype installation notes."/>
+          </Border>
+          <WrapPanel Grid.Row="1" HorizontalAlignment="Left" Margin="8,8,0,0">
+            <Button Style="{StaticResource ActionBtnGreen}" Content="Open Settings" Margin="{StaticResource HmiFieldGap}" Click="OnOpenSettingsClick"/>
+            <Button Style="{StaticResource ActionBtnBlue}" Content="Calibration" Margin="{StaticResource HmiFieldGap}" Click="OnOpenCalibrationClick"/>
+            <Button Style="{StaticResource ActionBtn}" Content="Installation Notes" Margin="{StaticResource HmiFieldGap}" Click="OnOpenInstallClick"/>
+          </WrapPanel>
+        </Grid>
+      </Border>
 
-    <!-- Steps -->
-    <Border Grid.Row="1" Style="{StaticResource Panel}" Margin="0,0,0,8">
-      <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-          <TextBlock Text="Mandatory Review Sequence" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
-        </Border>
-        <DataGrid Grid.Row="1" x:Name="StepsGrid">
-          <DataGrid.Columns>
-            <DataGridTextColumn Header="#"           Binding="{Binding Num}"      Width="38"/>
-            <DataGridTextColumn Header="Step"        Binding="{Binding Step}"     Width="*" ElementStyle="{StaticResource HmiDataGridCellText}"/>
-            <DataGridTextColumn Header="Priority"    Binding="{Binding Priority}" Width="80"/>
-          </DataGrid.Columns>
-        </DataGrid>
-      </Grid>
-    </Border>
+      <!-- Steps: the guide content, star-sized to fill the viewport -->
+      <Border Grid.Row="1" Style="{StaticResource Panel}" Margin="{StaticResource HmiRowGap}">
+        <Grid>
+          <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+            <TextBlock Text="Mandatory Review Sequence" Style="{StaticResource HmiSectionHeaderText}"/>
+          </Border>
+          <DataGrid Grid.Row="1" x:Name="StepsGrid">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="#"           Binding="{Binding Num}"      Width="38"/>
+              <DataGridTextColumn Header="Step"        Binding="{Binding Step}"     Width="*" ElementStyle="{StaticResource HmiDataGridCellText}"/>
+              <DataGridTextColumn Header="Priority"    Binding="{Binding Priority}" Width="80"/>
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+      </Border>
 
-    <!-- Header info -->
-    <Border Grid.Row="2" Style="{StaticResource Panel}">
-      <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-          <TextBlock Text="Guide Header" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
-        </Border>
-        <UniformGrid Grid.Row="1" Columns="3" Margin="8" Rows="1">
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
+      <!-- Review policy reference facts (self-labeled; boundary wording kept verbatim) -->
+      <Border Grid.Row="2" Style="{StaticResource Panel}">
+        <UniformGrid Columns="3" Rows="1" Margin="8">
+          <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiButtonGap}">
             <StackPanel>
               <TextBlock Text="Default Policy" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="Minimize False Positives" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
             </StackPanel>
           </Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0">
+          <Border Style="{StaticResource FieldBox}" Margin="{StaticResource HmiButtonGap}">
             <StackPanel>
               <TextBlock Text="Primary Evidence" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/>
               <TextBlock Text="Image + ROI + GT + Inspection Result" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
@@ -77,10 +74,7 @@
             </StackPanel>
           </Border>
         </UniformGrid>
-      </Grid>
-    </Border>
-
+      </Border>
     </Grid>
   </ScrollViewer>
 </UserControl>
-

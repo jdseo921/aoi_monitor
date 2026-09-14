@@ -262,11 +262,11 @@ public partial class SettingsView
 
         if (_isKorean)
         {
-            SetComboItemText(FontCombo, 0, "\uD45C\uC900 - 14pt \uC6B4\uC601\uC790 \uCD5C\uC18C \uD06C\uAE30");
+            FontCombo.Text = "\uD45C\uC900 - 14pt \uC6B4\uC601\uC790 \uCD5C\uC18C \uD06C\uAE30";
             SetComboItemText(ResolutionCombo, 0, "1920 x 1080 \uCD5C\uC18C HMI");
             SetComboItemText(ResolutionCombo, 1, "2560 x 1440 \uC5D4\uC9C0\uB2C8\uC5B4\uB9C1 \uBAA8\uB2C8\uD130");
             SetComboItemText(ResolutionCombo, 2, "3840 x 2160 \uBCBD\uBA74 \uD45C\uC2DC");
-            SetComboItemText(ThemeCombo, 0, "\uC0B0\uC5C5\uC6A9 \uB2E4\uD06C");
+            ThemeCombo.Text = "\uC0B0\uC5C5\uC6A9 \uB2E4\uD06C";
 
             SetComboItemText(DetectionPriorityCombo, 0, DetectionPriorityDisplay(Models.DetectionPriority.MinimizeFalsePositives, true));
             SetComboItemText(DetectionPriorityCombo, 1, DetectionPriorityDisplay(Models.DetectionPriority.Balanced, true));
@@ -274,11 +274,11 @@ public partial class SettingsView
         }
         else
         {
-            SetComboItemText(FontCombo, 0, "Standard - 14 pt operator floor");
+            FontCombo.Text = "Standard - 14 pt operator floor";
             SetComboItemText(ResolutionCombo, 0, "1920 x 1080 minimum HMI");
             SetComboItemText(ResolutionCombo, 1, "2560 x 1440 engineering monitor");
             SetComboItemText(ResolutionCombo, 2, "3840 x 2160 wall display");
-            SetComboItemText(ThemeCombo, 0, "Industrial Dark");
+            ThemeCombo.Text = "Industrial Dark";
 
             SetComboItemText(DetectionPriorityCombo, 0, "Minimize False Positives");
             SetComboItemText(DetectionPriorityCombo, 1, "Balanced");
@@ -307,14 +307,12 @@ public partial class SettingsView
         var preferences = UiPreferencesService.Load();
         LangCombo.SelectedIndex = preferences.Language == UiLanguage.Korean ? 1 : 0;
         _ = preferences.FontPreset;
-        FontCombo.SelectedIndex = 0;
         ResolutionCombo.SelectedIndex = preferences.ResolutionPreset switch
         {
             UiResolutionPreset.Qhd2560x1440 => 1,
             UiResolutionPreset.Uhd3840x2160 => 2,
             _ => 0,
         };
-        ThemeCombo.SelectedIndex = 0;
         ConsoleTitleText.Text = preferences.ConsoleTitle;
         StationNameText.Text = preferences.StationDisplayName;
         StationSubtitleText.Text = preferences.StationSubtitle;

@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,7 +57,7 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Pilot wizard refresh failed: {ex.Message}";
+            SetStatus($"Pilot wizard refresh failed: {ex.Message}", StatusSeverity.Error);
         }
     }
 
@@ -89,7 +88,7 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         try
         {
             LoadSnapshot(CustomerPilotWizardService.StartNew(SelectedProfile(), WorkflowState.Instance.OperatorWithRole));
-            StatusText.Text = "Started a new customer pilot session.";
+            SetStatus("Started a new customer pilot session.");
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
         {
@@ -116,12 +115,12 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
             if (result is null)
             {
                 if (showMessage)
-                    StatusText.Text = "No incomplete customer pilot session exists.";
+                    SetStatus("No incomplete customer pilot session exists.", StatusSeverity.Warning);
                 return;
             }
 
             LoadSnapshot(result.Snapshot);
-            StatusText.Text = $"Resumed pilot session {result.SessionId}.";
+            SetStatus($"Resumed pilot session {result.SessionId}.");
         }
         catch (OperationCanceledException)
         {
@@ -130,6 +129,46 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
         {
             ShowError("Could not resume pilot", ex);
+        }
+    }
+
+    private void OnRunStepClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.DataContext is not PilotStepRow row)
+            return;
+
+        switch (row.StepKey)
+        {
+            case CustomerPilotStepKind.ConfirmDeploymentProfile:
+                OnConfirmProfileClick(sender, e);
+                break;
+            case CustomerPilotStepKind.RunSystemDiagnostics:
+                OnDiagnosticsClick(sender, e);
+                break;
+            case CustomerPilotStepKind.SelectCustomerDataset:
+                OnSelectDatasetClick(sender, e);
+                break;
+            case CustomerPilotStepKind.RunDatasetPreflight:
+                OnPreflightClick(sender, e);
+                break;
+            case CustomerPilotStepKind.RunBatchValidation:
+                OnBatchClick(sender, e);
+                break;
+            case CustomerPilotStepKind.RunFalseCallReduction:
+                OnFalseCallClick(sender, e);
+                break;
+            case CustomerPilotStepKind.RunModelAcceptance:
+                OnModelClick(sender, e);
+                break;
+            case CustomerPilotStepKind.ExportCustomerValidationPackage:
+                OnCustomerPackageClick(sender, e);
+                break;
+            case CustomerPilotStepKind.RunStage2Acceptance:
+                OnStage2Click(sender, e);
+                break;
+            case CustomerPilotStepKind.ExportReadinessAndChecklist:
+                OnReadinessClick(sender, e);
+                break;
         }
     }
 
@@ -173,7 +212,7 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
             var evidence = latest is null ? string.Empty : $"SQLite:BatchTestRuns/{latest.Id}";
             var message = latest is null ? "No batch validation run has been recorded." : $"Latest batch validation run {latest.Id}; rows={latest.TotalImages}; falseCall={latest.FalseCallRate:P1}.";
             LoadSnapshot(CustomerPilotWizardService.RecordBatchValidationEvidence(RequireSession().Session.Id, evidence, status, message));
-            StatusText.Text = "Batch validation evidence evaluated.";
+            SetStatus("Batch validation evidence evaluated.");
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
         {
@@ -206,7 +245,7 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
     {
         if (StepsGrid.SelectedItem is not PilotStepRow row)
         {
-            StatusText.Text = "Select a step to waive.";
+            SetStatus("Select a step to waive.", StatusSeverity.Warning);
             return;
         }
 
@@ -239,7 +278,7 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         {
             var result = CustomerPilotWizardService.ExportPilotEvidenceBundle(RequireSession().Session.Id, dialog.FolderName);
             RefreshFromState();
-            StatusText.Text = $"Pilot evidence bundle exported. JSON: {result.JsonPath}; HTML: {result.HtmlPath}; PDF: {result.PdfPath}.";
+            SetStatus($"Pilot evidence bundle exported. JSON: {result.JsonPath}; HTML: {result.HtmlPath}; PDF: {result.PdfPath}.");
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
         {
@@ -252,7 +291,7 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         try
         {
             LoadSnapshot(action());
-            StatusText.Text = successMessage;
+            SetStatus(successMessage);
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException or ArgumentException)
         {
@@ -302,14 +341,37 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         _steps.Clear();
         foreach (var step in orderedSteps)
             _steps.Add(PilotStepRow.FromRecord(step));
+        SummaryTilesPanel.Visibility = Visibility.Visible;
+        StepsEmptyStateText.Visibility = Visibility.Collapsed;
     }
 
     private static string ShortPath(string path)
         => string.IsNullOrWhiteSpace(path) ? "not selected" : Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
 
-    private static void ShowError(string title, Exception ex)
+    private void ShowError(string title, Exception ex)
     {
+        SetStatus($"{title}: {ex.Message}", StatusSeverity.Error);
         MessageBox.Show(ex.Message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
+    private void SetStatus(string message, StatusSeverity severity = StatusSeverity.Info)
+    {
+        StatusText.Text = message;
+        var brushKey = severity switch
+        {
+            StatusSeverity.Error => "HmiNgSoftBrush",
+            StatusSeverity.Warning => "HmiWarnSoftBrush",
+            _ => "HmiTextLabelBrush",
+        };
+        if (TryFindResource(brushKey) is Brush brush)
+            StatusText.Foreground = brush;
+    }
+
+    private enum StatusSeverity
+    {
+        Info,
+        Warning,
+        Error,
     }
 
     public sealed class PilotStepRow
@@ -322,6 +384,8 @@ public partial class PilotWizardView : UserControl, IAsyncNavigationPage
         public string MessagesDisplay { get; init; } = string.Empty;
         public bool Waived { get; init; }
         public Brush StatusBrush { get; init; } = Brushes.Transparent;
+
+        public string RunActionName => $"Run step {StepOrder}: {StepName}";
 
         public static PilotStepRow FromRecord(CustomerPilotStepRecord step)
             => new()

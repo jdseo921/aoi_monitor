@@ -28,14 +28,16 @@
     </Rectangle>
     <!-- Border -->
     <Border BorderBrush="#30383E" BorderThickness="1" Background="Transparent"/>
-    <!-- Polyline chart (640x192 logical coords, scaled to fill) -->
+    <!-- Polyline chart (640x192 logical coords, scaled to fill). Each series carries a
+         distinct dash pattern (solid / dashed / dotted) mirrored by the host legend so
+         color is never the only signal separating the lines. -->
     <Viewbox Stretch="Fill">
       <Canvas Width="640" Height="192">
         <Polyline Stroke="#5CA0D3" StrokeThickness="2" Fill="Transparent"
           Points="0,150 40,132 80,141 120,92 160,110 200,80 240,106 280,72 320,86 360,58 400,78 440,52 480,84 520,38 560,78 600,50 640,70"/>
-        <Polyline Stroke="#E1A334" StrokeThickness="2" Fill="Transparent"
+        <Polyline Stroke="#E1A334" StrokeThickness="2" StrokeDashArray="4 2" Fill="Transparent"
           Points="0,125 40,128 80,118 120,122 160,104 200,114 240,96 280,110 320,93 360,88 400,96 440,82 480,98 520,76 560,89 600,72 640,80"/>
-        <Polyline Stroke="#F13B3F" StrokeThickness="2" Fill="Transparent"
+        <Polyline Stroke="#F13B3F" StrokeThickness="2" StrokeDashArray="1 2" Fill="Transparent"
           Points="0,172 40,164 80,169 120,158 160,166 200,150 240,161 280,145 320,156 360,139 400,148 440,132 480,144 520,125 560,140 600,119 640,134"/>
       </Canvas>
     </Viewbox>

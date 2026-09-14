@@ -77,7 +77,11 @@ public partial class RecipeView : UserControl, IReleasablePageResources, IAsyncN
             cancellationToken.ThrowIfCancellationRequested();
             if (snapshot is null)
             {
-                RecipeStatusText.Text = "No saved recipe revision found. Load a PCB image to start.";
+                // Idle state is not an event: the editor's empty-state card owns the
+                // "load a PCB image" instruction and RevisionText already reports that no
+                // saved revision is loaded, so the status line stays empty until an
+                // operator action produces an outcome worth reporting.
+                RecipeStatusText.Text = string.Empty;
                 return;
             }
 

@@ -2,10 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource HmiBgBrush}">
-  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <!-- Fill the viewport: the runtime-notes table absorbs spare height (audit
-         TrailingVoidPercent was 53.8% at 1080p before this). -->
-    <Grid Margin="8" MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+         TrailingVoidPercent was 53.8% at 1080p before this). Page inset lives on the
+         ScrollViewer Padding (FactoryViewportFillPage); the root Grid carries no Margin. -->
+    <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
       <Grid.RowDefinitions>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
@@ -20,8 +21,8 @@
       <Border Grid.Column="0" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-            <TextBlock Text="Prototype Runtime Notes" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+            <TextBlock Text="Prototype Runtime Notes" Style="{StaticResource HmiSectionHeaderText}"/>
           </Border>
           <DataGrid Grid.Row="1" x:Name="RuntimeGrid">
             <DataGrid.Columns>
@@ -42,8 +43,8 @@
       <Border Grid.Column="2" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-            <TextBlock Text="GUI Role" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+            <TextBlock Text="GUI Role" Style="{StaticResource HmiSectionHeaderText}"/>
           </Border>
           <UniformGrid Grid.Row="1" Columns="1" Margin="8" Rows="4">
             <Border Style="{StaticResource FieldBox}" Margin="0,0,0,6"><StackPanel><TextBlock Text="Current Runtime"       Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/><TextBlock Text="Local WPF App"        FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel></Border>
@@ -59,10 +60,12 @@
     <Border Grid.Row="1" Style="{StaticResource Panel}" Margin="0,0,0,8">
       <Grid>
         <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-          <TextBlock Text="Documentation Boundary" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+          <TextBlock Text="Documentation Boundary" Style="{StaticResource HmiSectionHeaderText}"/>
         </Border>
-        <DataGrid Grid.Row="1" x:Name="BoundaryGrid" MaxHeight="140">
+        <!-- No MaxHeight: the table renders its four static rows in full instead of
+             nesting a second scrollbar inside the page ScrollViewer. -->
+        <DataGrid Grid.Row="1" x:Name="BoundaryGrid">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Topic"       Binding="{Binding Topic}"   Width="175"/>
             <DataGridTextColumn Header="Description" Binding="{Binding Desc}"    Width="*"/>

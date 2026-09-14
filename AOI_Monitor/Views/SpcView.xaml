@@ -37,29 +37,33 @@
       </Style.Triggers>
     </Style>
   </UserControl.Resources>
-  <ScrollViewer Style="{StaticResource FactoryScrollablePage}">
-  <!-- Fill the viewport: the chart and DB-health table absorb spare height (audit
-       TrailingVoidPercent was 59.2% at 1080p before this). -->
-  <Grid Margin="8" MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}">
+  <!-- Viewport-bound page: Height (not just MinHeight) tracks the ScrollViewer viewport so
+       the star row genuinely bounds the chart and the Database Health table — the table
+       scrolls on its own virtualized scrollbar instead of stretching the page into a
+       runaway scroll. MinHeight=720 keeps a floor so small windows still page-scroll.
+       The page inset lives on the ScrollViewer Padding, never on this Grid: a Margin here
+       adds to the scroll extent and re-creates the permanent sliver of scroll. -->
+  <Grid Height="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" MinHeight="720">
     <Grid.RowDefinitions>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <Grid Margin="0,0,0,8">
+    <Grid Margin="{StaticResource HmiRowGap}">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="410"/>
+        <ColumnDefinition Width="3*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="1.3*" MinWidth="380"/>
       </Grid.ColumnDefinitions>
 
       <!-- SPC Chart + stats -->
       <Border Grid.Column="0" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
             <DockPanel>
-              <Border DockPanel.Dock="Right" Style="{StaticResource ChipPurple}" Padding="6,1">
+              <Border DockPanel.Dock="Right" Style="{StaticResource ChipPurple}" Padding="6,1" VerticalAlignment="Center">
                 <TextBlock Text="Demo Trend / Not Live Data" Foreground="{DynamicResource HmiSimulatedSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
               </Border>
-              <TextBlock Text="SPC / SQLite Summary" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+              <TextBlock Text="SPC / SQLite Summary" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
             </DockPanel>
           </Border>
           <Grid Grid.Row="1" Margin="8">
@@ -68,15 +72,20 @@
               <RowDefinition Height="Auto"/>
               <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <c:LineChart/>
-            <WrapPanel Grid.Row="1" Margin="0,6,0,0">
-              <StackPanel Orientation="Horizontal" Margin="0,0,12,0"><Rectangle Width="10" Height="3" Fill="#5CA0D3" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="Yield" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
-              <StackPanel Orientation="Horizontal" Margin="0,0,12,0"><Rectangle Width="10" Height="3" Fill="#E1A334" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="False Calls" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
-              <StackPanel Orientation="Horizontal"><Rectangle Width="10" Height="3" Fill="#F13B3F" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="Escapes" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
+            <c:LineChart Margin="{StaticResource HmiRowGap}"/>
+            <!-- Legend swatches repeat each series' dash pattern (solid / dashed / dotted)
+                 so color is never the only signal separating the lines. -->
+            <WrapPanel Grid.Row="1">
+              <StackPanel Orientation="Horizontal" Margin="{StaticResource HmiButtonGap}"><Line X1="0" Y1="2" X2="28" Y2="2" Width="28" Height="4" Stroke="#5CA0D3" StrokeThickness="3" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="Yield" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
+              <StackPanel Orientation="Horizontal" Margin="{StaticResource HmiButtonGap}"><Line X1="0" Y1="2" X2="28" Y2="2" Width="28" Height="4" Stroke="#E1A334" StrokeThickness="3" StrokeDashArray="4 2" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="False Calls" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
+              <StackPanel Orientation="Horizontal"><Line X1="0" Y1="2" X2="28" Y2="2" Width="28" Height="4" Stroke="#F13B3F" StrokeThickness="3" StrokeDashArray="1 2" VerticalAlignment="Center" Margin="0,0,4,0"/><TextBlock Text="Escapes" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel>
             </WrapPanel>
-            <!-- Stats grid. SQLite Inspections / Review Events / Imported Images duplicated
-                 Database Health table rows on the same screen and were removed; the
-                 Database Health table remains the authoritative per-table view. -->
+            <!-- Stats grid. Each card states something the Database Health table cannot:
+                 the OK/NG/REVIEW verdict split, the derived yield %, and broken vault
+                 links (the table shows per-table row counts only). SQLite Inspections /
+                 Review Events / Imported Images duplicated Database Health table rows on
+                 the same screen and were removed; the Database Health table remains the
+                 authoritative per-table view. -->
             <UniformGrid Grid.Row="2" Columns="3" Margin="0,10,0,0" Rows="1">
               <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0"><StackPanel><TextBlock Text="OK / NG / REVIEW" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/><TextBlock x:Name="VerdictBreakdownText" Text="0 / 0 / 0" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel></Border>
               <Border Style="{StaticResource FieldBox}" Margin="0,0,6,0"><StackPanel><TextBlock Text="SQLite Yield" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,2"/><TextBlock x:Name="YieldText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/></StackPanel></Border>
@@ -90,10 +99,10 @@
       <Border Grid.Column="2" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-            <TextBlock Text="Database Health" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+            <TextBlock Text="Database Health" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
           </Border>
-          <DataGrid Grid.Row="1" x:Name="DbHealthGrid" Style="{StaticResource HmiTable}" MinWidth="340">
+          <DataGrid Grid.Row="1" x:Name="DbHealthGrid" Style="{StaticResource HmiTable}">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Table / Index" Binding="{Binding Table}"  Width="*" MinWidth="150">
                 <DataGridTextColumn.ElementStyle>
@@ -103,8 +112,8 @@
                   </Style>
                 </DataGridTextColumn.ElementStyle>
               </DataGridTextColumn>
-              <DataGridTextColumn Header="Count"         Binding="{Binding Count}"  Width="90" MinWidth="90"/>
-              <DataGridTemplateColumn Header="Status" Width="96" MinWidth="96">
+              <DataGridTextColumn Header="Count"         Binding="{Binding Count}"  Width="Auto"/>
+              <DataGridTemplateColumn Header="Status" Width="Auto">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                     <Border Style="{StaticResource DbStatusChipBorder}" HorizontalAlignment="Left" Margin="0,1,0,1">
@@ -119,12 +128,13 @@
       </Border>
     </Grid>
 
-    <!-- Bottom alarm -->
-    <Border Grid.Row="1" Background="#14080A" BorderBrush="#4B2325" BorderThickness="1" Padding="7,10">
+    <!-- Evidence banner (stays outside scroll-only areas). Neutral info surface by
+         default; code-behind swaps to HmiVerdictBannerNg + HmiNgSoftBrush only on a
+         real database warning — never raw hex brushes. -->
+    <Border Grid.Row="1" x:Name="DatabaseWarningBorder" Style="{StaticResource HmiVerdictBanner}">
       <TextBlock x:Name="DatabaseWarningText" Text="SQLite summary loaded from local PoC database."
-                 Foreground="{DynamicResource HmiNgBrush}" FontWeight="ExtraBold" TextAlignment="Center" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
+                 Foreground="{DynamicResource HmiInfoSoftBrush}" FontWeight="ExtraBold" TextAlignment="Center" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
     </Border>
   </Grid>
   </ScrollViewer>
 </UserControl>
-

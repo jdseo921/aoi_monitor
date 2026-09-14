@@ -135,7 +135,7 @@
     <TabControl x:Name="SettingsCategoryTabs" Grid.Row="2" Background="{DynamicResource Bg}" BorderBrush="{DynamicResource LineBrush}">
       <TabItem Header="Basics">
         <ScrollViewer Style="{StaticResource FactoryScrollablePage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <Grid Margin="10">
+          <Grid Margin="10" Grid.IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="12"/>
@@ -146,11 +146,11 @@
               <Border Style="{StaticResource SettingsPanel}">
                 <StackPanel>
                   <TextBlock x:Name="DisplayLanguageHeaderText" Text="Display / Language" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock Text="Resolution, language, theme, and font choices are staged until Apply." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
+                  <TextBlock Text="Resolution and language choices are staged until Apply." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="LanguageLabelText" Text="Language" Style="{StaticResource SettingsLabel}"/>
@@ -162,7 +162,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="ResolutionLabelText" Text="Resolution" Style="{StaticResource SettingsLabel}"/>
@@ -175,25 +175,21 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="ThemeLabelText" Text="Theme" Style="{StaticResource SettingsLabel}"/>
-                    <ComboBox Grid.Column="1" x:Name="ThemeCombo" AutomationProperties.Name="Theme" SelectedIndex="0" IsEnabled="False" Style="{StaticResource SettingsCombo}" ToolTip="Industrial Dark is the single supported theme; its contrast contract is machine-checked by HmiThemePaletteTests.">
-                      <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Industrial Dark"/>
-                    </ComboBox>
+                    <TextBox Grid.Column="1" x:Name="ThemeCombo" AutomationProperties.Name="Theme" Style="{StaticResource ReadonlyInput}" Text="Industrial Dark" ToolTip="Industrial Dark is the single supported theme; its contrast contract is machine-checked by HmiThemePaletteTests."/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="FontSizeLabelText" Text="Font Size" Style="{StaticResource SettingsLabel}"/>
-                    <ComboBox Grid.Column="1" x:Name="FontCombo" AutomationProperties.Name="Base font size" SelectedIndex="0" IsEnabled="False" Style="{StaticResource SettingsCombo}"
-                              ToolTip="Operator text is fixed at the customer-spec floor of 14 pt (18.67 px); the layout audit fails below it. Use Windows display scaling for per-station sizing - layouts are validated at 100/125/150% DPI.">
-                      <ComboBoxItem Style="{StaticResource SettingsComboItem}">Standard - 14 pt operator floor</ComboBoxItem>
-                    </ComboBox>
+                    <TextBox Grid.Column="1" x:Name="FontCombo" AutomationProperties.Name="Base font size" Style="{StaticResource ReadonlyInput}" Text="Standard - 14 pt operator floor"
+                             ToolTip="Operator text is fixed at the customer-spec floor of 14 pt (18.67 px); the layout audit fails below it. Use Windows display scaling for per-station sizing - layouts are validated at 100/125/150% DPI."/>
                   </Grid>
 
                   <TextBlock x:Name="LocalizationStatusText"
@@ -209,7 +205,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                       <ColumnDefinition Width="98"/>
                     </Grid.ColumnDefinitions>
@@ -220,7 +216,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Deployment Target" Style="{StaticResource SettingsLabel}" ToolTip="Selects the evidence stage expected by Factory Readiness. It does not certify production release by itself."/>
@@ -235,7 +231,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Operating Mode" Style="{StaticResource SettingsLabel}" ToolTip="Demo allows sample/mock sources. Pilot requires clear labels. Production blocks demo/fallback evidence where possible."/>
@@ -256,12 +252,11 @@
             <StackPanel Grid.Column="2">
               <Border Style="{StaticResource SettingsPanel}">
                 <StackPanel>
-                  <TextBlock x:Name="ProgramAssetsHeaderText" Text="Program Assets" Style="{StaticResource HmiSectionHeaderText}"/>
-                  <TextBlock Text="Client-visible identity can be customized without changing code." Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
+                  <TextBlock x:Name="ProgramAssetsHeaderText" Text="Program Assets" Style="{StaticResource HmiSectionHeaderText}" Margin="0,0,0,10"/>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="ConsoleTitleLabelText" Text="Console Title" Style="{StaticResource SettingsLabel}"/>
@@ -270,7 +265,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="StationLabelText" Text="Station Label" Style="{StaticResource SettingsLabel}"/>
@@ -279,7 +274,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="StationSubtitleLabelText" Text="Station Subtitle" Style="{StaticResource SettingsLabel}"/>
@@ -288,7 +283,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock x:Name="AccentColorLabelText" Text="Accent Color" Style="{StaticResource SettingsLabel}"/>
@@ -297,7 +292,7 @@
 
                   <Grid Margin="{StaticResource HmiRowGap}">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                       <ColumnDefinition Width="98"/>
                     </Grid.ColumnDefinitions>
@@ -323,7 +318,7 @@
 
                   <Grid Margin="0,8,0,8">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="170"/>
+                      <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Retention days" Style="{StaticResource SettingsLabel}"/>
@@ -335,7 +330,7 @@
                             ToolTip="Show an advisory when rows are within the warning window of being purged."/>
 
                   <WrapPanel Margin="0,8,0,0">
-                    <Button x:Name="ApplyRetentionBtn" Style="{StaticResource ActionBtnBlue}" MinWidth="220" MinHeight="40"
+                    <Button x:Name="ApplyRetentionBtn" Style="{StaticResource ActionBtnBlue}"
                             Content="Apply Data Retention Policy" Click="OnApplyRetentionClick"/>
                   </WrapPanel>
                   <TextBlock x:Name="RetentionStatusText" Text="Retention policy: loading..." Foreground="{DynamicResource HmiTextLabelBrush}"
@@ -350,7 +345,7 @@
 
       <TabItem Header="QOL">
         <ScrollViewer Style="{StaticResource FactoryScrollablePage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <Grid Margin="10">
+          <Grid Margin="10" Grid.IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="12"/>
@@ -364,7 +359,7 @@
 
                 <Grid Margin="{StaticResource HmiRowGap}">
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                     <ColumnDefinition Width="*"/>
                   </Grid.ColumnDefinitions>
                   <TextBlock x:Name="ReviewDefaultLabelText" Text="Review Default" Style="{StaticResource SettingsLabel}"/>
@@ -373,7 +368,7 @@
 
                 <Grid>
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/>
                     <ColumnDefinition Width="*"/>
                   </Grid.ColumnDefinitions>
                   <TextBlock x:Name="DetectionPriorityLabelText" Text="Detection Priority" Style="{StaticResource SettingsLabel}"/>
@@ -596,7 +591,7 @@
 
       <TabItem Header="Hardware">
         <ScrollViewer Style="{StaticResource FactoryScrollablePage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <Grid Margin="10">
+          <Grid Margin="10" Grid.IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="12"/>
@@ -611,7 +606,7 @@
                              Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Mode" Style="{StaticResource SettingsLabel}"/>
                     <ComboBox x:Name="CameraSourceCombo" AutomationProperties.Name="Camera source mode" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}">
                       <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="No Camera / Not Connected"/>
@@ -621,53 +616,53 @@
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Top Folder" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraTopFolderText" AutomationProperties.Name="Camera top folder" Grid.Column="1" MinHeight="34"/>
                     <Button x:Name="BrowseCameraTopBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseCameraTopClick"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Side Folder" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraSideFolderText" AutomationProperties.Name="Camera side folder" Grid.Column="1" MinHeight="34"/>
                     <Button x:Name="BrowseCameraSideBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseCameraSideClick"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Bottom Folder" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraBottomFolderText" AutomationProperties.Name="Camera bottom folder" Grid.Column="1" MinHeight="34"/>
                     <Button x:Name="BrowseCameraBottomBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseCameraBottomClick"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Top Device ID" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraTopDeviceIdText" AutomationProperties.Name="Camera top device ID" Grid.Column="1" MinHeight="34" ToolTip="Stage 2 generic adapter device identifier. This does not imply camera connection."/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Side Device ID" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraSideDeviceIdText" AutomationProperties.Name="Camera side device ID" Grid.Column="1" MinHeight="34"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Bottom Device ID" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraBottomDeviceIdText" AutomationProperties.Name="Camera bottom device ID" Grid.Column="1" MinHeight="34"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="98"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Adapter Folder" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraAdapterFolderText" AutomationProperties.Name="Camera adapter folder" Grid.Column="1" MinHeight="34" ToolTip="External folder containing a camera_adapter_manifest.json or *.camera-adapter.json manifest."/>
                     <Button x:Name="BrowseCameraAdapterBtn" Grid.Column="2" Style="{StaticResource MiniBtn}" Content="Browse" Margin="8,0,0,0" Click="OnBrowseCameraAdapterClick"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Acquisition" Style="{StaticResource SettingsLabel}"/>
                     <ComboBox x:Name="CameraAcquisitionModeCombo" AutomationProperties.Name="Camera acquisition mode" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}">
                       <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Continuous"/>
@@ -677,46 +672,50 @@
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Exposure / Gain" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraExposureMsText" AutomationProperties.Name="Camera exposure milliseconds" Grid.Column="1" MinHeight="34" Text="5.0" ToolTip="Exposure in milliseconds."/>
                     <TextBox x:Name="CameraGainText" AutomationProperties.Name="Camera gain" Grid.Column="3" MinHeight="34" Text="1.0"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Timeouts ms" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraTriggerTimeoutMsText" AutomationProperties.Name="Camera trigger timeout milliseconds" Grid.Column="1" MinHeight="34" Text="250" ToolTip="Trigger timeout in milliseconds."/>
                     <TextBox x:Name="CameraFrameTimeoutMsText" AutomationProperties.Name="Camera frame timeout milliseconds" Grid.Column="3" MinHeight="34" Text="1000" ToolTip="Frame timeout in milliseconds."/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Board Model" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraBoardModelText" AutomationProperties.Name="Camera board model" Grid.Column="1" MinHeight="34" Text="TBOX-MAIN"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Lot ID" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="CameraLotIdText" AutomationProperties.Name="Camera lot ID" Grid.Column="1" MinHeight="34" Text="POC-LOT"/>
                   </Grid>
 
-                  <UniformGrid Columns="2">
+                  <Grid Margin="{StaticResource HmiRowGap}">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Source status" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="CameraSourceStatusText" Text="Not Connected" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiNgBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="CameraSourceStatusText" Grid.Column="1" Text="Not Connected" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiNgBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Acceptance" Style="{StaticResource SettingsLabel}" ToolTip="Acceptance means evidence collected against configured criteria. It does not certify production readiness by itself."/>
-                    <TextBlock x:Name="CameraAcceptanceStatusText" Text="Not validated" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                  </UniformGrid>
+                    <TextBlock x:Name="CameraAcceptanceStatusText" Grid.Column="1" Text="Not validated" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
 
                   <WrapPanel Margin="0,8,0,0">
-                    <Button x:Name="TestCameraSourceBtn" Style="{StaticResource MiniBtn}" Content="Test Camera Source" MinWidth="150" Margin="0,0,8,8" Click="OnTestCameraSourceClick"/>
-                    <Button x:Name="DiscoverCameraAdaptersBtn" Style="{StaticResource MiniBtn}" Content="Discover Adapters" MinWidth="160" Margin="0,0,8,8" Click="OnDiscoverCameraAdaptersClick"/>
-                    <Button x:Name="DiscoverCamerasBtn" Style="{StaticResource MiniBtn}" Content="Discover Cameras" MinWidth="150" Margin="0,0,8,8" Click="OnDiscoverCamerasClick"/>
-                    <Button x:Name="RunCameraAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtnGreen}" Content="Run Camera Acceptance Test" MinWidth="210" Margin="0,0,8,8" Click="OnRunCameraAcceptanceClick"/>
-                    <Button x:Name="CancelCameraAcceptanceBtn" Style="{StaticResource MiniBtnAmber}" Content="Cancel" Margin="0,0,8,8" Click="OnCancelCameraAcceptanceClick" IsEnabled="False"/>
-                    <Button x:Name="ExportCameraAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="Export Report" MinWidth="130" Margin="0,0,8,8" Click="OnExportCameraAcceptanceClick"/>
-                    <Button x:Name="ExportHardwareAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="Export Hardware Acceptance Package" MinWidth="260" Margin="0,0,0,8" Click="OnExportHardwareAcceptanceClick" ToolTip="Exports camera, lighting, robot, and 3D acceptance evidence with simulated/mock limitations labeled."/>
+                    <Button x:Name="TestCameraSourceBtn" Style="{StaticResource ActionBtn}" Content="Test Camera Source" Margin="0,0,8,8" Click="OnTestCameraSourceClick"/>
+                    <Button x:Name="DiscoverCameraAdaptersBtn" Style="{StaticResource ActionBtn}" Content="Discover Adapters" Margin="0,0,8,8" Click="OnDiscoverCameraAdaptersClick"/>
+                    <Button x:Name="DiscoverCamerasBtn" Style="{StaticResource ActionBtn}" Content="Discover Cameras" Margin="0,0,8,8" Click="OnDiscoverCamerasClick"/>
+                    <Button x:Name="RunCameraAcceptanceBtn" Style="{StaticResource ActionBtnGreen}" Content="Run Camera Acceptance Test" Margin="0,0,8,8" Click="OnRunCameraAcceptanceClick"/>
+                    <Button x:Name="CancelCameraAcceptanceBtn" Style="{StaticResource ActionBtnAmber}" Content="Cancel" Margin="0,0,8,8" Click="OnCancelCameraAcceptanceClick" IsEnabled="False"/>
+                    <Button x:Name="ExportCameraAcceptanceBtn" Style="{StaticResource ActionBtn}" Content="Export Report" Margin="0,0,8,8" Click="OnExportCameraAcceptanceClick"/>
+                    <Button x:Name="ExportHardwareAcceptanceBtn" Style="{StaticResource ActionBtn}" Content="Export Hardware Acceptance Package" Margin="0,0,0,8" Click="OnExportHardwareAcceptanceClick" ToolTip="Exports camera, lighting, robot, and 3D acceptance evidence with simulated/mock limitations labeled."/>
                   </WrapPanel>
                   <TextBlock x:Name="CameraDiagnosticsText" Text="Generic adapter configured is not the same as camera connected." Style="{StaticResource HmiTechnicalHintText}"/>
                 </StackPanel>
@@ -731,7 +730,7 @@
                              Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Mode" Style="{StaticResource SettingsLabel}"/>
                     <ComboBox x:Name="LightingModeCombo" AutomationProperties.Name="Lighting mode" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}">
                       <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="None / Not Connected"/>
@@ -742,21 +741,21 @@
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions>
                     <TextBlock Text="TCP Host / Port" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="LightingTcpHostText" AutomationProperties.Name="Lighting TCP host" Grid.Column="1" MinHeight="34"/>
                     <TextBox x:Name="LightingTcpPortText" AutomationProperties.Name="Lighting TCP port" Grid.Column="3" MinHeight="34" Text="5025"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="100"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="100"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Serial / Baud" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="LightingSerialPortText" AutomationProperties.Name="Lighting serial port" Grid.Column="1" MinHeight="34"/>
                     <TextBox x:Name="LightingBaudRateText" AutomationProperties.Name="Lighting baud rate" Grid.Column="3" MinHeight="34" Text="9600"/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Programs" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="LightingTopProgramText" AutomationProperties.Name="Lighting top program" Grid.Column="1" MinHeight="34" Text="TOP"/>
                     <TextBox x:Name="LightingSideProgramText" AutomationProperties.Name="Lighting side program" Grid.Column="3" MinHeight="34" Text="SIDE"/>
@@ -764,28 +763,32 @@
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Command" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="LightingCommandTemplateText" AutomationProperties.Name="Lighting command template" Grid.Column="1" MinHeight="34" Text="SET {view} {program}\n" ToolTip="Template supports {view}, {program}, \n and \r."/>
                   </Grid>
 
                   <Grid Margin="{StaticResource HmiRowGap}">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Timeout ms" Style="{StaticResource SettingsLabel}"/>
                     <TextBox x:Name="LightingTimeoutMsText" AutomationProperties.Name="Lighting timeout milliseconds" Grid.Column="1" MinHeight="34" Text="500"/>
                   </Grid>
 
-                  <UniformGrid Columns="2">
+                  <Grid Margin="{StaticResource HmiRowGap}">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Lighting status" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="LightingSettingsStatusText" Text="Lighting: Not Connected" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiNgBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="LightingSettingsStatusText" Grid.Column="1" Text="Lighting: Not Connected" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiNgBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Sync acceptance" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="LightingAcceptanceStatusText" Text="Not validated" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                  </UniformGrid>
+                    <TextBlock x:Name="LightingAcceptanceStatusText" Grid.Column="1" Text="Not validated" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
                   <WrapPanel Margin="0,8,0,0">
-                    <Button x:Name="TestLightingBtn" Style="{StaticResource MiniBtn}" Content="Test Lighting" Margin="0,0,8,8" Click="OnTestLightingClick"/>
-                    <Button x:Name="RunLightingAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtnGreen}" Content="Run Lighting Sync Test" MinWidth="190" Margin="0,0,8,8" Click="OnRunLightingAcceptanceClick"/>
-                    <Button x:Name="CancelLightingAcceptanceBtn" Style="{StaticResource MiniBtnAmber}" Content="Cancel" Margin="0,0,8,8" Click="OnCancelLightingAcceptanceClick" IsEnabled="False"/>
-                    <Button x:Name="ExportLightingAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="Export Report" MinWidth="130" Margin="0,0,0,8" Click="OnExportLightingAcceptanceClick"/>
+                    <Button x:Name="TestLightingBtn" Style="{StaticResource ActionBtn}" Content="Test Lighting" Margin="0,0,8,8" Click="OnTestLightingClick"/>
+                    <Button x:Name="RunLightingAcceptanceBtn" Style="{StaticResource ActionBtnGreen}" Content="Run Lighting Sync Test" Margin="0,0,8,8" Click="OnRunLightingAcceptanceClick"/>
+                    <Button x:Name="CancelLightingAcceptanceBtn" Style="{StaticResource ActionBtnAmber}" Content="Cancel" Margin="0,0,8,8" Click="OnCancelLightingAcceptanceClick" IsEnabled="False"/>
+                    <Button x:Name="ExportLightingAcceptanceBtn" Style="{StaticResource ActionBtn}" Content="Export Report" Margin="0,0,0,8" Click="OnExportLightingAcceptanceClick"/>
                   </WrapPanel>
                   <TextBlock x:Name="LightingDiagnosticsText" Text="Simulated mode is not real hardware. TCP/serial commands are sent only when explicitly configured." Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
                 </StackPanel>
@@ -796,16 +799,20 @@
                   <TextBlock Text="Robot Cell Acceptance (Stage 3 Boundary)" Style="{StaticResource HmiSectionHeaderText}"/>
                   <TextBlock Text="Robot controls default to Not Connected. Simulated evidence never claims real hardware readiness or safety certification."
                              Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
-                  <UniformGrid Columns="2">
+                  <Grid Margin="{StaticResource HmiRowGap}">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Robot acceptance" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="RobotAcceptanceStatusText" Text="Not validated" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="RobotAcceptanceStatusText" Grid.Column="1" Text="Not validated" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Evidence boundary" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock Text="Simulation is not production robot validation" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                  </UniformGrid>
+                    <TextBlock Grid.Column="1" Text="Simulation is not production robot validation" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiWarnBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
                   <WrapPanel Margin="0,8,0,0">
-                    <Button x:Name="RunRobotCellAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtnGreen}" Content="Run Robot Cell Acceptance" MinWidth="210" Margin="0,0,8,8" Click="OnRunRobotCellAcceptanceClick"/>
-                    <Button x:Name="CancelRobotCellAcceptanceBtn" Style="{StaticResource MiniBtnAmber}" Content="Cancel" Margin="0,0,8,8" Click="OnCancelRobotCellAcceptanceClick" IsEnabled="False"/>
-                    <Button x:Name="ExportRobotCellAcceptanceBtn" MinHeight="40" Style="{StaticResource MiniBtn}" Content="Export Report" MinWidth="130" Margin="0,0,0,8" Click="OnExportRobotCellAcceptanceClick"/>
+                    <Button x:Name="RunRobotCellAcceptanceBtn" Style="{StaticResource ActionBtnGreen}" Content="Run Robot Cell Acceptance" Margin="0,0,8,8" Click="OnRunRobotCellAcceptanceClick"/>
+                    <Button x:Name="CancelRobotCellAcceptanceBtn" Style="{StaticResource ActionBtnAmber}" Content="Cancel" Margin="0,0,8,8" Click="OnCancelRobotCellAcceptanceClick" IsEnabled="False"/>
+                    <Button x:Name="ExportRobotCellAcceptanceBtn" Style="{StaticResource ActionBtn}" Content="Export Report" Margin="0,0,0,8" Click="OnExportRobotCellAcceptanceClick"/>
                   </WrapPanel>
                   <TextBlock x:Name="RobotAcceptanceDiagnosticsText" Text="Robot/PLC controls default to Not Connected. Real Hardware is not connected from this screen. Simulated evidence never claims real hardware readiness or safety certification." Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
                 </StackPanel>
@@ -817,7 +824,7 @@
 
       <TabItem Header="Traceability">
         <ScrollViewer Style="{StaticResource FactoryScrollablePage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <Grid Margin="10">
+          <Grid Margin="10" Grid.IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="12"/>
@@ -831,7 +838,7 @@
                            Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="MES Mode" Style="{StaticResource SettingsLabel}"/>
                   <ComboBox x:Name="MesModeCombo" AutomationProperties.Name="MES mode" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}" ToolTip="Not Connected is blue/gray. Mock REST is purple and cannot be treated as production MES.">
                     <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Not Connected"/>
@@ -841,26 +848,26 @@
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Mock Endpoint" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="MesEndpointText" AutomationProperties.Name="MES mock endpoint" Grid.Column="1" MinHeight="34" ToolTip="Optional. If blank, mock uploads are written to local JSON."/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="REST Base URL" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="MesRestBaseUrlText" AutomationProperties.Name="MES REST base URL" Grid.Column="1" MinHeight="34" ToolTip="Explicit REST mode only. Example: https://mes.example.local"/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="REST Paths" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="MesResultPathText" AutomationProperties.Name="MES result path" Grid.Column="1" MinHeight="34" Text="/api/aoi/results"/>
                   <TextBox x:Name="MesImagePathText" AutomationProperties.Name="MES image path" Grid.Column="3" MinHeight="34" Text="/api/aoi/images"/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Auth Mode" Style="{StaticResource SettingsLabel}"/>
                   <ComboBox x:Name="MesAuthModeCombo" AutomationProperties.Name="MES authentication mode" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}">
                     <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="None"/>
@@ -871,27 +878,27 @@
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="API Key" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="MesApiKeyHeaderText" AutomationProperties.Name="MES API key header" Grid.Column="1" MinHeight="34" Text="X-API-Key"/>
                   <PasswordBox x:Name="MesApiKeyBox" AutomationProperties.Name="MES API key" Grid.Column="3" Style="{StaticResource SettingsPasswordBox}"/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Bearer Token" Style="{StaticResource SettingsLabel}"/>
                   <PasswordBox x:Name="MesBearerTokenBox" AutomationProperties.Name="MES bearer token" Grid.Column="1" Style="{StaticResource SettingsPasswordBox}"/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Basic Auth" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="MesUsernameText" AutomationProperties.Name="MES basic auth username" Grid.Column="1" MinHeight="34"/>
                   <PasswordBox x:Name="MesPasswordBox" AutomationProperties.Name="MES basic auth password" Grid.Column="3" Style="{StaticResource SettingsPasswordBox}"/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Retry" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="MesTimeoutText" AutomationProperties.Name="MES timeout seconds" Grid.Column="1" MinHeight="34" Text="10"/>
                   <TextBox x:Name="MesMaxRetryText" AutomationProperties.Name="MES max retry count" Grid.Column="3" MinHeight="34" Text="2"/>
@@ -899,13 +906,14 @@
                 </Grid>
 
                 <CheckBox x:Name="MesAutoUploadCheck" Content="Automatic upload when inspection result is saved" Foreground="{DynamicResource TextBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,8"/>
-                <Button x:Name="TestMesRestBtn" Style="{StaticResource MiniBtn}" Content="Test / Send Payload" MinWidth="160" Margin="0,0,0,8" Click="OnTestMesRestClick" HorizontalAlignment="Left"/>
+                <Button x:Name="TestMesRestBtn" Style="{StaticResource ActionBtn}" Content="Test / Send Payload" Margin="0,0,0,8" Click="OnTestMesRestClick" HorizontalAlignment="Left"/>
                 <TextBlock Text="REST mode is an integration boundary, not MES validation. OPC UA is a Stage 4 adapter TODO. Secrets are redacted from logs/status."
                            Foreground="{DynamicResource HmiWarnBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                <UniformGrid Columns="2">
+                <Grid>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="MES status" Style="{StaticResource SettingsLabel}"/>
-                  <TextBlock x:Name="MesMockStatusText" Text="MES: Not Connected" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiNgBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                </UniformGrid>
+                  <TextBlock x:Name="MesMockStatusText" Grid.Column="1" Text="MES: Not Connected" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource HmiNgBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                </Grid>
                 <TextBlock x:Name="MesDiagnosticsText" Text="Default mode is Not Connected. Mock local writes JSON evidence only." Style="{StaticResource HmiTechnicalHintText}" Margin="0,8,0,0"/>
               </StackPanel>
             </Border>
@@ -917,7 +925,7 @@
                            Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Mode" Style="{StaticResource SettingsLabel}"/>
                   <ComboBox x:Name="CentralSyncModeCombo" AutomationProperties.Name="Central sync mode" Grid.Column="1" SelectedIndex="0" Style="{StaticResource SettingsCombo}" ToolTip="Endpoint summaries and folders may be redacted in exported reports.">
                     <ComboBoxItem Style="{StaticResource SettingsComboItem}" Content="Disabled"/>
@@ -928,20 +936,20 @@
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Endpoint/Folder" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="CentralSyncEndpointText" AutomationProperties.Name="Central sync endpoint or folder" Grid.Column="1" MinHeight="34" ToolTip="FileDrop folder, REST endpoint, or future central database endpoint summary."/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Station / Interval" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="CentralSyncStationIdText" AutomationProperties.Name="Central sync station ID" Grid.Column="1" MinHeight="34"/>
                   <TextBox x:Name="CentralSyncIntervalText" AutomationProperties.Name="Central sync interval seconds" Grid.Column="3" MinHeight="34" Text="300"/>
                 </Grid>
 
                 <Grid Margin="{StaticResource HmiRowGap}">
-                  <Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                  <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                   <TextBlock Text="Retry / Secret" Style="{StaticResource SettingsLabel}"/>
                   <TextBox x:Name="CentralSyncMaxRetryText" AutomationProperties.Name="Central sync max retry count" Grid.Column="1" MinHeight="34" Text="5"/>
                   <PasswordBox x:Name="CentralSyncSecretBox" AutomationProperties.Name="Central sync secret" Grid.Column="3" Style="{StaticResource SettingsPasswordBox}"/>
@@ -960,7 +968,7 @@
 
       <TabItem Header="Evidence">
         <ScrollViewer Style="{StaticResource FactoryScrollablePage}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <Grid Margin="10">
+          <Grid Margin="10" Grid.IsSharedSizeScope="True">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*"/>
               <ColumnDefinition Width="12"/>
@@ -974,21 +982,31 @@
                   <TextBlock Text="Prepares local candidate files only. No model training, fine-tuning, or deployment is run from this prototype."
                              Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
                   <WrapPanel>
-                    <Button Style="{StaticResource MiniBtnGreen}" Content="Prepare" Margin="0,0,8,8" Click="OnStartTrainingClick"/>
-                    <Button Style="{StaticResource MiniBtn}" Content="Validate List" MinWidth="130" Margin="0,0,8,8" Click="OnRunEpochClick"/>
-                    <Button Style="{StaticResource MiniBtnAmber}" Content="Stop" MinHeight="40" MinWidth="120" Margin="0,0,8,8" Click="OnStopTrainingClick"/>
-                    <Button Style="{StaticResource MiniBtn}" Content="Open Folder" Margin="0,0,0,8" Click="OnOpenTrainingFolderClick"/>
+                    <Button Style="{StaticResource ActionBtnGreen}" Content="Prepare" Margin="0,0,8,8" Click="OnStartTrainingClick"/>
+                    <Button Style="{StaticResource ActionBtn}" Content="Validate List" Margin="0,0,8,8" Click="OnRunEpochClick"/>
+                    <Button Style="{StaticResource ActionBtnAmber}" Content="Stop" Margin="0,0,8,8" Click="OnStopTrainingClick"/>
+                    <Button Style="{StaticResource ActionBtn}" Content="Open Folder" Margin="0,0,0,8" Click="OnOpenTrainingFolderClick"/>
                   </WrapPanel>
-                  <UniformGrid Columns="2" Margin="0,4,0,0">
+                  <Grid Margin="0,4,0,8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Export status" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="TrainingStatusText" Text="IDLE" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TrainingStatusText" Grid.Column="1" Text="IDLE" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Grid Margin="{StaticResource HmiRowGap}">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="Queued samples" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="TrainingQueueText" Text="0" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TrainingQueueText" Grid.Column="1" Text="0" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Grid Margin="{StaticResource HmiRowGap}">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="List checks" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="TrainingEpochText" Text="0" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TrainingEpochText" Grid.Column="1" Text="0" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
+                  <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" SharedSizeGroup="SettingsLabelColumn"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <TextBlock Text="List quality" Style="{StaticResource SettingsLabel}"/>
-                    <TextBlock x:Name="TrainingValidationText" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextWrapping="Wrap"/>
-                  </UniformGrid>
+                    <TextBlock x:Name="TrainingValidationText" Grid.Column="1" Text="--" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                  </Grid>
                 </StackPanel>
               </Border>
 
@@ -1001,20 +1019,20 @@
                   <TextBlock Text="These actions create diagnostics, backups, restore previews, or support bundles. Package outputs redact secrets by default."
                              Style="{StaticResource HmiTechnicalHintText}" Margin="0,4,0,10"/>
                   <WrapPanel>
-                    <Button x:Name="RunSetupWizardBtn" Style="{StaticResource ActionBtnAmber}" Content="Run Setup Wizard Again" MinWidth="210" Click="OnRunSetupWizardClick" Margin="0,0,8,8"/>
-                    <Button x:Name="OpenInstallNotesBtn" Style="{StaticResource ActionBtn}" Content="Installation Notes" MinWidth="170" Click="OnOpenInstallNotesClick" Margin="0,0,8,8"/>
-                    <Button x:Name="OpenGuideBtn" Style="{StaticResource ActionBtn}" Content="Open Guide" MinWidth="150" Click="OnOpenGuideClick" Margin="0,0,8,8"/>
-                    <Button x:Name="ExportDiagnosticsBtn" Style="{StaticResource ActionBtn}" Content="Export Diagnostics Report" MinWidth="220" Click="OnExportDiagnosticsClick" Margin="0,0,8,8"/>
-                    <Button x:Name="RunLayoutStressBtn" Style="{StaticResource ActionBtn}" Content="Run Layout Stress Test" MinWidth="210" Click="OnRunLayoutStressClick" Margin="0,0,8,8" ToolTip="Developer/maintenance layout audit across all screens. Writes a report file; no settings change."/>
-                    <Button x:Name="BackupConfigurationBtn" Style="{StaticResource ActionBtnGreen}" Content="Backup Configuration" MinWidth="190" Click="OnBackupConfigurationClick" Margin="0,0,8,8"/>
-                    <Button x:Name="RestoreConfigurationPreviewBtn" Style="{StaticResource ActionBtnAmber}" Content="Restore Configuration Preview" MinWidth="240" Click="OnRestoreConfigurationPreviewClick" Margin="0,0,8,8"/>
+                    <Button x:Name="RunSetupWizardBtn" Style="{StaticResource ActionBtnAmber}" Content="Run Setup Wizard Again" Click="OnRunSetupWizardClick" Margin="0,0,8,8"/>
+                    <Button x:Name="OpenInstallNotesBtn" Style="{StaticResource ActionBtn}" Content="Installation Notes" Click="OnOpenInstallNotesClick" Margin="0,0,8,8"/>
+                    <Button x:Name="OpenGuideBtn" Style="{StaticResource ActionBtn}" Content="Open Guide" Click="OnOpenGuideClick" Margin="0,0,8,8"/>
+                    <Button x:Name="ExportDiagnosticsBtn" Style="{StaticResource ActionBtn}" Content="Export Diagnostics Report" Click="OnExportDiagnosticsClick" Margin="0,0,8,8"/>
+                    <Button x:Name="RunLayoutStressBtn" Style="{StaticResource ActionBtn}" Content="Run Layout Stress Test" Click="OnRunLayoutStressClick" Margin="0,0,8,8" ToolTip="Developer/maintenance layout audit across all screens. Writes a report file; no settings change."/>
+                    <Button x:Name="BackupConfigurationBtn" Style="{StaticResource ActionBtnGreen}" Content="Backup Configuration" Click="OnBackupConfigurationClick" Margin="0,0,8,8"/>
+                    <Button x:Name="RestoreConfigurationPreviewBtn" Style="{StaticResource ActionBtnAmber}" Content="Restore Configuration Preview" Click="OnRestoreConfigurationPreviewClick" Margin="0,0,8,8"/>
                     <Button x:Name="ApplyRestoreBtn" Style="{StaticResource ActionBtnGreen}" Content="Apply Restore" Click="OnApplyRestoreClick" Margin="0,0,8,8" IsEnabled="False"/>
-                    <Button x:Name="RollbackRestoreBtn" Style="{StaticResource ActionBtnAmber}" Content="Rollback Last Restore" MinWidth="200" Click="OnRollbackRestoreClick" Margin="0,0,8,8"/>
+                    <Button x:Name="RollbackRestoreBtn" Style="{StaticResource ActionBtnAmber}" Content="Rollback Last Restore" Click="OnRollbackRestoreClick" Margin="0,0,8,8"/>
                   </WrapPanel>
                   <WrapPanel Margin="0,6,0,0">
                     <CheckBox x:Name="SupportBundleRedactPathsCheck" Content="Redact image/storage paths" IsChecked="True" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center" Margin="0,0,12,8"/>
                     <CheckBox x:Name="SupportBundleIncludeModelsCheck" Content="Include model files" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center" Margin="0,0,12,8"/>
-                    <Button x:Name="ExportSupportBundleBtn" Style="{StaticResource ActionBtn}" Content="Export Support Bundle" MinWidth="190" Click="OnExportSupportBundleClick" Margin="0,0,0,8"/>
+                    <Button x:Name="ExportSupportBundleBtn" Style="{StaticResource ActionBtn}" Content="Export Support Bundle" Click="OnExportSupportBundleClick" Margin="0,0,0,8"/>
                   </WrapPanel>
                 </StackPanel>
               </Border>

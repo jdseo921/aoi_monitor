@@ -35,6 +35,68 @@
         </DataTrigger>
       </Style.Triggers>
     </Style>
+    <!-- Collapsed-by-default panel expander: the HmiPanelHeader strip doubles as the
+         toggle so demoted reference/planned content keeps the shared header vocabulary.
+         Candidate for promotion into FactoryHmiLayout.xaml once a second view needs it. -->
+    <Style x:Key="LibraryPanelExpander" TargetType="Expander">
+      <Setter Property="IsExpanded" Value="False"/>
+      <Setter Property="Focusable" Value="False"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Expander">
+            <DockPanel LastChildFill="True">
+              <ToggleButton DockPanel.Dock="Top"
+                            IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            AutomationProperties.Name="{Binding (AutomationProperties.Name), RelativeSource={RelativeSource TemplatedParent}}"
+                            Cursor="Hand">
+                <ToggleButton.Template>
+                  <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="HeaderStrip" Style="{StaticResource HmiPanelHeader}">
+                      <DockPanel>
+                        <!-- Direction glyph + collapsed/expanded content are the state signals;
+                             color is never the only one. -->
+                        <Path x:Name="ExpandGlyph"
+                              DockPanel.Dock="Left"
+                              Data="M 0,0 L 10,6 L 0,12 Z"
+                              Fill="{DynamicResource HmiTextLabelBrush}"
+                              VerticalAlignment="Center"
+                              Margin="{StaticResource HmiButtonGap}"
+                              RenderTransformOrigin="0.5,0.5">
+                          <Path.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                          </Path.RenderTransform>
+                        </Path>
+                        <ContentPresenter VerticalAlignment="Center"/>
+                      </DockPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="ExpandGlyph" Property="RenderTransform">
+                          <Setter.Value>
+                            <RotateTransform Angle="90"/>
+                          </Setter.Value>
+                        </Setter>
+                      </Trigger>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="HeaderStrip" Property="Background" Value="{DynamicResource HmiRaisedBrush}"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </ToggleButton.Template>
+              </ToggleButton>
+              <ContentPresenter x:Name="ExpandSite" Visibility="Collapsed"/>
+            </DockPanel>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsExpanded" Value="True">
+                <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
   </UserControl.Resources>
   <Grid Margin="8">
     <Grid.RowDefinitions>
@@ -45,46 +107,22 @@
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-    <!-- Filters + toolbar -->
+    <!-- Record actions + demoted prototype filters. The action band leads; the inert
+         filter combos are planned-only and live behind a collapsed "Filters" expander
+         so they cannot read as working query controls. -->
     <Border Grid.Row="0" Style="{StaticResource Panel}">
       <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
           <DockPanel>
-            <Border DockPanel.Dock="Right" Style="{StaticResource ChipPurple}" Padding="6,1">
+            <Border DockPanel.Dock="Right" Style="{StaticResource ChipPurple}" Padding="6,1" VerticalAlignment="Center">
               <TextBlock Text="Prototype Filters" Foreground="{DynamicResource HmiSimulatedSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
             </Border>
-            <TextBlock Text="Database Filter Console" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+            <TextBlock Text="Database Filter Console" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
           </DockPanel>
         </Border>
         <StackPanel Grid.Row="1" Margin="8">
-          <WrapPanel Style="{StaticResource HmiAdaptiveFilterBand}" Margin="0">
-            <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
-              <TextBlock Text="Board Model" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
-              <ComboBox SelectedIndex="0"><ComboBoxItem>TBOX-MAIN</ComboBoxItem></ComboBox>
-            </StackPanel>
-            <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
-              <TextBlock Text="Defect Type" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
-              <ComboBox SelectedIndex="0"><ComboBoxItem>All defect types</ComboBoxItem></ComboBox>
-            </StackPanel>
-            <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
-              <TextBlock Text="Risk Class" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
-              <ComboBox SelectedIndex="0"><ComboBoxItem>Possible Escape first</ComboBoxItem></ComboBox>
-            </StackPanel>
-            <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
-              <TextBlock Text="Review Status" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
-              <ComboBox SelectedIndex="0"><ComboBoxItem>Pending / Verified</ComboBoxItem></ComboBox>
-            </StackPanel>
-            <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
-              <TextBlock Text="Recipe Version" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
-              <ComboBox SelectedIndex="0"><ComboBoxItem>TBOX_TOP_V1.2</ComboBoxItem></ComboBox>
-            </StackPanel>
-            <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
-              <TextBlock Text="Image Link State" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
-              <ComboBox SelectedIndex="0"><ComboBoxItem>Linked only</ComboBoxItem></ComboBox>
-            </StackPanel>
-          </WrapPanel>
-          <WrapPanel Style="{StaticResource HmiAdaptiveFilterActionBand}">
+          <WrapPanel Style="{StaticResource HmiAdaptiveFilterActionBand}" Margin="{StaticResource HmiRowGap}">
             <Button Style="{StaticResource ActionBtn}" Content="Open Record" Margin="{StaticResource HmiButtonGap}" Click="OnOpenRecordClick"/>
             <Button Style="{StaticResource ActionBtnBlue}" Content="Batch Import" Margin="{StaticResource HmiButtonGap}" Click="OnBatchImportClick"/>
             <Button Style="{StaticResource ActionBtn}" Content="Compare Golden" Margin="{StaticResource HmiButtonGap}" Click="OnCompareGoldenClick"/>
@@ -92,14 +130,59 @@
             <Button Style="{StaticResource ActionBtnAmber}" Content="Batch Relabel" Margin="{StaticResource HmiButtonGap}" Click="OnBatchRelabelClick"/>
             <Button Style="{StaticResource ActionBtnGreen}" Content="Export Selected" Margin="{StaticResource HmiButtonGap}" Click="OnExportSelectedClick"/>
           </WrapPanel>
+          <Expander Style="{StaticResource LibraryPanelExpander}"
+                    AutomationProperties.Name="Filters"
+                    Margin="{StaticResource HmiRowGap}">
+            <Expander.Header>
+              <DockPanel>
+                <Border DockPanel.Dock="Right" Style="{StaticResource Chip}" Padding="6,1" VerticalAlignment="Center">
+                  <TextBlock Text="Not configured" Foreground="{DynamicResource HmiTextLabelBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
+                </Border>
+                <TextBlock Text="Filters" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
+              </DockPanel>
+            </Expander.Header>
+            <StackPanel Margin="8">
+              <TextBlock Text="Planned filters. Filtering is not configured in the Stage 1 prototype; the table lists records unfiltered."
+                         Foreground="{DynamicResource HmiTextLabelBrush}"
+                         FontSize="{StaticResource HmiFontSizeBody}"
+                         TextWrapping="Wrap"
+                         Margin="{StaticResource HmiRowGap}"/>
+              <WrapPanel Style="{StaticResource HmiAdaptiveFilterBand}" Margin="0">
+                <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                  <TextBlock Text="Board Model" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                  <ComboBox IsEnabled="False"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                  <TextBlock Text="Defect Type" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                  <ComboBox IsEnabled="False"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                  <TextBlock Text="Risk Class" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                  <ComboBox IsEnabled="False"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                  <TextBlock Text="Review Status" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                  <ComboBox IsEnabled="False"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                  <TextBlock Text="Recipe Version" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                  <ComboBox IsEnabled="False"/>
+                </StackPanel>
+                <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+                  <TextBlock Text="Image Link State" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,4"/>
+                  <ComboBox IsEnabled="False"/>
+                </StackPanel>
+              </WrapPanel>
+            </StackPanel>
+          </Expander>
           <TextBlock x:Name="ImportStatusText"
                      Text="Imported images are loaded from the local SQLite image table."
                      Foreground="{DynamicResource HmiTextLabelBrush}"
                      FontSize="{StaticResource HmiFontSizeBody}"
-                     TextWrapping="Wrap"
-                     Margin="0,6,0,0"/>
-          <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-            <ProgressBar x:Name="ImportProgressBar" Width="180" Height="12" Minimum="0" Maximum="100" Value="0" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                     TextWrapping="Wrap"/>
+          <!-- Progress + Cancel appear only while an import is running (BeginImport/EndImport). -->
+          <StackPanel x:Name="ImportProgressPanel" Orientation="Horizontal" Margin="0,6,0,0" Visibility="Collapsed">
+            <ProgressBar x:Name="ImportProgressBar" Width="180" Height="12" Minimum="0" Maximum="100" Value="0" Margin="{StaticResource HmiButtonGap}" VerticalAlignment="Center"/>
             <Button x:Name="CancelImportButton" Style="{StaticResource MiniBtn}" Content="Cancel" IsEnabled="False" Click="OnCancelImportClick"/>
           </StackPanel>
         </StackPanel>
@@ -109,13 +192,13 @@
     <!-- Records table -->
     <Border Grid.Row="2" Style="{StaticResource Panel}">
       <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
           <DockPanel>
-            <Border DockPanel.Dock="Right" x:Name="RecordsSourceChip" Style="{StaticResource Chip}" Padding="6,1">
+            <Border DockPanel.Dock="Right" x:Name="RecordsSourceChip" Style="{StaticResource Chip}" Padding="6,1" VerticalAlignment="Center">
               <TextBlock x:Name="RecordsSourceText" Text="SQLite Records" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
             </Border>
-            <TextBlock Text="Inspection Records" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+            <TextBlock Text="Inspection Records" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
           </DockPanel>
         </Border>
         <!-- Abbreviations are explained by the per-header tooltips (HmiHeaderRefDesTemplate /
@@ -149,27 +232,28 @@
       </Grid>
     </Border>
 
-    <!-- Schema -->
+    <!-- Schema reference: informs, but does not drive an operator decision, so it stays
+         collapsed by default. All rows are kept; the amber truthfulness chip stays visible
+         on the header even while collapsed. -->
     <Border Grid.Row="4" Style="{StaticResource Panel}">
-      <Grid>
-        <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+      <Expander Style="{StaticResource LibraryPanelExpander}"
+                AutomationProperties.Name="Database Transparency (reference)">
+        <Expander.Header>
           <DockPanel>
-            <Border DockPanel.Dock="Right" Style="{StaticResource ChipAmber}" Padding="6,1">
+            <Border DockPanel.Dock="Right" Style="{StaticResource ChipAmber}" Padding="6,1" VerticalAlignment="Center">
               <TextBlock Text="Static Schema Reference" Foreground="{DynamicResource HmiWarnSoftBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}"/>
             </Border>
-            <TextBlock Text="Database Transparency" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+            <TextBlock Text="Database Transparency (reference)" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
           </DockPanel>
-        </Border>
-        <DataGrid Grid.Row="1" x:Name="SchemaGrid" Style="{StaticResource HmiDenseTable}" MinWidth="720">
+        </Expander.Header>
+        <DataGrid x:Name="SchemaGrid" Style="{StaticResource HmiDenseTable}" MinWidth="720">
           <DataGrid.Columns>
             <DataGridTextColumn Header="Table"   Binding="{Binding Table}"   Width="150" MinWidth="150"/>
             <DataGridTextColumn Header="Columns" Binding="{Binding Columns}" Width="470" MinWidth="470" ElementStyle="{StaticResource HmiDataGridCellText}"/>
             <DataGridTextColumn Header="Status"  Binding="{Binding Status}"  Width="96" MinWidth="96"/>
           </DataGrid.Columns>
         </DataGrid>
-      </Grid>
+      </Expander>
     </Border>
   </Grid>
 </UserControl>
-

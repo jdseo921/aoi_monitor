@@ -167,7 +167,7 @@ public sealed class HmiLayoutAuditTests : IDisposable
         AssertDefinitionRequires(definitions, "image-viewer-window", "SaveImageButton");
         AssertDefinitionRequires(definitions, "recipe-editor", "RecipeEmptyStateCard");
         AssertDefinitionRequires(definitions, "profile-3d", "ProfileSourceBadgeText");
-        AssertDefinitionRequires(definitions, "hardware-readiness", "CurrentStepText");
+        AssertDefinitionRequires(definitions, "hardware-readiness", "StepsGrid");
     }
 
     [Fact]

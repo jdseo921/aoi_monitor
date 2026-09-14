@@ -1,4 +1,3 @@
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using AOI_Monitor.Services;
@@ -30,48 +29,9 @@ public partial class GuideView : UserControl
     private void OnOpenCalibrationClick(object sender, System.Windows.RoutedEventArgs e) => Navigate("calibration");
     private void OnOpenInstallClick(object sender, System.Windows.RoutedEventArgs e) => Navigate("install");
 
-    private void OnRunSetupWizardClick(object sender, RoutedEventArgs e)
-    {
-        if (!AuthorizeSettingsAction("Running setup wizard"))
-            return;
-
-        var wizard = new FirstRunWizardView
-        {
-            Owner = Window.GetWindow(this),
-        };
-        wizard.ShowDialog();
-    }
-
-    private void OnExportDiagnosticsClick(object sender, RoutedEventArgs e)
-    {
-        if (!AuthorizeSettingsAction("Exporting diagnostics report"))
-            return;
-
-        try
-        {
-            var report = SystemDiagnosticService.RunDiagnostics();
-            var export = SystemDiagnosticService.ExportReport(report);
-            WorkflowState.Instance.AddEvent("DIAGNOSTICS", $"Diagnostics report exported from Guide: {Path.GetFileName(export.JsonPath)}");
-            MessageBox.Show(
-                $"Diagnostics exported.\n\nJSON: {export.JsonPath}\nHTML: {export.HtmlPath}\nText: {export.TextPath}",
-                "AOI Monitor Diagnostics",
-                MessageBoxButton.OK,
-                report.ErrorCount == 0 ? MessageBoxImage.Information : MessageBoxImage.Warning);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
-        {
-            MessageBox.Show($"Diagnostics export failed:\n{ex.Message}", "AOI Monitor Diagnostics", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-    }
-
-    private static bool AuthorizeSettingsAction(string action)
-    {
-        if (WorkflowState.Instance.TryAuthorize(RoleAuthorization.CanManageSettings, action, out var message))
-            return true;
-
-        MessageBox.Show(message, "Permission Denied", MessageBoxButton.OK, MessageBoxImage.Warning);
-        return false;
-    }
+    // "Run Setup Wizard Again" and "Export Diagnostics Report" live only in their
+    // authoritative System Settings > Evidence diagnostics cluster (RunSetupWizardBtn /
+    // ExportDiagnosticsBtn); the Guide keeps navigation shortcuts only.
 
     private void Navigate(string key)
     {

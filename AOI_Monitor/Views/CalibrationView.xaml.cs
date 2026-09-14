@@ -299,6 +299,7 @@ public partial class CalibrationView : UserControl, IReleasablePageResources, IA
         TransformStatusText.Foreground = transform.IsAvailable
             ? System.Windows.Media.Brushes.LightGreen
             : System.Windows.Media.Brushes.Orange;
+        EmptyPointsText.Visibility = _points.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void LoadCalibrationImage(string imagePath)

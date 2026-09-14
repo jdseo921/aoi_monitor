@@ -2,8 +2,6 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using AOI_Monitor.Data;
 using AOI_Monitor.Models;
 using AOI_Monitor.Services;
@@ -352,12 +350,12 @@ public partial class LibraryView : UserControl, IAsyncNavigationPage, IDisposabl
             : snapshot.ShowDemoRows
                 ? "Demo Data"
                 : $"{snapshot.Mode} Mode: Demo Hidden";
-        var statusColor = snapshot.Records.Length > 0 ? "#C6FFD0" : snapshot.ShowDemoRows ? "#FFE0A7" : "#FFBFC1";
-        var backgroundColor = snapshot.Records.Length > 0 ? "#14311D" : snapshot.ShowDemoRows ? "#372914" : "#35191B";
-        var borderColor = snapshot.Records.Length > 0 ? "#377849" : snapshot.ShowDemoRows ? "#8C6C35" : "#9A393E";
-        RecordsSourceText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(statusColor));
-        RecordsSourceChip.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(backgroundColor));
-        RecordsSourceChip.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(borderColor));
+
+        // Shared chip styles + soft-brush tokens instead of raw hex in code-behind.
+        var sourceChipStyle = snapshot.Records.Length > 0 ? "ChipGreen" : snapshot.ShowDemoRows ? "ChipAmber" : "ChipRed";
+        var sourceTextBrush = snapshot.Records.Length > 0 ? "HmiOkSoftBrush" : snapshot.ShowDemoRows ? "HmiWarnSoftBrush" : "HmiNgSoftBrush";
+        RecordsSourceChip.Style = (Style)FindResource(sourceChipStyle);
+        RecordsSourceText.SetResourceReference(TextBlock.ForegroundProperty, sourceTextBrush);
 
         if (selectedImageId is not null)
             RecordsGrid.SelectedItem = snapshot.Records.FirstOrDefault(r => r.ImageLink == selectedImageId.Value.ToString());
@@ -365,7 +363,6 @@ public partial class LibraryView : UserControl, IAsyncNavigationPage, IDisposabl
         if (RecordsGrid.SelectedIndex < 0 && RecordsGrid.Items.Count > 0)
             RecordsGrid.SelectedIndex = 0;
 
-        SchemaGrid.Items.Refresh();
         ImportStatusText.Text = snapshot.Records.Length > 0
             ? $"{snapshot.Records.Length} imported image record(s) loaded from SQLite."
             : snapshot.ShowDemoRows
@@ -571,6 +568,7 @@ public partial class LibraryView : UserControl, IAsyncNavigationPage, IDisposabl
     {
         _importCts = new CancellationTokenSource();
         ImportProgressBar.Value = 0;
+        ImportProgressPanel.Visibility = Visibility.Visible;
         CancelImportButton.IsEnabled = true;
         ImportStatusText.Text = message;
         return _importCts;
@@ -582,6 +580,7 @@ public partial class LibraryView : UserControl, IAsyncNavigationPage, IDisposabl
         _importCts = null;
         CancelImportButton.IsEnabled = false;
         ImportProgressBar.Value = 0;
+        ImportProgressPanel.Visibility = Visibility.Collapsed;
     }
 
     private void UpdateImportProgress(ImportProgress progress)

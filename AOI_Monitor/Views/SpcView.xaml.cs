@@ -1,4 +1,5 @@
 using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using AOI_Monitor.Data;
@@ -38,13 +39,17 @@ public partial class SpcView : UserControl, IAsyncNavigationPage
 
         VerdictBreakdownText.Text = $"{snapshot.Ok:N0} / {snapshot.Ng:N0} / {snapshot.Review:N0}";
         YieldText.Text = snapshot.Yield;
+        var hasWarning = snapshot.BrokenLinks > 0;
         BrokenImageLinksText.Text = snapshot.BrokenLinks.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
-        BrokenImageLinksText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(snapshot.BrokenLinks > 0 ? "#F13B3F" : "#DCE5EB"));
+        BrokenImageLinksText.Foreground = (Brush)FindResource(hasWarning ? "HmiNgSoftBrush" : "HmiTextBodyBrush");
 
-        DatabaseWarningText.Text = snapshot.BrokenLinks > 0
+        DatabaseWarningText.Text = hasWarning
             ? $"SQLite warning: {snapshot.BrokenLinks:N0} imported image vault link(s) are missing. Run Verify Paths in Log & Export."
             : "SQLite summary uses local database counts. Trend chart is prototype data, not live factory SPC.";
-        DatabaseWarningText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(snapshot.BrokenLinks > 0 ? "#F27777" : "#E1A334"));
+        // Evidence banner is state-driven: neutral info surface by default, NG surface
+        // tokens only on a real warning (style swap, never raw hex brushes).
+        DatabaseWarningBorder.Style = (Style)FindResource(hasWarning ? "HmiVerdictBannerNg" : "HmiVerdictBanner");
+        DatabaseWarningText.Foreground = (Brush)FindResource(hasWarning ? "HmiNgSoftBrush" : "HmiInfoSoftBrush");
     }
 
     public void RefreshFromState() => _ = RefreshSafeAsync();
@@ -58,7 +63,8 @@ public partial class SpcView : UserControl, IAsyncNavigationPage
         catch (Exception ex)
         {
             DatabaseWarningText.Text = $"SQLite summary could not be loaded: {ex.Message}";
-            DatabaseWarningText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F13B3F"));
+            DatabaseWarningBorder.Style = (Style)FindResource("HmiVerdictBannerNg");
+            DatabaseWarningText.Foreground = (Brush)FindResource("HmiNgSoftBrush");
         }
     }
 

@@ -3,38 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{DynamicResource HmiBgBrush}">
   <UserControl.Resources>
-    <Style x:Key="CompareResultChipBorder" TargetType="Border" BasedOn="{StaticResource Chip}">
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding Judgement}" Value="NG">
-          <Setter Property="Background" Value="#35191B"/>
-          <Setter Property="BorderBrush" Value="#9A393E"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Judgement}" Value="Review">
-          <Setter Property="Background" Value="#372914"/>
-          <Setter Property="BorderBrush" Value="#8C6C35"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Judgement}" Value="OK">
-          <Setter Property="Background" Value="#14311D"/>
-          <Setter Property="BorderBrush" Value="#377849"/>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
-    <Style x:Key="CompareResultChipText" TargetType="TextBlock">
-      <Setter Property="Foreground" Value="{DynamicResource HmiTextBodyBrush}"/>
-      <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
-      <Setter Property="FontWeight" Value="Bold"/>
-      <Style.Triggers>
-        <DataTrigger Binding="{Binding Judgement}" Value="NG">
-          <Setter Property="Foreground" Value="{DynamicResource HmiNgSoftBrush}"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Judgement}" Value="Review">
-          <Setter Property="Foreground" Value="{DynamicResource HmiWarnSoftBrush}"/>
-        </DataTrigger>
-        <DataTrigger Binding="{Binding Judgement}" Value="OK">
-          <Setter Property="Foreground" Value="{DynamicResource HmiOkSoftBrush}"/>
-        </DataTrigger>
-      </Style.Triggers>
-    </Style>
     <Style x:Key="CompareFooterLabelText" TargetType="TextBlock" BasedOn="{StaticResource FactoryTrimmedTextWithTooltip}">
       <Setter Property="Foreground" Value="{DynamicResource HmiTextDimBrush}"/>
       <Setter Property="FontSize" Value="{StaticResource HmiFontSizeBody}"/>
@@ -47,8 +15,11 @@
       <Setter Property="LineHeight" Value="25"/>
     </Style>
   </UserControl.Resources>
-  <ScrollViewer Style="{StaticResource FactoryScrollablePage}">
-  <Grid Margin="8" MinHeight="665">
+  <ScrollViewer Style="{StaticResource FactoryViewportFillPage}">
+  <!-- Viewport-fill idiom: the page inset lives on the ScrollViewer Padding; the root Grid
+       carries NO outer Margin so the panels genuinely bound to the viewport instead of a
+       hard-coded MinHeight. -->
+  <Grid MinHeight="{Binding ViewportHeight, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="8"/>
@@ -61,36 +32,42 @@
     <Border Grid.Column="0" Style="{StaticResource Panel}">
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" MinHeight="42"/>
+          <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="7,5">
-          <DockPanel>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-              <Button x:Name="OpenDefectImageViewerButton"
-                      Style="{StaticResource MiniBtn}"
-                      Content="Large Image"
-                      MinWidth="112"
-                      Margin="0,0,6,0"
-                      Click="OnOpenDefectImageViewerClick"/>
-              <TextBlock x:Name="DefectSubtitleText"
-                         Text="IMG_0241 / AI OK / GT NG"
-                         Foreground="{DynamicResource HmiTextLabelBrush}"
-                         FontSize="{StaticResource HmiFontSizeBody}"
-                         VerticalAlignment="Center"
-                         TextWrapping="NoWrap"
-                         TextTrimming="CharacterEllipsis"
-                         MaxWidth="210"
-                         ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-            </StackPanel>
-            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <!-- Header grid: title + purple sim chip (Auto, chip stays beside its title),
+             subtitle star-sized with trim-plus-tooltip (no MaxWidth, so the GT-NG verdict
+             stays readable), viewer button Auto. -->
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
               <TextBlock Text="Defect Sample" FontWeight="ExtraBold" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
-              <Border Style="{StaticResource ChipPurple}" Margin="8,0,0,0">
-                <TextBlock Text="Demo Board" Foreground="#F1D8FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold"/>
+              <Border Style="{StaticResource ChipPurple}" Margin="8,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="Demo Board" Foreground="{DynamicResource HmiSimulatedSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold"/>
               </Border>
-            </WrapPanel>
-          </DockPanel>
+            </StackPanel>
+            <TextBlock x:Name="DefectSubtitleText"
+                       Grid.Column="1"
+                       Text="IMG_0241 / AI OK / GT NG"
+                       Style="{StaticResource FactoryTrimmedTextWithTooltip}"
+                       Foreground="{DynamicResource HmiTextLabelBrush}"
+                       TextAlignment="Right"
+                       VerticalAlignment="Center"
+                       Margin="10,0,10,0"/>
+            <Button Grid.Column="2"
+                    x:Name="OpenDefectImageViewerButton"
+                    Style="{StaticResource MiniBtn}"
+                    Content="Large Image"
+                    MinWidth="112"
+                    VerticalAlignment="Center"
+                    Click="OnOpenDefectImageViewerClick"/>
+          </Grid>
         </Border>
         <!-- Defect PCB view -->
         <Border x:Name="DefectImageViewport" Grid.Row="1" Margin="8" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Background="{DynamicResource HmiSurfaceBrush}" ClipToBounds="True">
@@ -126,10 +103,12 @@
                 <TextBlock Text="U107 BRIDGE" Foreground="White" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold"/>
               </Border>
             </Canvas>
-            <!-- Diff box -->
+            <!-- Diff box. The DIFF tag is right-anchored (Canvas.Right) just left of the
+                 red defect callout so "U107 BRIDGE" stays fully legible; growth extends
+                 leftward, away from the red label. -->
             <Canvas Canvas.Left="222" Canvas.Top="148" Width="76" Height="58">
               <Rectangle Width="76" Height="58" Stroke="#E1A334" StrokeThickness="2" Fill="Transparent"/>
-              <Border Canvas.Left="-2" Canvas.Top="-21" Background="#E1A334" Padding="5,2">
+              <Border Canvas.Right="72" Canvas.Top="-21" Background="#E1A334" Padding="5,2">
                 <TextBlock Text="DIFF" Foreground="#111111" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="ExtraBold"/>
               </Border>
             </Canvas>
@@ -140,14 +119,14 @@
           <Image x:Name="DefectActualImage" Visibility="Collapsed" Stretch="Uniform"/>
           </Grid>
         </Border>
-        <!-- Footer fields -->
-        <UniformGrid Grid.Row="2" Columns="3" Margin="8" Rows="2">
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="Sample" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="IMG_0241" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
+        <!-- Footer fields: per-side facts an operator compares. The sample id lives in the
+             header subtitle (one source per fact), so no Sample field here. -->
+        <UniformGrid Grid.Row="2" Columns="3" Margin="8">
           <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="RefDes" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="U107" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,0,5"><StackPanel><TextBlock Text="FOV" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="TOP-03" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
+          <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="FOV" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="TOP-03" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
+          <Border Style="{StaticResource FieldBox}" Margin="0,0,0,5"><StackPanel><TextBlock Text="Shift" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="A" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="Risk" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Possible Escape" Style="{StaticResource CompareFooterValueText}" Foreground="{DynamicResource HmiNgStrongBrush}"/></StackPanel></Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="Defect" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Solder Bridge" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0"><StackPanel><TextBlock Text="Shift" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="A" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
         </UniformGrid>
       </Grid>
     </Border>
@@ -163,9 +142,9 @@
       <!-- Sync / controls -->
       <Border Grid.Row="0" Style="{StaticResource Panel}">
         <Grid>
-          <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-            <TextBlock Text="Alignment / Difference Control" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+            <TextBlock Text="Alignment / Difference Control" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
           </Border>
           <Grid Grid.Row="1" Margin="8">
             <Grid.RowDefinitions>
@@ -184,27 +163,27 @@
               <Button Style="{StaticResource ActionBtnGreen}" Content="Export Pair" MinWidth="120" MinHeight="40" Click="OnExportPairClick"/>
             </WrapPanel>
             <!-- Score -->
-            <Border Grid.Row="1" Background="#13191D" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" MinHeight="78" Padding="8" Margin="0,0,0,6">
+            <Border Grid.Row="1" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" MinHeight="78" Padding="8" Margin="0,0,0,6">
               <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" TextBlock.TextAlignment="Center">
                 <TextBlock x:Name="DiffScoreText" Text="87%" FontSize="32" FontWeight="ExtraBold" Foreground="{DynamicResource HmiTextBrush}" TextAlignment="Center"/>
                 <TextBlock Text="Difference Score" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextAlignment="Center"/>
                 <TextBlock x:Name="DiffSummaryText" Text="ROI mismatch vs golden" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextAlignment="Center"/>
               </StackPanel>
             </Border>
-            <Border Grid.Row="2" x:Name="LearnedArtifactsPanel" Background="#13191D" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" MinHeight="118" Padding="8" Margin="0,0,0,6" Visibility="Collapsed">
+            <Border Grid.Row="2" x:Name="LearnedArtifactsPanel" Background="{DynamicResource HmiInsetPanelBrush}" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" MinHeight="118" Padding="8" Margin="0,0,0,6" Visibility="Collapsed">
               <StackPanel>
                 <TextBlock x:Name="LearnedCompareEvidenceText" Text="Learned PCB Visual Model evidence unavailable." Foreground="{DynamicResource HmiSimulatedBrush}" FontWeight="Bold" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap"/>
                 <UniformGrid Columns="2" Height="78" Margin="0,6,0,0">
-                  <Border Background="#080A0C" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1" Margin="0,0,5,0">
+                  <Border Background="{DynamicResource HmiDeepInsetBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1" Margin="0,0,5,0">
                     <Grid>
                       <Image x:Name="LearnedToleranceImage" Stretch="Uniform"/>
-                      <TextBlock Text="Tolerance Map" Foreground="#DCE5EB" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="6" VerticalAlignment="Bottom"/>
+                      <TextBlock Text="Tolerance Map" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="6" VerticalAlignment="Bottom"/>
                     </Grid>
                   </Border>
-                  <Border Background="#080A0C" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
+                  <Border Background="{DynamicResource HmiDeepInsetBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1">
                     <Grid>
                       <Image x:Name="LearnedAnomalyMapImage" Stretch="Uniform"/>
-                      <TextBlock Text="Anomaly Threshold Map" Foreground="#DCE5EB" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="6" VerticalAlignment="Bottom"/>
+                      <TextBlock Text="Anomaly Threshold Map" Foreground="{DynamicResource HmiTextBodyBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="6" VerticalAlignment="Bottom"/>
                     </Grid>
                   </Border>
                 </UniformGrid>
@@ -225,34 +204,42 @@
       <!-- Findings -->
       <Border Grid.Row="2" Style="{StaticResource Panel}">
         <Grid>
-          <Grid.RowDefinitions><RowDefinition Height="Auto" MinHeight="32"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
             <DockPanel>
-              <Border x:Name="FindingsSourceChip" DockPanel.Dock="Right" Style="{StaticResource Chip}" Background="#2A1740" BorderBrush="#8F5FD1">
-                <TextBlock x:Name="FindingsSourceText" Text="Demo Data" Foreground="#F1D8FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold"/>
+              <!-- Source chip reuses the shared adaptive-status family; code-behind swaps
+                   the style per source (FindResource swap, never raw hexes). -->
+              <Border x:Name="FindingsSourceChip" DockPanel.Dock="Right" Style="{StaticResource HmiAdaptiveStatusSimulated}" Margin="0" VerticalAlignment="Center">
+                <TextBlock x:Name="FindingsSourceText" Text="Demo Data" Foreground="{DynamicResource HmiSimulatedSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold"/>
               </Border>
               <TextBlock Text="Comparison Findings" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
             </DockPanel>
           </Border>
+          <!-- Star row bounds the grid (viewport-fill root), so no MaxHeight cap. The
+               verdict column leads (Auto, never clips NG/Review); text columns use star
+               widths + MinWidth with the shared trim-with-tooltip cell style. -->
           <DataGrid Grid.Row="1"
                     x:Name="FindingsGrid"
                     BorderThickness="0"
                     MinWidth="0"
-                    MaxHeight="480"
                     Style="{StaticResource HmiDenseTable}">
               <DataGrid.Columns>
-                <DataGridTextColumn Header="Region"  Binding="{Binding Region}"   Width="105" MinWidth="105" ElementStyle="{StaticResource {x:Type TextBlock}}"/>
-                <DataGridTextColumn Header="Defect"  Binding="{Binding Defect}"   Width="118" MinWidth="118"/>
-                <DataGridTextColumn Header="Golden"  Binding="{Binding Golden}"   Width="120" MinWidth="120"/>
-                <DataGridTemplateColumn Header="Result" Width="80" MinWidth="80">
+                <DataGridTemplateColumn Header="Result" Width="Auto" MinWidth="90">
                   <DataGridTemplateColumn.CellTemplate>
                     <DataTemplate>
-                      <Border Style="{StaticResource CompareResultChipBorder}" HorizontalAlignment="Left" Margin="0,1,0,1">
-                        <TextBlock Text="{Binding Judgement}" Style="{StaticResource CompareResultChipText}"/>
+                      <!-- Shared adaptive-status chip styles are applied per judgement in
+                           code-behind (FindResource swap); no local color styles here. -->
+                      <Border HorizontalAlignment="Left" Margin="0,1,0,1"
+                              Loaded="OnResultChipLoaded"
+                              DataContextChanged="OnResultChipDataContextChanged">
+                        <TextBlock Text="{Binding Judgement}" Style="{StaticResource HmiAdaptiveStatusText}"/>
                       </Border>
                     </DataTemplate>
                   </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Region"  Binding="{Binding Region}"   Width="*" MinWidth="105" ElementStyle="{StaticResource HmiDataGridCellText}"/>
+                <DataGridTextColumn Header="Defect"  Binding="{Binding Defect}"   Width="1.2*" MinWidth="118" ElementStyle="{StaticResource HmiDataGridCellText}"/>
+                <DataGridTextColumn Header="Golden"  Binding="{Binding Golden}"   Width="1.2*" MinWidth="120" ElementStyle="{StaticResource HmiDataGridCellText}"/>
               </DataGrid.Columns>
             </DataGrid>
         </Grid>
@@ -263,36 +250,41 @@
     <Border Grid.Column="4" Style="{StaticResource Panel}">
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" MinHeight="42"/>
+          <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="7,5">
-          <DockPanel>
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-              <Button x:Name="OpenGoldenImageViewerButton"
-                      Style="{StaticResource MiniBtn}"
-                      Content="Large Image"
-                      MinWidth="112"
-                      Margin="0,0,6,0"
-                      Click="OnOpenGoldenImageViewerClick"/>
-              <TextBlock x:Name="GoldenSubtitleText"
-                         Text="IMG_GOLD_0241 / verified OK"
-                         Foreground="{DynamicResource HmiTextLabelBrush}"
-                         FontSize="{StaticResource HmiFontSizeBody}"
-                         VerticalAlignment="Center"
-                         TextWrapping="NoWrap"
-                         TextTrimming="CharacterEllipsis"
-                         MaxWidth="210"
-                         ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-            </StackPanel>
-            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <!-- Header grid mirrors the defect side: title + purple sim chip (Auto), subtitle
+             star-sized with trim-plus-tooltip, viewer button Auto. -->
+        <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
               <TextBlock Text="Golden Reference" FontWeight="ExtraBold" Foreground="{DynamicResource HmiTextBrush}" FontSize="{StaticResource HmiFontSizeBody}" VerticalAlignment="Center"/>
-              <Border Style="{StaticResource ChipPurple}" Margin="8,0,0,0">
-                <TextBlock Text="Demo Board" Foreground="#F1D8FF" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold"/>
+              <Border Style="{StaticResource ChipPurple}" Margin="8,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="Demo Board" Foreground="{DynamicResource HmiSimulatedSoftBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold"/>
               </Border>
-            </WrapPanel>
-          </DockPanel>
+            </StackPanel>
+            <TextBlock x:Name="GoldenSubtitleText"
+                       Grid.Column="1"
+                       Text="IMG_GOLD_0241 / verified OK"
+                       Style="{StaticResource FactoryTrimmedTextWithTooltip}"
+                       Foreground="{DynamicResource HmiTextLabelBrush}"
+                       TextAlignment="Right"
+                       VerticalAlignment="Center"
+                       Margin="10,0,10,0"/>
+            <Button Grid.Column="2"
+                    x:Name="OpenGoldenImageViewerButton"
+                    Style="{StaticResource MiniBtn}"
+                    Content="Large Image"
+                    MinWidth="112"
+                    VerticalAlignment="Center"
+                    Click="OnOpenGoldenImageViewerClick"/>
+          </Grid>
         </Border>
         <!-- Golden PCB view (slightly desaturated) -->
         <Border x:Name="GoldenImageViewport" Grid.Row="1" Margin="8" BorderBrush="{DynamicResource HmiBorderMidBrush}" BorderThickness="1" Background="{DynamicResource HmiSurfaceBrush}" ClipToBounds="True" Opacity="0.88">
@@ -329,12 +321,11 @@
           <Image x:Name="GoldenLearnedReferenceImage" Visibility="Collapsed" Stretch="Uniform"/>
           </Grid>
         </Border>
-        <!-- Footer fields -->
-        <!-- RefDes/FOV are shown once, in the defect-side footer; the golden footer keeps
-             only golden-specific fields. -->
-        <UniformGrid Grid.Row="2" Columns="2" Margin="8" Rows="2">
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,5,5"><StackPanel><TextBlock Text="Sample" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="IMG_GOLD_0241" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
-          <Border Style="{StaticResource FieldBox}" Margin="0,0,0,5"><StackPanel><TextBlock Text="Status" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Demo OK" Style="{StaticResource CompareFooterValueText}" Foreground="{DynamicResource HmiSimulatedBrush}"/></StackPanel></Border>
+        <!-- Footer fields: golden-side facts only. RefDes/FOV are shown once, in the
+             defect-side footer, and the golden sample id lives in the header subtitle
+             (one source per fact). Status keeps the purple Demo OK simulation label. -->
+        <UniformGrid Grid.Row="2" Columns="3" Margin="8">
+          <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="Status" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Demo OK" Style="{StaticResource CompareFooterValueText}" Foreground="{DynamicResource HmiSimulatedBrush}"/></StackPanel></Border>
           <Border Style="{StaticResource FieldBox}" Margin="0,0,5,0"><StackPanel><TextBlock Text="Program" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="TBOX_TOP_V1.2" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
           <Border Style="{StaticResource FieldBox}" Margin="0"><StackPanel><TextBlock Text="Captured" Style="{StaticResource CompareFooterLabelText}"/><TextBlock Text="Baseline" Style="{StaticResource CompareFooterValueText}"/></StackPanel></Border>
         </UniformGrid>
@@ -344,4 +335,3 @@
   </Grid>
   </ScrollViewer>
 </UserControl>
-

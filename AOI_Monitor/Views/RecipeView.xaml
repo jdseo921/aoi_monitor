@@ -9,61 +9,70 @@
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
+    <!-- Header band: identity filters (Auto) | event status line (star, wrap) | actions (right). -->
     <Border Grid.Row="0" Style="{StaticResource Panel}">
-      <WrapPanel Margin="8">
-        <StackPanel Style="{StaticResource HmiAdaptiveFilterField}" Width="170">
-          <TextBlock Text="Recipe ID" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-          <TextBox x:Name="RecipeNameText" AutomationProperties.Name="Recipe ID" Text="TBOX_TOP"/>
-        </StackPanel>
-        <StackPanel Style="{StaticResource HmiAdaptiveFilterField}" Width="170">
-          <TextBlock Text="Board Program" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-          <TextBlock x:Name="BoardProgramText" Text="TBOX-MAIN" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
-        </StackPanel>
-        <StackPanel Style="{StaticResource HmiAdaptiveFilterField}" Width="155">
-          <TextBlock Text="Operator" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-          <TextBlock x:Name="OperatorText" Text="Engineer01" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
-        </StackPanel>
-        <StackPanel Style="{StaticResource HmiAdaptiveFilterField}" Width="155">
-          <TextBlock Text="Revision Lock" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-          <TextBlock x:Name="LockStatusText" Text="UNLOCKED" FontWeight="Bold" Foreground="{DynamicResource HmiOkSoftBrush}"/>
-        </StackPanel>
-        <TextBlock x:Name="RecipeStatusText" Text="Load a PCB image to start editing." Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="360" Margin="{StaticResource HmiFieldGap}"/>
-        <WrapPanel VerticalAlignment="Bottom" Style="{StaticResource HmiInlineActionBand}">
+      <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <WrapPanel Grid.Column="0" VerticalAlignment="Bottom">
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="Recipe ID" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+            <TextBox x:Name="RecipeNameText" AutomationProperties.Name="Recipe ID" Text="TBOX_TOP"/>
+          </StackPanel>
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="Board Program" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+            <TextBlock x:Name="BoardProgramText" Text="TBOX-MAIN" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+          </StackPanel>
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="Operator" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+            <TextBlock x:Name="OperatorText" Text="Engineer01" FontWeight="Bold" Foreground="{DynamicResource HmiTextBodyBrush}" Style="{StaticResource FactoryTrimmedTextWithTooltip}"/>
+          </StackPanel>
+          <StackPanel Style="{StaticResource HmiAdaptiveFilterField}">
+            <TextBlock Text="Revision Lock" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+            <TextBlock x:Name="LockStatusText" Text="UNLOCKED" FontWeight="Bold" Foreground="{DynamicResource HmiOkSoftBrush}"/>
+          </StackPanel>
+        </WrapPanel>
+        <!-- Event-based status line: empty at idle (the editor's empty-state card owns the
+             load instruction); populated only by load/save/import/test-run outcomes. -->
+        <TextBlock Grid.Column="1" x:Name="RecipeStatusText" Text="" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="{StaticResource HmiFieldGap}"/>
+        <WrapPanel Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Style="{StaticResource HmiInlineActionBand}">
           <Button Style="{StaticResource ActionBtn}" Content="Load Image" Margin="{StaticResource HmiButtonGap}" Click="OnLoadImageClick"/>
-          <Button Style="{StaticResource MiniBtn}" Content="Import Centroid CSV" Margin="{StaticResource HmiButtonGap}" Click="OnImportCentroidClick"/>
+          <Button Style="{StaticResource ActionBtn}" Content="Import Centroid CSV" Margin="{StaticResource HmiButtonGap}" Click="OnImportCentroidClick"/>
           <Button Style="{StaticResource ActionBtnBlue}" Content="Test Run" Margin="{StaticResource HmiButtonGap}" Click="OnTestRunClick"/>
           <Button x:Name="SaveRecipeButton" Style="{StaticResource ActionBtnGreen}" Content="Save Recipe" Margin="{StaticResource HmiButtonGap}" Click="OnSaveRecipeClick"/>
         </WrapPanel>
-      </WrapPanel>
+      </Grid>
     </Border>
 
     <Grid Grid.Row="2">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="2.5*"/>
         <ColumnDefinition Width="8"/>
-        <ColumnDefinition Width="360"/>
+        <ColumnDefinition Width="*" MinWidth="420"/>
       </Grid.ColumnDefinitions>
 
       <Border Grid.Column="0" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" MinHeight="32"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
+          <Border Grid.Row="0" Style="{StaticResource HmiPanelHeader}">
             <DockPanel>
-              <TextBlock x:Name="CanvasHintText" DockPanel.Dock="Right" Text="Drag to draw. Wheel zooms. Right-drag pans." Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock Text="Recipe Background + ROI Editor" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
+              <TextBlock Text="Recipe Background + ROI Editor" Style="{StaticResource HmiSectionHeaderText}" VerticalAlignment="Center"/>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource MiniBtn}" Content="Zoom -" Margin="{StaticResource HmiButtonGap}" Click="OnZoomOutClick"/>
+                <Button Style="{StaticResource MiniBtn}" Content="Zoom +" Margin="{StaticResource HmiButtonGap}" Click="OnZoomInClick"/>
+                <Button Style="{StaticResource MiniBtn}" Content="Fit" Margin="{StaticResource HmiButtonGap}" Click="OnFitClick"/>
+                <TextBlock x:Name="ZoomText" Text="100%" Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center"/>
+              </StackPanel>
+              <TextBlock x:Name="CanvasHintText" Text="Drag to draw. Wheel zooms. Right-drag pans." Style="{StaticResource FactoryTrimmedTextWithTooltip}" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="8,0"/>
             </DockPanel>
           </Border>
-          <WrapPanel Grid.Row="1" Margin="8" Style="{StaticResource HmiInlineActionBand}">
-            <Button Style="{StaticResource MiniBtn}" Content="Zoom -" Margin="{StaticResource HmiButtonGap}" Click="OnZoomOutClick"/>
-            <Button Style="{StaticResource MiniBtn}" Content="Zoom +" Margin="{StaticResource HmiButtonGap}" Click="OnZoomInClick"/>
-            <Button Style="{StaticResource MiniBtn}" Content="Fit" Margin="{StaticResource HmiButtonGap}" Click="OnFitClick"/>
-            <TextBlock x:Name="ZoomText" Text="100%" Foreground="{DynamicResource HmiTextBodyBrush}" VerticalAlignment="Center"/>
-          </WrapPanel>
-          <Border Grid.Row="2" Margin="8" Background="#050607" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1" ClipToBounds="True">
+          <Border Grid.Row="1" Margin="8" Background="#050607" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="1" ClipToBounds="True">
             <Grid>
               <Canvas x:Name="ViewportCanvas"
                       Background="#050607"
@@ -104,140 +113,152 @@
       <Border Grid.Column="2" Style="{StaticResource Panel}">
         <Grid>
           <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" MinHeight="32"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
           </Grid.RowDefinitions>
-          <Border Grid.Row="0" Background="{DynamicResource HmiSurfaceAltBrush}" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8,4">
-            <TextBlock Text="ROI Setup" Foreground="{DynamicResource HmiTextBodyBrush}" FontWeight="ExtraBold" FontSize="{StaticResource HmiFontSizeBody}"/>
-          </Border>
 
-          <DataGrid Grid.Row="1" x:Name="RoiGrid" SelectionChanged="OnRoiSelectionChanged" CanUserSortColumns="True" Style="{StaticResource HmiTable}" MinWidth="0" MaxHeight="180">
-            <DataGrid.Columns>
-              <DataGridTextColumn Header="Type" Binding="{Binding RoiType}" Width="140" MinWidth="140"/>
-              <DataGridTextColumn Header="AI" Binding="{Binding AiScoreThreshold}" Width="80" MinWidth="80" HeaderTemplate="{StaticResource HmiHeaderInspectionResultTemplate}"/>
-              <DataGridTextColumn Header="X" Binding="{Binding X}" Width="80" MinWidth="80"/>
-              <DataGridTextColumn Header="Y" Binding="{Binding Y}" Width="80" MinWidth="80"/>
-            </DataGrid.Columns>
-          </DataGrid>
-
-          <Grid Grid.Row="2" Margin="8">
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="6"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="6"/>
-              <RowDefinition Height="Auto"/>
-              <RowDefinition Height="6"/>
-              <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="8"/>
-              <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
-              <TextBlock Text="ROI Type" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-              <ComboBox x:Name="RoiTypeCombo" AutomationProperties.Name="ROI type" SelectionChanged="OnRoiParameterChanged">
-                <ComboBoxItem Content="Presence" Tag="Presence"/>
-                <ComboBoxItem Content="Polarity" Tag="Polarity"/>
-                <ComboBoxItem Content="Placement" Tag="Placement"/>
-                <ComboBoxItem Content="Solder Bridge" Tag="Solder Bridge"/>
-                <ComboBoxItem Content="Solder Volume" Tag="Solder Volume"/>
-                <ComboBoxItem Content="Height" Tag="Height"/>
-                <ComboBoxItem Content="Surface Defect" Tag="Surface Defect"/>
-                <ComboBoxItem Content="Anomaly" Tag="Anomaly"/>
-              </ComboBox>
-            </StackPanel>
-
-            <StackPanel Grid.Row="2" Grid.Column="0">
-              <TextBlock Text="AI Score Threshold" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-              <TextBox x:Name="AiThresholdText" AutomationProperties.Name="AI score threshold" TextChanged="OnRoiParameterChanged"/>
-            </StackPanel>
-            <StackPanel Grid.Row="2" Grid.Column="2">
-              <TextBlock Text="Height Min" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-              <TextBox x:Name="HeightMinText" AutomationProperties.Name="Height minimum" TextChanged="OnRoiParameterChanged"/>
-            </StackPanel>
-
-            <StackPanel Grid.Row="4" Grid.Column="0">
-              <TextBlock Text="Height Max" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-              <TextBox x:Name="HeightMaxText" AutomationProperties.Name="Height maximum" TextChanged="OnRoiParameterChanged"/>
-            </StackPanel>
-            <StackPanel Grid.Row="4" Grid.Column="2">
-              <TextBlock Text="Volume Min" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-              <TextBox x:Name="VolumeMinText" AutomationProperties.Name="Volume minimum" TextChanged="OnRoiParameterChanged"/>
-            </StackPanel>
-
-            <StackPanel Grid.Row="6" Grid.Column="0">
-              <TextBlock Text="Volume Max" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
-              <TextBox x:Name="VolumeMaxText" AutomationProperties.Name="Volume maximum" TextChanged="OnRoiParameterChanged"/>
-            </StackPanel>
-            <WrapPanel Grid.Row="6" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-              <Button Style="{StaticResource ActionBtnRed}" Content="Delete ROI" Click="OnDeleteRoiClick"/>
-            </WrapPanel>
-          </Grid>
-
-          <ScrollViewer Grid.Row="3" Margin="8" Padding="0,0,14,0" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-              <TextBlock Text="Processing &amp; Tolerance Rules" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="0,0,0,6"/>
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*"/>
-                  <ColumnDefinition Width="8"/>
-                  <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+          <TabControl Grid.Row="0" Margin="8">
+            <TabItem Header="ROI Setup">
+              <Grid Margin="4">
                 <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="6"/>
-                  <RowDefinition Height="Auto"/>
-                  <RowDefinition Height="6"/>
+                  <RowDefinition Height="*"/>
                   <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Grid.Column="0">
-                  <TextBlock Text="X/Y tolerance mm" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-                  <TextBox x:Name="PlacementToleranceText" Text="0.020" MinHeight="34" AutomationProperties.Name="X/Y placement tolerance millimeters" ToolTip="Dimensional tolerance for placement offset evidence."/>
-                </StackPanel>
-                <StackPanel Grid.Row="0" Grid.Column="2">
-                  <TextBlock Text="Rotation tolerance deg" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-                  <TextBox x:Name="RotationToleranceText" Text="1.0" MinHeight="34" AutomationProperties.Name="Rotation tolerance degrees" ToolTip="Skew tolerance for component placement evidence."/>
-                </StackPanel>
-                <StackPanel Grid.Row="2" Grid.Column="0">
-                  <TextBlock Text="IPC acceptability class" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-                  <ComboBox x:Name="IpcClassCombo" SelectedIndex="1" MinHeight="34" AutomationProperties.Name="IPC acceptability class">
-                    <ComboBoxItem Content="IPC Class 1" Tag="IPC Class 1"/>
-                    <ComboBoxItem Content="IPC Class 2" Tag="IPC Class 2"/>
-                    <ComboBoxItem Content="IPC Class 3" Tag="IPC Class 3"/>
-                  </ComboBox>
-                </StackPanel>
-                <StackPanel Grid.Row="2" Grid.Column="2">
-                  <TextBlock Text="Lighting profile" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-                  <ComboBox x:Name="LightingProfileCombo" SelectedIndex="0" MinHeight="34" AutomationProperties.Name="Lighting profile">
-                    <ComboBoxItem Content="Top bright field" Tag="Top bright field"/>
-                    <ComboBoxItem Content="Low-angle dark field" Tag="Low-angle dark field"/>
-                    <ComboBoxItem Content="Side marking light" Tag="Side marking light"/>
-                    <ComboBoxItem Content="Solder fillet highlight" Tag="Solder fillet highlight"/>
-                  </ComboBox>
-                </StackPanel>
-                <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
-                  <TextBlock Text="False-call policy" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
-                  <ComboBox x:Name="FalseCallPolicyCombo" SelectedIndex="1" MinHeight="34" AutomationProperties.Name="False-call policy">
-                    <ComboBoxItem Content="Strict: hold every suspected defect" Tag="Strict: hold every suspected defect"/>
-                    <ComboBoxItem Content="Balanced: review benign visual noise" Tag="Balanced: review benign visual noise"/>
-                    <ComboBoxItem Content="Sensitive: reduce possible escapes" Tag="Sensitive: reduce possible escapes"/>
-                  </ComboBox>
-                </StackPanel>
+
+                <DataGrid Grid.Row="0" x:Name="RoiGrid" SelectionChanged="OnRoiSelectionChanged" CanUserSortColumns="True" Style="{StaticResource HmiTable}" MinWidth="0">
+                  <DataGrid.Columns>
+                    <DataGridTextColumn Header="Type" Binding="{Binding RoiType}" Width="*" MinWidth="140"/>
+                    <DataGridTextColumn Header="AI" Binding="{Binding AiScoreThreshold}" Width="Auto" MinWidth="80" HeaderTemplate="{StaticResource HmiHeaderInspectionResultTemplate}"/>
+                    <DataGridTextColumn Header="X" Binding="{Binding X}" Width="Auto" MinWidth="80"/>
+                    <DataGridTextColumn Header="Y" Binding="{Binding Y}" Width="Auto" MinWidth="80"/>
+                  </DataGrid.Columns>
+                </DataGrid>
+
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+
+                  <StackPanel Grid.Row="0" Grid.ColumnSpan="3">
+                    <TextBlock Text="ROI Type" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+                    <ComboBox x:Name="RoiTypeCombo" AutomationProperties.Name="ROI type" SelectionChanged="OnRoiParameterChanged">
+                      <ComboBoxItem Content="Presence" Tag="Presence"/>
+                      <ComboBoxItem Content="Polarity" Tag="Polarity"/>
+                      <ComboBoxItem Content="Placement" Tag="Placement"/>
+                      <ComboBoxItem Content="Solder Bridge" Tag="Solder Bridge"/>
+                      <ComboBoxItem Content="Solder Volume" Tag="Solder Volume"/>
+                      <ComboBoxItem Content="Height" Tag="Height"/>
+                      <ComboBoxItem Content="Surface Defect" Tag="Surface Defect"/>
+                      <ComboBoxItem Content="Anomaly" Tag="Anomaly"/>
+                    </ComboBox>
+                  </StackPanel>
+
+                  <StackPanel Grid.Row="2" Grid.Column="0">
+                    <TextBlock Text="AI Score Threshold" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+                    <TextBox x:Name="AiThresholdText" AutomationProperties.Name="AI score threshold" TextChanged="OnRoiParameterChanged"/>
+                  </StackPanel>
+                  <StackPanel Grid.Row="2" Grid.Column="2">
+                    <TextBlock Text="Height Min" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+                    <TextBox x:Name="HeightMinText" AutomationProperties.Name="Height minimum" TextChanged="OnRoiParameterChanged"/>
+                  </StackPanel>
+
+                  <StackPanel Grid.Row="4" Grid.Column="0">
+                    <TextBlock Text="Height Max" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+                    <TextBox x:Name="HeightMaxText" AutomationProperties.Name="Height maximum" TextChanged="OnRoiParameterChanged"/>
+                  </StackPanel>
+                  <StackPanel Grid.Row="4" Grid.Column="2">
+                    <TextBlock Text="Volume Min" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+                    <TextBox x:Name="VolumeMinText" AutomationProperties.Name="Volume minimum" TextChanged="OnRoiParameterChanged"/>
+                  </StackPanel>
+
+                  <StackPanel Grid.Row="6" Grid.Column="0">
+                    <TextBlock Text="Volume Max" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,0,0,3"/>
+                    <TextBox x:Name="VolumeMaxText" AutomationProperties.Name="Volume maximum" TextChanged="OnRoiParameterChanged"/>
+                  </StackPanel>
+                  <WrapPanel Grid.Row="6" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource ActionBtnRed}" Content="Delete ROI" Click="OnDeleteRoiClick"/>
+                  </WrapPanel>
+                </Grid>
               </Grid>
-              <TextBlock Text="Revision Notes" Foreground="{DynamicResource HmiTextDimBrush}" FontSize="{StaticResource HmiFontSizeBody}" FontWeight="Bold" Margin="0,12,0,3"/>
-              <TextBlock x:Name="RevisionText" Text="No saved revision loaded." Foreground="{DynamicResource HmiTextBodyBrush}" TextWrapping="Wrap" FontSize="{StaticResource HmiFontSizeBody}"/>
-              <TextBlock Text="Active ROI is yellow. Saved ROI is green. Unsaved ROI is blue. Stage 1 evidence remains image-based until real camera, lighting, robot, and MES acceptance records exist."
-                         Foreground="{DynamicResource HmiTextLabelBrush}" TextWrapping="Wrap" FontSize="{StaticResource HmiFontSizeBody}" Margin="0,8,0,0"/>
-            </StackPanel>
-          </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Rules &amp; Revision">
+              <ScrollViewer Margin="4" Padding="0,0,10,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                  <TextBlock Text="Processing &amp; Tolerance Rules" Style="{StaticResource HmiSectionHeaderText}" Margin="0,0,0,6"/>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="8"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="6"/>
+                      <RowDefinition Height="Auto"/>
+                      <RowDefinition Height="6"/>
+                      <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="0">
+                      <TextBlock Text="X/Y tolerance mm" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                      <TextBox x:Name="PlacementToleranceText" Text="0.020" MinHeight="34" AutomationProperties.Name="X/Y placement tolerance millimeters" ToolTip="Dimensional tolerance for placement offset evidence."/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2">
+                      <TextBlock Text="Rotation tolerance deg" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                      <TextBox x:Name="RotationToleranceText" Text="1.0" MinHeight="34" AutomationProperties.Name="Rotation tolerance degrees" ToolTip="Skew tolerance for component placement evidence."/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="0">
+                      <TextBlock Text="IPC acceptability class" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                      <ComboBox x:Name="IpcClassCombo" SelectedIndex="1" MinHeight="34" AutomationProperties.Name="IPC acceptability class">
+                        <ComboBoxItem Content="IPC Class 1" Tag="IPC Class 1"/>
+                        <ComboBoxItem Content="IPC Class 2" Tag="IPC Class 2"/>
+                        <ComboBoxItem Content="IPC Class 3" Tag="IPC Class 3"/>
+                      </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="2">
+                      <TextBlock Text="Lighting profile" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                      <ComboBox x:Name="LightingProfileCombo" SelectedIndex="0" MinHeight="34" AutomationProperties.Name="Lighting profile">
+                        <ComboBoxItem Content="Top bright field" Tag="Top bright field"/>
+                        <ComboBoxItem Content="Low-angle dark field" Tag="Low-angle dark field"/>
+                        <ComboBoxItem Content="Side marking light" Tag="Side marking light"/>
+                        <ComboBoxItem Content="Solder fillet highlight" Tag="Solder fillet highlight"/>
+                      </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
+                      <TextBlock Text="False-call policy" Foreground="{DynamicResource HmiTextLabelBrush}" FontSize="{StaticResource HmiFontSizeBody}"/>
+                      <ComboBox x:Name="FalseCallPolicyCombo" SelectedIndex="1" MinHeight="34" AutomationProperties.Name="False-call policy">
+                        <ComboBoxItem Content="Strict: hold every suspected defect" Tag="Strict: hold every suspected defect"/>
+                        <ComboBoxItem Content="Balanced: review benign visual noise" Tag="Balanced: review benign visual noise"/>
+                        <ComboBoxItem Content="Sensitive: reduce possible escapes" Tag="Sensitive: reduce possible escapes"/>
+                      </ComboBox>
+                    </StackPanel>
+                  </Grid>
+                  <TextBlock Text="Revision Notes" Style="{StaticResource HmiSectionHeaderText}" Margin="0,12,0,3"/>
+                  <TextBlock x:Name="RevisionText" Text="No saved revision loaded." Foreground="{DynamicResource HmiTextBodyBrush}" TextWrapping="Wrap" FontSize="{StaticResource HmiFontSizeBody}"/>
+                </StackPanel>
+              </ScrollViewer>
+            </TabItem>
+          </TabControl>
+
+          <!-- Stage 1 evidence boundary: pinned outside every scroll region so it stays
+               visible regardless of tab or scroll position. Wording is contract-fixed. -->
+          <Border Grid.Row="1" BorderBrush="{DynamicResource HmiPanelBorderBrush}" BorderThickness="0,1,0,0" Padding="8">
+            <TextBlock Text="Active ROI is yellow. Saved ROI is green. Unsaved ROI is blue. Stage 1 evidence remains image-based until real camera, lighting, robot, and MES acceptance records exist."
+                       Foreground="{DynamicResource HmiTextLabelBrush}" TextWrapping="Wrap" FontSize="{StaticResource HmiFontSizeBody}"/>
+          </Border>
         </Grid>
       </Border>
     </Grid>
   </Grid>
 </UserControl>
-
