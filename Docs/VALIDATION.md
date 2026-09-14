@@ -140,6 +140,32 @@ Difference-score separation on this dataset: known-good boards 0.16-0.90 %, know
 
 These are synthetic-data workflow numbers. They demonstrate that the pipeline detects and reports correctly; they are **not** model accuracy evidence and never substitute for customer-dataset acceptance (§5).
 
+#### Public-dataset engineering validation runs (2026-09-14/15)
+
+The same four-step chain was run against two public PCB defect datasets converted to 
+ROI-tile Stage 1 datasets (converter scripts and split protocols are colocated with each 
+dataset's README):
+
+- **DeepPCB** (100 unmodified 224 px tiles, 40 OK / 60 NG, per-tile goldens from the 
+  dataset's own reference captures): readiness gate **PASS 15/15** under the default 
+  `maximize-defect-recall` bands with zero false calls and zero possible escapes. 
+  **Read the metrics with the denominator**: 48 of 100 tiles end in REVIEW (metrics count 
+  decided rows only, per §7), so this run demonstrates the pipeline and honest 
+  REVIEW routing on real board imagery — it does not meet the review-rate expectations 
+  for an acceptance claim, and the false-call sweep finds no VALID operating point at 
+  this tile geometry.
+- **PKU PCB_DATASET** (112 px tiles, synthesized defects composited onto real board 
+  photos, binary OK/NG ground truth): threshold profile calibrated on a 124-tile 
+  calibration split (boards 01-08), then frozen and verified at **100 % accuracy / 
+  precision / recall, zero REVIEW, zero false calls** on a 76-tile evaluation split and 
+  a 50-tile frozen-geometry hold-out (board 09) that was never used for calibration. 
+  Readiness gate **PASS 15/15**; the deployed board-model-scoped profile is stamped in 
+  every result.
+
+These runs are **engineering validation on public data** — pipeline proof, not customer 
+acceptance. "Customer validation of AI accuracy" (§5) still requires the 
+customer/evaluator dataset and the §10 sign-off.
+
 ### 4.1 Batch validation
 
 Run §5.3-5.4 with `Test Image Folder` = `SampleData/DemoSet_Quick/images`, `Ground Truth CSV` = `SampleData/DemoSet_Quick/customer_validation_manifest.csv`: `Run Dataset Preflight`, `Run Batch Inspection`; review accuracy/precision/recall, OK/NG/REVIEW counts, false calls, possible escapes, timing, rows, selected-image preview; use `Export CSV`, `Export Annotated Images`, or `Export Stage 1 Validation Package` (contents: §5.6).
@@ -162,7 +188,7 @@ Outputs: `benchmark_report.html`/`.pdf`/`.json`, `benchmark_results.csv`, latest
 
 ### 4.3 Stage 1 readiness report
 
-After preflight, batch validation, false-call review, package export, benchmark: `Readiness & QA > Stage 1 Readiness` > `Refresh`; check overall status, missing evidence, preflight/batch/benchmark summaries, package path, next action; `Export Report` writes `stage1_readiness_report.html`, `.pdf`, `.json`. Handoff gate for uploaded-image validation only: can pass with no real camera/lighting/robot/MES evidence but must keep that limitation visible. (Content requirements: §5.7.)
+After preflight, batch validation, false-call review, package export, benchmark: `Readiness & QA > Stage 1 Readiness` > `Refresh Stage 1 Readiness`; check overall status, missing evidence, preflight/batch/benchmark summaries, package path, next action; `Export Stage 1 Readiness Report` writes `stage1_readiness_report.html`, `.pdf`, `.json`. Handoff gate for uploaded-image validation only: can pass with no real camera/lighting/robot/MES evidence but must keep that limitation visible. (Content requirements: §5.7.)
 
 ### 4.4 Folder Camera Simulation
 
@@ -275,7 +301,7 @@ Benchmark: `Readiness & QA > Performance Benchmark` > `Image folder` > the same 
 
 ### 5.7 Readiness report and status meanings
 
-After preflight, batch, false-call review, package export, benchmark: `Readiness & QA > Stage 1 Readiness` > `Refresh`; verify overall status, missing evidence, preflight summary, latest batch run, benchmark p95 + over-one-second count, latest package path, next action; `Export Report` (`stage1_readiness_report.html`/`.pdf`/`.json`). The report must identify what was tested, data used, row counts, false calls, possible escapes, p95 timing, over-one-second count, reports generated, missing evidence, limitations, remaining Stage 2/3/4 work. `PASS` = data, manifest, metrics, dataset quality, configured gates passed for the Stage 1 claim (not full factory readiness); `CONDITIONAL` = no blocking gate failed, warnings need review/waiver/follow-up; `FAIL` = a blocking requirement failed (missing images or manifest columns, all-OK/all-NG data, insufficient OK/NG balance or class coverage, excessive unknown labels, missing goldens under Pixel Difference criteria). Factory readiness stays separate (§9).
+After preflight, batch, false-call review, package export, benchmark: `Readiness & QA > Stage 1 Readiness` > `Refresh Stage 1 Readiness`; verify overall status, missing evidence, preflight summary, latest batch run, benchmark p95 + over-one-second count, latest package path, next action; `Export Stage 1 Readiness Report` (`stage1_readiness_report.html`/`.pdf`/`.json`). The report must identify what was tested, data used, row counts, false calls, possible escapes, p95 timing, over-one-second count, reports generated, missing evidence, limitations, remaining Stage 2/3/4 work. `PASS` = data, manifest, metrics, dataset quality, configured gates passed for the Stage 1 claim (not full factory readiness); `CONDITIONAL` = no blocking gate failed, warnings need review/waiver/follow-up; `FAIL` = a blocking requirement failed (missing images or manifest columns, all-OK/all-NG data, insufficient OK/NG balance or class coverage, excessive unknown labels, missing goldens under Pixel Difference criteria). Factory readiness stays separate (§9).
 
 ## 6. Client test kit (packaged build evaluation)
 

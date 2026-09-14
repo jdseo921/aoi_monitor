@@ -4,7 +4,7 @@ OpenAI/Codex and numerous other coding agents will review your output once you a
 
 AOI Monitor is a Windows WPF desktop prototype for PCBA automated optical inspection review workflows. It gives operators a simplified local console organized around focused workflow menus: Home, Board & Images, Run Inspection, Golden Compare, Defect Review, Recipe Rules, AI / Models, Yield Analytics, Export & Trace, Readiness & QA, Calibration, 3D Profile, Hardware Readiness, and System Settings.
 
-The application currently demonstrates the review loop with local files, local SQLite records, and clearly labeled demo placeholders where production data sources are not yet implemented. It can load a sample PCB image and a golden reference image, run the deterministic Pixel Difference Prototype Engine, optionally run a configured ONNX ML Model, produce an `OK`, `REVIEW`, or `NG` verdict, record disposition actions, collect candidate samples for local training-set export review, and write local export artifacts. It is not yet connected to live AOI hardware, cameras, PLCs, robots, conveyors, a centralized production database, or a bundled trained production ML model.
+The application currently demonstrates the review loop with local files, local SQLite records, and clearly labeled demo placeholders where production data sources are not yet implemented. It can load a sample PCB image and a golden reference image, run the deterministic Pixel Difference Prototype Engine, optionally run a configured ONNX ML Model, produce an `OK`, `REVIEW`, or `NG` verdict, record disposition actions, collect candidate samples for local training-set export review, and write local export artifacts. Verdict bands are governed by versioned, Engineer-approved threshold profiles (Draft → Approved → Deployed → Retired, board-model-scoped, audited, and stamped into every result they decide). The operator UI is fully localized in English and Korean, with parity tests covering every operator screen. It is not yet connected to live AOI hardware, cameras, PLCs, robots, conveyors, a centralized production database, or a bundled trained production ML model.
 
 Home includes an explicit readiness panel for Database, Image Vault, Inspection Engine, Camera, Robot, and MES/ERP. Stage 2 Camera Pilot architecture includes camera adapter boundaries, plugin loading, and camera/lighting/3D acceptance services, while real vendor adapters and real hardware acceptance evidence remain open. Stage 3 (robot/handler control) and Stage 4 (production MES/ERP authentication and traceability) are planned boundaries. A clearly labeled 2D calibration profile workflow, a clearly labeled Mock MES REST mode, and a Sample-Data-Mode 3D viewer exist for Stage 2+ planning; none of them are live hardware or production integrations.
 
@@ -127,13 +127,15 @@ Synthetic demo output proves workflow capability only. Customer acceptance requi
 
 ## Stage 1 Testing
 
-The complete Stage 1 evidence chain runs headlessly. One command generates the demo dataset, runs the exit-evidence workflow, the performance benchmark, and the build-evidence record, then evaluates the readiness gate:
+The complete Stage 1 evidence chain runs headlessly. One command generates the demo dataset, runs the performance benchmark, the exit-evidence workflow (the benchmark runs first so the validation package embeds this dataset's benchmark), and the build-evidence record, then evaluates the readiness gate:
 
 ```powershell
 pwsh Scripts/run-stage1-testing.ps1 -Operator <your-id>
 ```
 
 It exits `0` when the Stage 1 readiness gate reports PASS and `1` on CONDITIONAL, and prints every check with its evidence and next action. Individual commands, expected demo-dataset results, and the customer deviation statement with sign-off lines: [Docs/VALIDATION.md](Docs/VALIDATION.md) §4.0 and §10.
+
+Beyond the synthetic demo set, the same chain has been run against two public PCB defect datasets converted to ROI tiles (DeepPCB, 100 tiles; PKU PCB_DATASET, calibrated on a 124-tile split and verified on a 76-tile evaluation split plus a 50-tile frozen hold-out) with the readiness gate at 15/15 PASS on each — engineering validation of the pipeline on real board imagery. This public-dataset evidence is pipeline proof, not customer acceptance: the Stage 1 exit still requires the customer/evaluator dataset run and the §10 sign-off (open exit blockers: [Docs/ROADMAP.md](Docs/ROADMAP.md)).
 
 Stage 1 covers uploaded-image validation only. No Stage 1 artifact claims real camera, lighting, 3D, robot, PLC safety, MES/ERP, or factory-automation readiness.
 
@@ -167,4 +169,4 @@ pwsh Scripts/check-repo-hygiene.ps1
 
 ## Current State
 
-This is a functional local prototype focused on operator review flows, local SQLite-backed evidence, and file-based exports. The main production gaps are centralized production database integration, real machine/hardware integration, expanded persistent workflow storage, and a production-grade inspection model. Current stage status and milestone history: [Docs/ROADMAP.md](Docs/ROADMAP.md).
+This is a functional local prototype focused on operator review flows, local SQLite-backed evidence, and file-based exports. Stage 1 (uploaded-image validation) is code-complete: the headless evidence chain reaches a 15/15 readiness PASS on the synthetic demo set and on two public PCB datasets, the full quality gates (build, tests, HMI layout audit, navigation performance, export verification, standards traceability) pass, and the EN/KO operator UI is parity-tested. The Stage 1 exit remains evidence-gated on customer-side items — the customer/evaluator dataset run, the deviation-statement sign-off, and an executed 8-hour soak run. The main production gaps beyond Stage 1 are centralized production database integration, real machine/hardware integration, expanded persistent workflow storage, and a production-grade inspection model. Current stage status and milestone history: [Docs/ROADMAP.md](Docs/ROADMAP.md).

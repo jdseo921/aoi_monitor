@@ -92,15 +92,15 @@ This folder is ready for client software evaluation.
 2. Generate synthetic demo data:
    `pwsh .\SampleData\demo_dataset_generator.ps1 -OutputRoot "$PWD\SampleData\DemoSet_Quick"`
 3. Launch `app\AOI_Monitor.exe`.
-4. Open `AI / Models`.
-5. Select `SampleData\DemoSet_Quick\images`.
-6. Select `SampleData\DemoSet_Quick\customer_validation_manifest.csv`.
-7. Click `Run Dataset Preflight`.
-8. Click `Run Batch Inspection`.
-9. Export CSV and annotated images if requested.
-10. Click `Export Stage 1 Validation Package`.
-11. Open `Readiness & QA > Performance Benchmark` and run against `SampleData\DemoSet_Quick\images`.
-12. Open `Readiness & QA > Stage 1 Readiness`, click `Refresh`, then `Export Report`.
+4. Open `Readiness & QA`, click `Performance Benchmark` (Readiness and Quality Gates panel), choose Source `Image folder`, and run against `SampleData\DemoSet_Quick\images`. The benchmark runs first on purpose: the validation package embeds the latest recorded benchmark and refuses (with a PROVENANCE_MISMATCH note) one measured on a different dataset.
+5. Open `AI / Models`.
+6. Select `SampleData\DemoSet_Quick\images`.
+7. Select `SampleData\DemoSet_Quick\customer_validation_manifest.csv`.
+8. Click `Run Dataset Preflight`.
+9. Click `Run Batch Inspection`.
+10. Export CSV and annotated images if requested.
+11. Click `Export Stage 1 Validation Package`.
+12. Open `Readiness & QA > Stage 1 Readiness`, click `Refresh Stage 1 Readiness`, then `Export Stage 1 Readiness Report`.
 13. Review `stage1_readiness_report.html`, `stage1_readiness_report.pdf`, `stage1_readiness_report.json`, `validation_summary.html`, `customer_validation_report.html`, `benchmark_report.html`, `benchmark_results.csv`, and `limitations.txt`.
 
 ## Suggested First Tests
@@ -112,7 +112,7 @@ This folder is ready for client software evaluation.
 5. Record one disposition.
 6. Run a small customer dataset batch with client-supplied non-confidential data if available.
 7. Export inspection/review CSV evidence.
-8. Export Stage 1 Readiness, Factory Readiness, Client Demo Readiness, and Standards Traceability reports.
+8. From `Readiness & QA`, export the evidence reports: `Export Stage 1 Readiness Report` (Stage 1 Readiness tab), `Export Readiness Evidence`, `Client Demo Readiness` + `Export Demo Gate` (Readiness and Quality Gates panel), and `Export HTML/PDF/JSON` on the Standards & Quality Checklist tab.
 
 ## Evidence To Return
 

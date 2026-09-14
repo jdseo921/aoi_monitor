@@ -41,6 +41,8 @@ The local user/role model records user ID and role in audit rows, but it is not 
 
 Stage 1 workflow capability is implemented in the local prototype and Stage 2 camera-pilot architecture is present. Stage 1 exit and Stage 2 hardware readiness remain evidence-gated. Do not describe Stage 2 as complete.
 
+Public-dataset engineering validation (2026-09-14/15): the headless Stage 1 evidence chain reaches a 15/15 readiness PASS at the 97 % acceptance gates on the synthetic demo set and on two public PCB defect datasets converted to ROI tiles — DeepPCB (100 tiles; decided-row metrics only, 48 of 100 tiles end REVIEW under the default bands, so it demonstrates the pipeline rather than the acceptance gates) and PKU PCB_DATASET (calibrated threshold profile on a 124-tile split, verified at 100 % with zero REVIEW on a 76-tile evaluation split and a 50-tile frozen hold-out; binary OK/NG scope, synthesized defects). This is pipeline proof on real board imagery, not customer acceptance; the exit blockers below stay open until the customer/evaluator dataset run and §10 sign-off.
+
 ### Evidence boundary
 
 Simulation, folder-source, null-adapter, fake-adapter, sample CSV, mock REST, and boundary-only evidence is not real hardware readiness: Folder Camera Simulation is not real camera acquisition; `NullVisionCameraAdapter`, fake test adapters, and plugin-template adapters are not vendor camera acceptance; simulated/null lighting or command-format tests without physical controller confirmation are not real lighting sync evidence; 3D sample CSV evidence is not live 3D acquisition; Mock MES REST and local JSON payloads are not production MES/ERP acceptance; software-only robot/handler simulation is not robot, PLC, conveyor, or safety-circuit acceptance.
